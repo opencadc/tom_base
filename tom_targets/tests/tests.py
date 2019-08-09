@@ -525,7 +525,7 @@ class TestTargetAddRemoveGrouping(TestCase):
 
     def test_persist_filter(self):
         data = {'query_string': "type=SIDEREAL&identifier=A&name=B&key=C&value=123&targetlist__name=1",}
-        expected_query_dict = 
+        expected_query_dict = {
             'type': 'SIDEREAL',
             'identifier': 'A',
             'name': 'B',
