@@ -1,6 +1,8 @@
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.contrib.auth.models import User, Group
+from django.contrib.messages import get_messages
+from django.contrib.messages.constants import SUCCESS, WARNING, ERROR
 import pytz
 import ephem
 from astropy import units
@@ -392,10 +394,14 @@ class TestTargetAddRemoveGrouping(TestCase):
             'query_string': '',
         }
         response = self.client.post(reverse('targets:add-remove-grouping'), data=data)
-        
         self.assertEqual(self.fake_grouping.targets.count(), 2)
         self.assertTrue(self.fake_targets[0] in self.fake_grouping.targets.all())
         self.assertTrue(self.fake_targets[1] in self.fake_grouping.targets.all())
+        messages = [(m.message, m.level) for m in get_messages(response.wsgi_request)]
+        self.assertIn(("1 target(s) successfully added to group '{}'.".format(self.fake_grouping.name),
+                       SUCCESS), messages)
+        self.assertIn(("1 target(s) already in group '{}': {}".format(self.fake_grouping.name, self.fake_targets[0].identifier),
+                       WARNING), messages)
 
     def test_add_to_invalid_grouping(self):
         data = {
@@ -408,6 +414,8 @@ class TestTargetAddRemoveGrouping(TestCase):
         response = self.client.post(reverse('targets:add-remove-grouping'), data=data)
         self.assertEqual(self.fake_grouping.targets.count(), 1)
         self.assertTrue(self.fake_targets[0] in self.fake_grouping.targets.all())
+        messages = [(m.message, m.level) for m in get_messages(response.wsgi_request)]
+        self.assertTrue("Cannot find the target group with id=-1; " in messages[0][0])
 
     # Remove target[0] and [1] from grouping; 
     def test_remove_selected_from_grouping(self):
@@ -420,6 +428,11 @@ class TestTargetAddRemoveGrouping(TestCase):
         }
         response = self.client.post(reverse('targets:add-remove-grouping'), data=data)        
         self.assertEqual(self.fake_grouping.targets.count(), 0)
+        messages = [(m.message, m.level) for m in get_messages(response.wsgi_request)]
+        self.assertIn(("1 target(s) successfully removed from group '{}'.".format(self.fake_grouping.name),
+                       SUCCESS), messages)
+        self.assertIn(("1 target(s) not in group '{}': {}".format(self.fake_grouping.name, self.fake_targets[1].identifier),
+                       WARNING), messages)
         
     def test_empty_data(self):
         response = self.client.post(reverse('targets:add-remove-grouping'), data={'query_string': '',})
@@ -448,6 +461,11 @@ class TestTargetAddRemoveGrouping(TestCase):
         }
         response = self.client.post(reverse('targets:add-remove-grouping'), data=data)
         self.assertEqual(self.fake_grouping.targets.count(), 3)
+        messages = [(m.message, m.level) for m in get_messages(response.wsgi_request)]
+        self.assertIn(("2 target(s) successfully added to group '{}'.".format(self.fake_grouping.name),
+                       SUCCESS), messages)
+        self.assertIn(("1 target(s) already in group '{}': {}".format(self.fake_grouping.name, self.fake_targets[0].identifier),
+                       WARNING), messages)
 
     def test_remove_all_from_grouping_filtered_by_sidereal(self):
         data = {
@@ -459,6 +477,11 @@ class TestTargetAddRemoveGrouping(TestCase):
         }
         response = self.client.post(reverse('targets:add-remove-grouping'), data=data)
         self.assertEqual(self.fake_grouping.targets.count(), 0)
+        messages = [(m.message, m.level) for m in get_messages(response.wsgi_request)]
+        self.assertIn(("1 target(s) successfully removed from group '{}'.".format(self.fake_grouping.name),
+                       SUCCESS), messages)
+        self.assertIn(("2 target(s) not in group '{}': {}".format(self.fake_grouping.name, self.fake_targets[1].identifier + ', ' + self.fake_targets[2].identifier),
+                       WARNING), messages)
 
     def test_remove_all_from_grouping_filtered_by_grouping(self):
         data = {
@@ -470,6 +493,9 @@ class TestTargetAddRemoveGrouping(TestCase):
         }
         response = self.client.post(reverse('targets:add-remove-grouping'), data=data)
         self.assertEqual(self.fake_grouping.targets.count(), 0)
+        messages = [(m.message, m.level) for m in get_messages(response.wsgi_request)]
+        self.assertIn(("1 target(s) successfully removed from group '{}'.".format(self.fake_grouping.name),
+                       SUCCESS), messages)
 
     def test_add_remove_with_random_query_string(self):
         data = {
@@ -491,6 +517,11 @@ class TestTargetAddRemoveGrouping(TestCase):
         }
         response = self.client.post(reverse('targets:add-remove-grouping'), data=data)
         self.assertEqual(self.fake_grouping.targets.count(), 0)
+        messages = [(m.message, m.level) for m in get_messages(response.wsgi_request)]
+        self.assertIn(("1 target(s) successfully removed from group '{}'.".format(self.fake_grouping.name),
+                       SUCCESS), messages)
+        self.assertIn(("2 target(s) not in group '{}': {}".format(self.fake_grouping.name, self.fake_targets[1].identifier + ', ' + self.fake_targets[2].identifier),
+                       WARNING), messages)
     
     def test_persist_filter(self):
         data={'query_string': "type=SIDEREAL&identifier=A&name=B&key=C&value=123&targetlist__name=1",}
