@@ -49,7 +49,9 @@ setup(
         'specutils',
         'python-magic',
         'antares-client',
-        'rise-set'
+        'rise-set',
+        'suds-py3',
+        'lxml'
     ],
     extras_require={
         'test': ['factory_boy']
