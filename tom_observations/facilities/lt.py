@@ -111,12 +111,8 @@ class LTFacility(GenericObservationFacility):
             'Username': LT_SETTINGS['username'],
             'Password': LT_SETTINGS['password']
         }
-        url = '{0}://{1}:{2}/node_agent2/node_agent?wdsl'.format('http', '161.72.57.3', '8080')
-        print(observation_payload)
-        print(url)
-        print(headers)
+        url = '{0}://{1}:{2}/node_agent2/node_agent?wsdl'.format('http', '161.72.57.3', '8080')
         client = Client(url=url, headers=headers)
-        print(client.service.ping())
         client.service.handle_rtml(observation_payload)
 
     def validate_observation(self, observation_payload):
