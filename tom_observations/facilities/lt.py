@@ -1,9 +1,12 @@
 from lxml import etree
+from suds import Client
+from dateutil.parser import parse
+from datetime import datetime
 
 from django import forms
 from django.conf import settings
-from crispy_forms.layout import Layout, Div
-from suds.client import Client
+from astropy.coordinates import SkyCoord
+from astropy import units as u
 
 from tom_observations.facility import GenericObservationForm, GenericObservationFacility
 from tom_targets.models import Target
@@ -17,6 +20,9 @@ except (AttributeError, KeyError):
         'username': '',
         'password': ''
     }
+
+LT_HOST = '161.72.57.3'
+LT_PORT = '8080'
 
 
 class LTObservationForm(GenericObservationForm):
@@ -36,7 +42,7 @@ class LTObservationForm(GenericObservationForm):
         contact = etree.SubElement(project, 'Contact')
         etree.SubElement(contact, 'Username').text = LT_SETTINGS['username']
         etree.SubElement(contact, 'Name').text = ''
-        
+
         return project
 
     def _build_schedule(self):
@@ -44,22 +50,24 @@ class LTObservationForm(GenericObservationForm):
         schedule = etree.Element('Schedule')
 
         target = etree.SubElement(schedule, 'Target', name=target_to_observe.name)
+        c = SkyCoord(ra=target_to_observe.ra*u.degree, dec=target_to_observe.dec*u.degree)
+        print(c)
         coordinates = etree.SubElement(target, 'Coordinates')
         ra = etree.SubElement(coordinates, 'RightAscension')
-        etree.SubElement(ra, 'Hours').text = ''  # TODO: RA/Dec calculation
-        etree.SubElement(ra, 'Minutes').text = ''
-        etree.SubElement(ra, 'Seconds').text = ''
+        etree.SubElement(ra, 'Hours').text = str(int(c.ra.hms.h))  # TODO: RA/Dec calculation
+        etree.SubElement(ra, 'Minutes').text = str(int(c.ra.hms.m))
+        etree.SubElement(ra, 'Seconds').text = str(c.ra.hms.s)
         etree.SubElement(ra, 'Offset', units='arcseconds').text = '0.0'
-        dec = etree.SubElement(coordinates, 'Declination') 
-        etree.SubElement(dec, 'Degrees').text = ''
-        etree.SubElement(dec, 'Arcminutes').text = ''
-        etree.SubElement(dec, 'Arcseconds').text = ''
+        dec = etree.SubElement(coordinates, 'Declination')
+        etree.SubElement(dec, 'Degrees').text = str(c.dec.signed_dms.d)
+        etree.SubElement(dec, 'Arcminutes').text = str(c.dec.signed_dms.m)
+        etree.SubElement(dec, 'Arcseconds').text = str(c.dec.signed_dms.s)
         etree.SubElement(dec, 'Offset', units='arcseconds').text = '0.0'
         etree.SubElement(coordinates, 'Equinox').text = target_to_observe.epoch
 
-        device = etree.SubElement(schedule, 
-                                  'Device', 
-                                  name=self.cleaned_data['device'], 
+        device = etree.SubElement(schedule,
+                                  'Device',
+                                  name=self.cleaned_data['device'],
                                   type=self.cleaned_data['device_type'])
         etree.SubElement(device, 'SpectralRegion').text = 'optical'
         setup = etree.SubElement(device, 'Setup')
@@ -70,33 +78,31 @@ class LTObservationForm(GenericObservationForm):
         etree.SubElement(binning, 'Y', units='pixels').text = self.cleaned_data['binning'].split('x')[1]
 
         etree.SubElement(schedule, 'Priority').text = str(self.cleaned_data['priority'])
-        
+
         exposure = etree.SubElement(schedule, 'Exposure', count=str(self.cleaned_data['exp_count']))
         etree.SubElement(exposure, 'Value', units='seconds').text = str(self.cleaned_data['exp_time'])
 
         date = etree.SubElement(schedule, 'DateTimeConstraint', type='include')
-        etree.SubElement(date, 'DateTimeStart', system='UT', value=self.cleaned_data['start'])
-        etree.SubElement(date, 'DateTimeEnd', system='UT', value=self.cleaned_data['end'])
+        start = datetime.strftime(parse(self.cleaned_data['start']), '%Y%m%dT%H:%M:%s')
+        end = datetime.strftime(parse(self.cleaned_data['end']), '%Y%m%dT%H:%M:%s')
+        etree.SubElement(date, 'DateTimeStart', system='UT', value=start)
+        etree.SubElement(date, 'DateTimeEnd', system='UT', value=end)
 
         return schedule
 
-    # TODO: write xml headers and write out to in-memory file
     def observation_payload(self):
         namespaces = {
-            'xmlns': 'http://www.rtml.org/v3.1a',
             'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
         }
-        payload = etree.Element('RTML', 
-                             xmlns='http://www.rtml.org/v3.1a',
-                             xsi='{http://www.rtml.org/v3.1a}http://www.w3.org/2001/XMLSchema-instance',
-                             mode='request', 
-                             uid='rtml://rtml-ioo-1566316274', 
-                             version='3.1a',
-                             schemaLocation='{http://www.w3.org/2001/XMLSchema-instance}http://www.rtml.org/v3.1a http://telescope.livjm.ac.uk/rtml/RTML-nightly.xsd',
-                             nsmap=namespaces)
+        schemaLocation = etree.QName('http://www.w3.org/2001/XMLSchema-instance', 'schemaLocation')
+        payload = etree.Element('RTML',
+                                {schemaLocation: 'http://www.rtml.org/v3.1a http://telescope.livjm.ac.uk/rtml/RTML-nightly.xsd'},
+                                xmlns='http://www.rtml.org/v3.1a', mode='request',
+                                uid='rtml://rtml-ioo-1566316274', version='3.1a',
+                                nsmap=namespaces)
         payload.append(self._build_project())
         payload.append(self._build_schedule())
-        return etree.tostring(payload, pretty_print=True)
+        return etree.tostring(payload, encoding="unicode")
 
 
 class LTFacility(GenericObservationFacility):
@@ -111,9 +117,13 @@ class LTFacility(GenericObservationFacility):
             'Username': LT_SETTINGS['username'],
             'Password': LT_SETTINGS['password']
         }
-        url = '{0}://{1}:{2}/node_agent2/node_agent?wsdl'.format('http', '161.72.57.3', '8080')
+        url = '{0}://{1}:{2}/node_agent2/node_agent?wsdl'.format('http', LT_HOST, LT_PORT)
         client = Client(url=url, headers=headers)
-        client.service.handle_rtml(observation_payload)
+        print(client.service.ping())
+        print(observation_payload)
+        return_val = client.service.handle_rtml(observation_payload)
+        print()
+        print(return_val)
 
     def validate_observation(self, observation_payload):
         return
