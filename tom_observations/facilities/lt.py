@@ -23,6 +23,9 @@ except (AttributeError, KeyError):
 
 LT_HOST = '161.72.57.3'
 LT_PORT = '8080'
+LT_XML_NS = 'http://www.rtml.org/v3.1a'
+LT_XSI_NS = 'http://www.w3.org/2001/XMLSchema-instance'
+LT_SCHEMA_LOCATION = 'http://www.rtml.org/v3.1a http://telescope.livjm.ac.uk/rtml/RTML-nightly.xsd'
 
 
 class LTObservationForm(GenericObservationForm):
@@ -36,6 +39,14 @@ class LTObservationForm(GenericObservationForm):
     binning = forms.ChoiceField(choices=[('2x2', '2x2')])
     exp_count = forms.IntegerField(min_value=1)
     exp_time = forms.FloatField(min_value=0.1)
+
+    def _build_prolog(self):
+        namespaces = {
+            'xsi': LT_XSI_NS,
+        }
+        schemaLocation = etree.QName(LT_XSI_NS, 'schemaLocation')
+        return etree.Element('RTML', {schemaLocation: LT_SCHEMA_LOCATION}, xmlns=LT_XML_NS,
+                             mode='request', uid='rtml://rtml-ioo-1566316274', version='3.1a', nsmap=namespaces)
 
     def _build_project(self):
         project = etree.Element('Project', ProjectId=LT_SETTINGS['proposal'])
@@ -90,15 +101,7 @@ class LTObservationForm(GenericObservationForm):
         return schedule
 
     def observation_payload(self):
-        namespaces = {
-            'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-        }
-        schemaLocation = etree.QName('http://www.w3.org/2001/XMLSchema-instance', 'schemaLocation')
-        payload = etree.Element('RTML',
-                                {schemaLocation: 'http://www.rtml.org/v3.1a http://telescope.livjm.ac.uk/rtml/RTML-nightly.xsd'},
-                                xmlns='http://www.rtml.org/v3.1a', mode='request',
-                                uid='rtml://rtml-ioo-1566316274', version='3.1a',
-                                nsmap=namespaces)
+        payload = self._build_prolog()
         payload.append(self._build_project())
         payload.append(self._build_schedule())
         return etree.tostring(payload, encoding="unicode")
@@ -123,6 +126,11 @@ class LTFacility(GenericObservationFacility):
         return_val = client.service.handle_rtml(observation_payload)
         print()
         print(return_val)
+
+    def cancel_observation(self, observation_id):
+        form = self.get_form()()
+        payload = form._build_prolog()
+        payload.append(form._build_project())
 
     def validate_observation(self, observation_payload):
         return
