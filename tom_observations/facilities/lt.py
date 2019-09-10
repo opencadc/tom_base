@@ -51,18 +51,17 @@ class LTObservationForm(GenericObservationForm):
 
         target = etree.SubElement(schedule, 'Target', name=target_to_observe.name)
         c = SkyCoord(ra=target_to_observe.ra*u.degree, dec=target_to_observe.dec*u.degree)
-        print(c)
         coordinates = etree.SubElement(target, 'Coordinates')
         ra = etree.SubElement(coordinates, 'RightAscension')
-        etree.SubElement(ra, 'Hours').text = str(int(c.ra.hms.h))  # TODO: RA/Dec calculation
+        etree.SubElement(ra, 'Hours').text = str(int(c.ra.hms.h))
         etree.SubElement(ra, 'Minutes').text = str(int(c.ra.hms.m))
         etree.SubElement(ra, 'Seconds').text = str(c.ra.hms.s)
-        etree.SubElement(ra, 'Offset', units='arcseconds').text = '0.0'
+
         dec = etree.SubElement(coordinates, 'Declination')
-        etree.SubElement(dec, 'Degrees').text = str(c.dec.signed_dms.d)
-        etree.SubElement(dec, 'Arcminutes').text = str(c.dec.signed_dms.m)
+        sign = '+' if c.dec.signed_dms.sign == '1.0' else '-'
+        etree.SubElement(dec, 'Degrees').text = sign + str(int(c.dec.signed_dms.d))
+        etree.SubElement(dec, 'Arcminutes').text = str(int(c.dec.signed_dms.m))
         etree.SubElement(dec, 'Arcseconds').text = str(c.dec.signed_dms.s)
-        etree.SubElement(dec, 'Offset', units='arcseconds').text = '0.0'
         etree.SubElement(coordinates, 'Equinox').text = target_to_observe.epoch
 
         device = etree.SubElement(schedule,
