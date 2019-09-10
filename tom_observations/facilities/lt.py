@@ -93,8 +93,8 @@ class LTObservationForm(GenericObservationForm):
         etree.SubElement(exposure, 'Value', units='seconds').text = str(self.cleaned_data['exp_time'])
 
         date = etree.SubElement(schedule, 'DateTimeConstraint', type='include')
-        start = datetime.strftime(parse(self.cleaned_data['start']), '%Y%m%dT%H:%M:%s')
-        end = datetime.strftime(parse(self.cleaned_data['end']), '%Y%m%dT%H:%M:%s')
+        start = datetime.strftime(parse(self.cleaned_data['start']), '%Y-%m-%dT%H:%M:%s')
+        end = datetime.strftime(parse(self.cleaned_data['end']), '%Y-%m-%dT%H:%M:%s')
         etree.SubElement(date, 'DateTimeStart', system='UT', value=start)
         etree.SubElement(date, 'DateTimeEnd', system='UT', value=end)
 
