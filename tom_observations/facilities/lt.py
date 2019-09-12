@@ -1,3 +1,5 @@
+import time
+
 from lxml import etree
 from suds import Client
 from dateutil.parser import parse
@@ -45,11 +47,12 @@ class LTObservationForm(GenericObservationForm):
             'xsi': LT_XSI_NS,
         }
         schemaLocation = etree.QName(LT_XSI_NS, 'schemaLocation')
+        uid = 'rtml://rtml-ioo-{}'.format(str(int(time.time())))
         return etree.Element('RTML', {schemaLocation: LT_SCHEMA_LOCATION}, xmlns=LT_XML_NS,
-                             mode='request', uid='rtml://rtml-ioo-1566316274', version='3.1a', nsmap=namespaces)
+                             mode='request', uid=uid, version='3.1a', nsmap=namespaces)
 
     def _build_project(self):
-        project = etree.Element('Project', ProjectId=LT_SETTINGS['proposal'])
+        project = etree.Element('Project', ProjectID=LT_SETTINGS['proposal'])
         contact = etree.SubElement(project, 'Contact')
         etree.SubElement(contact, 'Username').text = LT_SETTINGS['username']
         etree.SubElement(contact, 'Name').text = ''
@@ -121,11 +124,10 @@ class LTFacility(GenericObservationFacility):
         }
         url = '{0}://{1}:{2}/node_agent2/node_agent?wsdl'.format('http', LT_HOST, LT_PORT)
         client = Client(url=url, headers=headers)
-        print(client.service.ping())
-        print(observation_payload)
-        return_val = client.service.handle_rtml(observation_payload)
-        print()
-        print(return_val)
+        response = client.service.handle_rtml(observation_payload)
+        response_rtml = etree.fromstring(response)
+        obs_id = response_rtml.get('uid').split('-')[-1]
+        return obs_id
 
     def cancel_observation(self, observation_id):
         form = self.get_form()()
@@ -139,7 +141,7 @@ class LTFacility(GenericObservationFacility):
         return
 
     def get_terminal_observing_states(self):
-        return
+        return []
 
     def get_observing_sites(self):
         return
