@@ -7,15 +7,30 @@ from astropy import units
 from astropy.io import fits, ascii
 from astropy.time import Time
 from astropy.wcs import WCS
+from django import forms
 from specutils import Spectrum1D
 
 from tom_dataproducts.data_processor import DataProcessor
 from tom_dataproducts.exceptions import InvalidFileFormatException
+from tom_dataproducts.forms import DataProductUploadForm
 from tom_dataproducts.processors.data_serializers import SpectrumSerializer
 from tom_observations.facility import get_service_class, get_service_classes
 
 
+class SpectrumUploadForm(DataProductUploadForm):
+    observation_date = forms.DateTimeField()
+    facility = forms.ChoiceField(
+        choices=[(None, '----------')] + [(k, k) for k in get_service_classes().keys()],
+        required=True
+    )
+
+    def clean(self, *args, **kwargs):
+        pass
+
+
 class SpectroscopyProcessor(DataProcessor):
+    name = 'Spectroscopy'
+    form = SpectrumUploadForm
 
     DEFAULT_WAVELENGTH_UNITS = units.angstrom
     DEFAULT_FLUX_CONSTANT = units.erg / units.cm ** 2 / units.second / units.angstrom
@@ -44,7 +59,7 @@ class SpectroscopyProcessor(DataProcessor):
 
         return [(obs_date, serialized_spectrum)]
 
-    def _process_spectrum_from_fits(self, data_product):
+    def _process_spectrum_from_fits(self, data_product, **kwargs):
         """
         Processes the data from a spectrum from a fits file into a Spectrum1D object, which can then be serialized and
         stored as a ReducedDatum for further processing or display. File is read using specutils as specified in the

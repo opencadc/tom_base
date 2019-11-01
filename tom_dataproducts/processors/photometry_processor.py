@@ -7,9 +7,16 @@ from astropy.time import Time, TimezoneInfo
 
 from tom_dataproducts.data_processor import DataProcessor
 from tom_dataproducts.exceptions import InvalidFileFormatException
+from tom_dataproducts.forms import DataProductUploadForm
+
+
+class PhotometryUploadForm(DataProductUploadForm):
+    pass
 
 
 class PhotometryProcessor(DataProcessor):
+    name = 'Photometry'
+    form = PhotometryUploadForm
 
     def process_data(self, data_product):
         """

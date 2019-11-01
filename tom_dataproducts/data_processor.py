@@ -3,10 +3,41 @@ import mimetypes
 from django.conf import settings
 from importlib import import_module
 
+from tom_dataproducts.forms import BaseDataProductUploadForm
 from tom_dataproducts.models import ReducedDatum
 
 
 DEFAULT_DATA_PROCESSOR_CLASS = 'tom_dataproducts.data_processor.DataProcessor'
+
+
+def get_data_processor_classes():
+    data_processor_classes = {}
+    for data_type, data_processor in settings.DATA_PRODUCT_TYPES.items():
+        if not data_processor:
+            data_processor = DEFAULT_DATA_PROCESSOR_CLASS
+        mod_name, class_name = data_processor.rsplit('.', 1)
+        try:
+            mod = import_module(mod_name)
+            clazz = getattr(mod, class_name)
+        except (ImportError, AttributeError):
+            raise ImportError(
+                '''Could not import {}.
+                Did you provide the correct path?'''.format(data_processor)
+            )
+        data_processor_classes[clazz.name] = clazz
+    print(data_processor_classes)
+    return data_processor_classes
+
+
+def get_data_processor_class(data_type):
+    available_classes = get_data_processor_classes()
+    try:
+        return available_classes['data_type']
+    except KeyError:
+        raise ImportError(
+            '''Could not a find a data processor for that type.
+            Did you add it to DATA_PRODUCT_TYPES?'''
+        )
 
 
 def run_data_processor(dp):
@@ -19,7 +50,7 @@ def run_data_processor(dp):
     """
 
     try:
-        processor_class = settings.DATA_PROCESSORS[dp.data_product_type]
+        processor_class = settings.DATA_PRODUCT_TYPE[dp.data_product_type][1]
     except Exception:
         processor_class = DEFAULT_DATA_PROCESSOR_CLASS
 
@@ -44,6 +75,8 @@ def run_data_processor(dp):
 
 
 class DataProcessor():
+    name = 'Other'
+    form = BaseDataProductUploadForm
 
     FITS_MIMETYPES = ['image/fits', 'application/fits']
     PLAINTEXT_MIMETYPES = ['text/plain', 'text/csv']
