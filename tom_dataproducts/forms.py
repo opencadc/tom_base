@@ -36,7 +36,7 @@ class BaseDataProductUploadForm(forms.Form):
         )
     )
     data_product_type = forms.ChoiceField(
-        choices=[(v, k) for k, v in settings.DATA_PRODUCT_TYPES.items()],
+        choices=[(k, k) for k in settings.DATA_PRODUCT_TYPES.keys()],
         widget=forms.HiddenInput(),
         required=False
     )
@@ -47,7 +47,7 @@ class BaseDataProductUploadForm(forms.Form):
 
 class DataProductUploadForm(BaseDataProductUploadForm):
     other_type = forms.ChoiceField(
-        choices=[(v, k) for k, v in settings.DATA_PRODUCT_TYPES.items() if k not in ['photometry', 'spectroscopy']],
+        choices=[(k, k) for k in settings.DATA_PRODUCT_TYPES.keys() if k not in ['photometry', 'spectroscopy']],
         widget=forms.RadioSelect(),
         required=False
     )
@@ -62,7 +62,6 @@ class DataProductUploadForm(BaseDataProductUploadForm):
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.add_input(Submit('submit', 'Upload'))
-        # self.helper.form_action = reverse('tom_dataproducts:upload')
         self.helper.layout = Layout(
             'observation_record',
             'target',
@@ -70,8 +69,8 @@ class DataProductUploadForm(BaseDataProductUploadForm):
             'data_product_type',
             Div('files'),
             TabHolder(
-                Tab('Photometry'),
-                Tab('Spectroscopy', 'observation_date', 'facility'),
+                Tab('Photometry', css_id='upload_photometry'),
+                Tab('Spectroscopy', 'observation_date', 'facility', css_id='upload_spectroscopy'),
                 Tab('Other', 'other_type'),
                 css_id='data_upload_tabs'
             )

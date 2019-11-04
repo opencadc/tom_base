@@ -9,6 +9,7 @@ from plotly import offline
 import plotly.graph_objs as go
 
 from tom_dataproducts.models import DataProduct, ReducedDatum
+from tom_dataproducts.data_processor import get_data_processor_classes
 from tom_dataproducts.processors.data_serializers import SpectrumSerializer
 
 register = template.Library()
@@ -70,7 +71,7 @@ def photometry_for_target(target):
     following keys in the JSON representation: magnitude, error, filter
     """
     photometry_data = {}
-    for datum in ReducedDatum.objects.filter(target=target, data_type=settings.DATA_PRODUCT_TYPES['photometry'][0]):
+    for datum in ReducedDatum.objects.filter(target=target, data_type='photometry'):
         values = json.loads(datum.value)
         photometry_data.setdefault(values['filter'], {})
         photometry_data[values['filter']].setdefault('time', []).append(datum.timestamp)
@@ -105,7 +106,7 @@ def spectroscopy_for_target(target, dataproduct=None):
     that spectrum.
     """
     spectral_dataproducts = DataProduct.objects.filter(target=target,
-                                                       data_product_type=settings.DATA_PRODUCT_TYPES['spectroscopy'][0])
+                                                       data_product_type='spectroscopy')
     if dataproduct:
         spectral_dataproducts = DataProduct.objects.get(data_product=dataproduct)
 

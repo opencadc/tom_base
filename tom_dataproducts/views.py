@@ -60,9 +60,6 @@ class DataProductSaveView(LoginRequiredMixin, View):
 class DataProductUploadView(LoginRequiredMixin, FormView):
     form_class = DataProductUploadForm
 
-    # def get_form_class(self):
-    #     pass
-
     def form_valid(self, form):
         target = form.cleaned_data['target']
         if not target:

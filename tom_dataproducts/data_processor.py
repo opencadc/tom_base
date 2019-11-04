@@ -50,7 +50,7 @@ def run_data_processor(dp):
     """
 
     try:
-        processor_class = settings.DATA_PRODUCT_TYPE[dp.data_product_type][1]
+        processor_class = settings.DATA_PRODUCT_TYPES[dp.data_product_type]
     except Exception:
         processor_class = DEFAULT_DATA_PROCESSOR_CLASS
 

@@ -186,10 +186,7 @@ class DataProduct(models.Model):
         Saves the current `DataProduct` instance. Before saving, validates the `data_product_type` against those
         specified in `settings.py`.
         """
-        for dp_type, dp_values in settings.DATA_PRODUCT_TYPES.items():
-            if not self.data_product_type or self.data_product_type == dp_values[0]:
-                break
-        else:
+        if not self.data_product_type or not settings.DATA_PRODUCT_TYPES.get(self.data_product_type, None):
             raise ValidationError('Not a valid DataProduct type.')
         return super().save()
 
@@ -331,9 +328,6 @@ class ReducedDatum(models.Model):
     value = models.TextField(null=False, blank=False)
 
     def save(self, *args, **kwargs):
-        for dp_type, dp_values in settings.DATA_PRODUCT_TYPES.items():
-            if self.data_type and self.data_type == dp_values[0]:
-                break
-        else:
+        if not self.data_type or not settings.DATA_PRODUCT_TYPES.get(self.data_type, None):
             raise ValidationError('Not a valid DataProduct type.')
         return super().save()

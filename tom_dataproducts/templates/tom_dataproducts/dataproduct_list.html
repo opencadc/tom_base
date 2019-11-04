@@ -40,10 +40,8 @@
             {% endfor %}
           </td>
           <td>
-            {% if product.data_product_type %}
-              {{ product.get_type_display }}
-            {% endif %}
-          </a></td>
+            {{ product.data_product_type }}
+          </td>
           {% if product.get_file_extension == '.fz' or product.get_file_extension == '.fits' %}
           <td>
             {% cache None thumbnail product.id %}
