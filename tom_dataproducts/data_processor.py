@@ -1,8 +1,11 @@
 import mimetypes
 
+from astropy import units
+from astropy.time import Time, TimezoneInfo
 from django.conf import settings
 from importlib import import_module
 
+from tom_dataproducts.exceptions import InvalidFileFormatException
 from tom_dataproducts.forms import BaseDataProductUploadForm
 from tom_dataproducts.models import ReducedDatum
 
@@ -10,37 +13,7 @@ from tom_dataproducts.models import ReducedDatum
 DEFAULT_DATA_PROCESSOR_CLASS = 'tom_dataproducts.data_processor.DataProcessor'
 
 
-def get_data_processor_classes():
-    data_processor_classes = {}
-    for data_type, data_processor in settings.DATA_PRODUCT_TYPES.items():
-        if not data_processor:
-            data_processor = DEFAULT_DATA_PROCESSOR_CLASS
-        mod_name, class_name = data_processor.rsplit('.', 1)
-        try:
-            mod = import_module(mod_name)
-            clazz = getattr(mod, class_name)
-        except (ImportError, AttributeError):
-            raise ImportError(
-                '''Could not import {}.
-                Did you provide the correct path?'''.format(data_processor)
-            )
-        data_processor_classes[clazz.name] = clazz
-    print(data_processor_classes)
-    return data_processor_classes
-
-
-def get_data_processor_class(data_type):
-    available_classes = get_data_processor_classes()
-    try:
-        return available_classes['data_type']
-    except KeyError:
-        raise ImportError(
-            '''Could not a find a data processor for that type.
-            Did you add it to DATA_PRODUCT_TYPES?'''
-        )
-
-
-def run_data_processor(dp):
+def run_data_processor(dp, **kwargs):
     """
     Reads the `data_product_type` from the dp parameter and imports the corresponding `DataProcessor` specified in
     `settings.py`, then runs `process_data` and inserts the returned values into the database.
@@ -51,6 +24,8 @@ def run_data_processor(dp):
 
     try:
         processor_class = settings.DATA_PRODUCT_TYPES[dp.data_product_type]
+        if not processor_class:
+            processor_class = DEFAULT_DATA_PROCESSOR_CLASS
     except Exception:
         processor_class = DEFAULT_DATA_PROCESSOR_CLASS
 
@@ -62,7 +37,7 @@ def run_data_processor(dp):
         raise ImportError('Could not import {}. Did you provide the correct path?'.format(processor_class))
 
     data_processor = clazz()
-    data = data_processor.process_data(dp)
+    data = data_processor.process_data(dp, **kwargs)
 
     for datum in data:
         ReducedDatum.objects.create(
@@ -86,7 +61,7 @@ class DataProcessor():
     mimetypes.add_type('application/fits', '.fits')
     mimetypes.add_type('application/fits', '.fz')
 
-    def process_data(self, data_product):
+    def process_data(self, data_product, **kwargs):
         """
         Routes a photometry processing call to a method specific to a file-format. This method is expected to be
         implemented by any subclasses.
@@ -98,3 +73,14 @@ class DataProcessor():
         :rtype: list of 2-tuples
         """
         return []
+
+    def _date_obs_to_astropy_time(self, date_obs):
+        try:
+            date_obs = Time(date_obs)
+        except ValueError:
+            try:
+                date_obs = Time(date_obs, format='mjd')
+            except ValueError:
+                raise InvalidFileFormatException('Invalid datetime format.')
+        utc = TimezoneInfo(utc_offset=0*units.hour)
+        return date_obs.to_datetime(timezone=utc)

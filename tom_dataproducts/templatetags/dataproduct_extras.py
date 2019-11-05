@@ -1,7 +1,6 @@
 import json
 
 from django import template
-from django.conf import settings
 from django.core.paginator import Paginator
 from datetime import datetime
 
@@ -9,7 +8,6 @@ from plotly import offline
 import plotly.graph_objs as go
 
 from tom_dataproducts.models import DataProduct, ReducedDatum
-from tom_dataproducts.data_processor import get_data_processor_classes
 from tom_dataproducts.processors.data_serializers import SpectrumSerializer
 
 register = template.Library()

@@ -4,9 +4,10 @@
 <script>
   function getType() {
     tab = $('#data_upload_tabs .nav-item .active').text();
-    console.log('hello');
-    console.log(tab.toLowerCase());
-    $('#id_data_product_type').val(tab.toLowerCase());
+    other_type = $('input[name="other_type"]:checked').val();
+    if (other_type !== null) $('#id_data_product_type').val(other_type)
+    else $('#id_data_product_type').val(tab.toLowerCase());
+
   }
 </script>
 <h4>Upload a data product</h4>

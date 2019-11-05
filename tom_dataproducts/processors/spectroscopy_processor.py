@@ -1,11 +1,8 @@
 import mimetypes
 import numpy as np
 
-from datetime import datetime
-
 from astropy import units
 from astropy.io import fits, ascii
-from astropy.time import Time
 from astropy.wcs import WCS
 from django import forms
 from specutils import Spectrum1D
@@ -35,7 +32,7 @@ class SpectroscopyProcessor(DataProcessor):
     DEFAULT_WAVELENGTH_UNITS = units.angstrom
     DEFAULT_FLUX_CONSTANT = units.erg / units.cm ** 2 / units.second / units.angstrom
 
-    def process_data(self, data_product):
+    def process_data(self, data_product, **kwargs):
         """
         Routes a spectroscopy processing call to a method specific to a file-format, then serializes the returned data.
 
@@ -49,9 +46,9 @@ class SpectroscopyProcessor(DataProcessor):
 
         mimetype = mimetypes.guess_type(data_product.data.path)[0]
         if mimetype in self.FITS_MIMETYPES:
-            spectrum, obs_date = self._process_spectrum_from_fits(data_product)
+            spectrum, obs_date = self._process_spectrum_from_fits(data_product, **kwargs)
         elif mimetype in self.PLAINTEXT_MIMETYPES:
-            spectrum, obs_date = self._process_spectrum_from_plaintext(data_product)
+            spectrum, obs_date = self._process_spectrum_from_plaintext(data_product, **kwargs)
         else:
             raise InvalidFileFormatException('Unsupported file type')
 
@@ -79,15 +76,34 @@ class SpectroscopyProcessor(DataProcessor):
 
         flux, header = fits.getdata(data_product.data.path, header=True)
 
-        for facility_class in get_service_classes():
-            facility = get_service_class(facility_class)()
-            if facility.is_fits_facility(header):
-                flux_constant = facility.get_flux_constant()
-                date_obs = facility.get_date_obs(header)
-                break
+        # Get observation facility. Try to get it from the form, then the FITS header.
+        facility_name = kwargs.get('facility')
+        if not facility_name:
+            for facility_class in get_service_classes():
+                facility = get_service_class(facility_class)()
+                if facility.is_fits_facility(header):
+                    break
+            else:
+                facility = None
         else:
-            flux_constant = self.DEFAULT_FLUX_CONSTANT
-            date_obs = datetime.now()
+            facility = get_service_class(facility_name)()
+
+        # Get the observation date. Try to get it from the form, then the FITS header. If there is no observation date,
+        # raise a ValidationError. If the observation date is obtained from the FITS header, attempt to convert it to
+        # an Astropy.Time object first without a specified format, then try to use modified Julian date.
+        date_obs = kwargs.get('observation_date')
+        if not date_obs:
+            if facility:
+                date_obs = facility.get_date_obs(header)
+            else:
+                raise ValidationError('Observation date must be specified in form or included in file.')
+
+        date_obs = self._date_obs_to_astropy_time(date_obs)
+
+        # Get the flux constant. Use the default one if no facility has been identified.
+        flux_constant = self.DEFAULT_FLUX_CONSTANT
+        if facility:
+            flux_constant = facility.get_flux_constant()
 
         dim = len(flux.shape)
         if dim == 3:
@@ -100,9 +116,9 @@ class SpectroscopyProcessor(DataProcessor):
 
         spectrum = Spectrum1D(flux=flux, wcs=wcs)
 
-        return spectrum, Time(date_obs).to_datetime()
+        return spectrum, date_obs
 
-    def _process_spectrum_from_plaintext(self, data_product):
+    def _process_spectrum_from_plaintext(self, data_product, **kwargs):
         """
         Processes the data from a spectrum from a plaintext file into a Spectrum1D object, which can then be serialized
         and stored as a ReducedDatum for further processing or display. File is read using astropy as specified in
@@ -128,15 +144,22 @@ class SpectroscopyProcessor(DataProcessor):
         data = ascii.read(data_product.data.path)
         if len(data) < 1:
             raise InvalidFileFormatException('Empty table or invalid file type')
-        facility_name = None
-        date_obs = datetime.now()
+        facility_name = kwargs.get('facility')
+        date_obs = kwargs.get('observation_date')
         comments = data.meta.get('comments', [])
 
         for comment in comments:
-            if 'date-obs' in comment.lower():
-                date_obs = comment.split(':')[1].strip()
-            if 'facility' in comment.lower():
-                facility_name = comment.split(':')[1].strip()
+            if not facility_name:
+                if 'facility' in comment.lower():
+                    facility_name = comment.split(':')[1].strip()
+            if not date_obs:
+                if 'date-obs' in comment.lower():
+                    date_obs = comment.split(':')[1].strip()
+
+        if date_obs:
+            date_obs = self._date_obs_to_astropy_time(date_obs)
+        else:
+            raise ValidationError('Observation date must be specified in form or included in file.')
 
         facility = get_service_class(facility_name)() if facility_name else None
         wavelength_units = facility.get_wavelength_units() if facility else self.DEFAULT_WAVELENGTH_UNITS
@@ -146,4 +169,4 @@ class SpectroscopyProcessor(DataProcessor):
         flux = np.array(data['flux']) * flux_constant
         spectrum = Spectrum1D(flux=flux, spectral_axis=spectral_axis)
 
-        return spectrum, Time(date_obs).to_datetime()
+        return spectrum, date_obs

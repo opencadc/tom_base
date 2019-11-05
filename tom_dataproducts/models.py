@@ -186,7 +186,7 @@ class DataProduct(models.Model):
         Saves the current `DataProduct` instance. Before saving, validates the `data_product_type` against those
         specified in `settings.py`.
         """
-        if not self.data_product_type or not settings.DATA_PRODUCT_TYPES.get(self.data_product_type, None):
+        if not self.data_product_type or self.data_product_type not in settings.DATA_PRODUCT_TYPES.keys():
             raise ValidationError('Not a valid DataProduct type.')
         return super().save()
 

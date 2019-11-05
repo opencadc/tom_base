@@ -3,7 +3,7 @@ import json
 
 from astropy import units
 from astropy.io import ascii
-from astropy.time import Time, TimezoneInfo
+from astropy.time import TimezoneInfo
 
 from tom_dataproducts.data_processor import DataProcessor
 from tom_dataproducts.exceptions import InvalidFileFormatException
@@ -18,7 +18,7 @@ class PhotometryProcessor(DataProcessor):
     name = 'Photometry'
     form = PhotometryUploadForm
 
-    def process_data(self, data_product):
+    def process_data(self, data_product, **kwargs):
         """
         Routes a photometry processing call to a method specific to a file-format.
 
@@ -58,11 +58,9 @@ class PhotometryProcessor(DataProcessor):
             raise InvalidFileFormatException('Empty table or invalid file type')
 
         for datum in data:
-            time = Time(float(datum['time']), format='mjd')
-            utc = TimezoneInfo(utc_offset=0*units.hour)
-            time.format = 'datetime'
+            time = self._date_obs_to_astropy_time(datum['time'])
             value = {
-                'timestamp': time.to_datetime(timezone=utc),
+                'timestamp': time,
                 'magnitude': datum['magnitude'],
                 'filter': datum['filter'],
                 'error': datum['error']

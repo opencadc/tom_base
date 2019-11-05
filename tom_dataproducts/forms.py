@@ -57,7 +57,6 @@ class DataProductUploadForm(BaseDataProductUploadForm):
     )
 
     def __init__(self, *args, **kwargs):
-        print([(v, k) for k, v in settings.DATA_PRODUCT_TYPES.items()])
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
@@ -75,7 +74,3 @@ class DataProductUploadForm(BaseDataProductUploadForm):
                 css_id='data_upload_tabs'
             )
         )
-
-    def clean(self):
-        cleaned_data = super().clean()
-        print(cleaned_data)
