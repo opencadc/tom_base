@@ -187,7 +187,7 @@ class DataProduct(models.Model):
         specified in `settings.py`.
         """
         if not self.data_product_type or self.data_product_type not in settings.DATA_PRODUCT_TYPES.keys():
-            raise ValidationError('Not a valid DataProduct type.')
+            raise ValidationError(f'{self.data_product_type} is not a valid DataProduct type.')
         return super().save()
 
     def get_type_display(self):

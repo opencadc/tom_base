@@ -53,7 +53,7 @@ class DataProductUploadForm(BaseDataProductUploadForm):
     )
     observation_date = forms.DateTimeField(required=False)
     facility = forms.ChoiceField(
-        choices=[(None, '---------')] + [(v, v) for k, v in get_service_classes().items()], required=False
+        choices=[(None, '---------')] + [(k, k) for k in get_service_classes().keys()], required=False
     )
 
     def __init__(self, *args, **kwargs):

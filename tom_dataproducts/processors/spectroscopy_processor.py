@@ -96,7 +96,7 @@ class SpectroscopyProcessor(DataProcessor):
             if facility:
                 date_obs = facility.get_date_obs(header)
             else:
-                raise ValidationError('Observation date must be specified in form or included in file.')
+                raise InvalidFileFormatException('Observation date must be specified in form or included in file.')
 
         date_obs = self._date_obs_to_astropy_time(date_obs)
 
@@ -159,7 +159,7 @@ class SpectroscopyProcessor(DataProcessor):
         if date_obs:
             date_obs = self._date_obs_to_astropy_time(date_obs)
         else:
-            raise ValidationError('Observation date must be specified in form or included in file.')
+            raise InvalidFileFormatException('Observation date must be specified in form or included in file.')
 
         facility = get_service_class(facility_name)() if facility_name else None
         wavelength_units = facility.get_wavelength_units() if facility else self.DEFAULT_WAVELENGTH_UNITS

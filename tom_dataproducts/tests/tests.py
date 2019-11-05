@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from unittest.mock import patch
-from datetime import date, time
+from datetime import datetime
 from specutils import Spectrum1D
 from astropy import units
 from astropy.io import fits
@@ -53,6 +53,7 @@ class Views(TestCase):
             product_id='testproductid',
             target=self.target,
             observation_record=self.observation_record,
+            data_product_type='fits_file',
             data=SimpleUploadedFile('afile.fits', b'somedata')
         )
         user = User.objects.create_user(username='test', email='test@example.com')
@@ -84,6 +85,7 @@ class Views(TestCase):
 
     # Non-FITS file
     def test_is_fits_image_file_invalid_fits(self, dp_mock):
+        self.data_product.data_product_type = 'image_file'
         with tempfile.TemporaryDirectory() as tmpdir:
             with self.settings(MEDIA_ROOT=tmpdir):
                 nonfits_file = os.path.join(tmpdir, 'nonfits.fits')
@@ -173,9 +175,8 @@ class TestUploadDataProducts(TestCase):
                 'facility': 'LCO',
                 'files': SimpleUploadedFile('afile.fits', b'afile'),
                 'target': self.target.id,
-                'data_product_type': settings.DATA_PRODUCT_TYPES['spectroscopy'][0],
-                'observation_timestamp_0': date(2019, 6, 1),
-                'observation_timestamp_1': time(12, 0, 0),
+                'data_product_type': 'spectroscopy',
+                'observation_date': datetime(2019, 6, 1, 12, 0, 0),
                 'referrer': reverse('targets:detail', kwargs={'pk': self.target.id})
             },
             follow=True
@@ -189,9 +190,8 @@ class TestUploadDataProducts(TestCase):
                 'facility': 'LCO',
                 'files': SimpleUploadedFile('bfile.fits', b'afile'),
                 'observation_record': self.observation_record.id,
-                'data_product_type': settings.DATA_PRODUCT_TYPES['spectroscopy'][0],
-                'observation_timestamp_0': date(2019, 6, 1),
-                'observation_timestamp_1': time(12, 0, 0),
+                'data_product_type': 'spectroscopy',
+                'observation_date': datetime(2019, 6, 1, 12, 0, 0),
                 'referrer': reverse('targets:detail', kwargs={'pk': self.target.id})
             },
             follow=True
@@ -211,15 +211,14 @@ class TestDataUploadForms(TestCase):
         )
         self.spectroscopy_form_data = {
             'target': self.target.id,
-            'data_product_type': settings.DATA_PRODUCT_TYPES['spectroscopy'][0],
+            'data_product_type': 'spectroscopy',
             'facility': 'LCO',
-            'observation_timestamp_0': date(2019, 6, 1),
-            'observation_timestamp_1': time(12, 0, 0),
+            'observation_date': datetime(2019, 6, 1, 12, 0, 0),
             'referrer': 'referrer'
         }
         self.photometry_form_data = {
             'target': self.target.id,
-            'data_product_type': settings.DATA_PRODUCT_TYPES['photometry'][0],
+            'data_product_type': 'photometry',
             'referrer': 'referrer'
         }
         self.file_data = {
@@ -279,7 +278,8 @@ class TestDataProcessor(TestCase):
     def setUp(self):
         self.target = TargetFactory.create()
         self.data_product = DataProduct.objects.create(
-            target=self.target
+            target=self.target,
+            data_product_type='spectroscopy',
         )
         self.spectrum_data_processor = SpectroscopyProcessor()
         self.photometry_data_processor = PhotometryProcessor()
@@ -290,16 +290,16 @@ class TestDataProcessor(TestCase):
     @patch('tom_dataproducts.processors.spectroscopy_processor.SpectrumSerializer.serialize', return_value={})
     def test_process_spectroscopy_with_fits_file(self, serializer_mock, process_data_mock):
         self.data_product.data.save('spectrum.fits', self.test_file)
-        self.spectrum_data_processor.process_data(self.data_product)
-        process_data_mock.assert_called_with(self.data_product)
+        self.spectrum_data_processor.process_data(self.data_product, observation_date=datetime(2019, 6, 1, 12, 0, 0))
+        process_data_mock.assert_called_with(self.data_product, observation_date=datetime(2019, 6, 1, 12, 0, 0))
 
     @patch('tom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor._process_spectrum_from_plaintext',
            return_value=('', ''))
     @patch('tom_dataproducts.processors.spectroscopy_processor.SpectrumSerializer.serialize', return_value={})
     def test_process_spectroscopy_with_plaintext_file(self, serializer_mock, process_data_mock):
         self.data_product.data.save('spectrum.csv', self.test_file)
-        self.spectrum_data_processor.process_data(self.data_product)
-        process_data_mock.assert_called_with(self.data_product)
+        self.spectrum_data_processor.process_data(self.data_product, observation_date=datetime(2019, 6, 1, 12, 0, 0))
+        process_data_mock.assert_called_with(self.data_product, observation_date=datetime(2019, 6, 1, 12, 0, 0))
 
     def test_process_spectroscopy_with_invalid_file_type(self):
         self.data_product.data.save('spectrum.png', self.test_file)
@@ -309,7 +309,10 @@ class TestDataProcessor(TestCase):
     def test_process_spectrum_from_fits(self):
         with open('tom_dataproducts/tests/test_data/test_spectrum.fits', 'rb') as spectrum_file:
             self.data_product.data.save('spectrum.fits', spectrum_file)
-            spectrum, date_obs = self.spectrum_data_processor._process_spectrum_from_fits(self.data_product)
+            spectrum, date_obs = self.spectrum_data_processor._process_spectrum_from_fits(
+                self.data_product,
+                observation_date=datetime(2019, 6, 1, 12, 0, 0)
+            )
             self.assertTrue(type(spectrum) is Spectrum1D)
             self.assertAlmostEqual(spectrum.flux.mean().value, 2.295068e-14, places=19)
             self.assertAlmostEqual(spectrum.wavelength.mean().value, 6600.478789, places=5)
@@ -317,13 +320,17 @@ class TestDataProcessor(TestCase):
     def test_process_spectrum_from_plaintext(self):
         with open('tom_dataproducts/tests/test_data/test_spectrum.csv', 'rb') as spectrum_file:
             self.data_product.data.save('spectrum.csv', spectrum_file)
-            spectrum, date_obs = self.spectrum_data_processor._process_spectrum_from_plaintext(self.data_product)
+            spectrum, date_obs = self.spectrum_data_processor._process_spectrum_from_plaintext(
+                self.data_product,
+                observation_date=datetime(2019, 6, 1, 12, 0, 0)
+            )
             self.assertTrue(type(spectrum) is Spectrum1D)
             self.assertAlmostEqual(spectrum.flux.mean().value, 1.166619e-14, places=19)
             self.assertAlmostEqual(spectrum.wavelength.mean().value, 3250.744489, places=5)
 
     @patch('tom_dataproducts.processors.photometry_processor.PhotometryProcessor._process_photometry_from_plaintext')
     def test_process_photometry_with_plaintext_file(self, process_data_mock):
+        self.data_product.data_product_type = 'photometry'
         self.data_product.data.save('lightcurve.csv', self.test_file)
         self.photometry_data_processor.process_data(self.data_product)
         process_data_mock.assert_called_with(self.data_product)
@@ -334,6 +341,7 @@ class TestDataProcessor(TestCase):
             self.photometry_data_processor.process_data(self.data_product)
 
     def test_process_photometry_from_plaintext(self):
+        self.data_product.data_product_type = 'photometry'
         with open('tom_dataproducts/tests/test_data/test_lightcurve.csv', 'rb') as lightcurve_file:
             self.data_product.data.save('lightcurve.csv', lightcurve_file)
             lightcurve = self.photometry_data_processor._process_photometry_from_plaintext(self.data_product)
