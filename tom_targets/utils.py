@@ -3,7 +3,7 @@ from django.db.models import Count
 import csv
 from .models import Target, TargetExtra, TargetName
 from io import StringIO
-
+import json
 
 # NOTE: This saves locally. To avoid this, create file buffer.
 # referenced https://www.codingforentrepreneurs.com/blog/django-queryset-to-csv-files-datasets/
@@ -91,5 +91,133 @@ def import_targets(targets):
         except Exception as e:
             error = 'Error on line {0}: {1}'.format(index + 2, str(e))
             errors.append(error)
+
+    return {'targets': targets, 'errors': errors}
+
+def import_ephemeris_target(stream):
+    """
+    Reads in a custom ephemeris from provided file stream.
+
+    Currently only reads in the first site-code ephemeris.
+    """
+
+
+    #need to make robust to input date type
+    #need to make robuest to input coordinate type
+
+    errors = []
+    targets = []
+
+
+    jpl_ra_key = 'R.A._____(ICRF)_____DEC'
+    jpl_jd_key = 'Date_________JDUT'
+
+    eph = stream.getvalue().split('\n')
+
+    num_sites = 0
+    for i in range(len(eph)):
+        if 'Center-site name' in eph[i]:
+            num_sites+=1
+
+    if num_sites!=8:
+        errors.append(Warning('WARNING: Provided file does not have ephemerides for all 7 LCO sites.'))
+
+
+    eph_json = {}
+    end_ind = 0
+    for ns in range(num_sites):
+
+        centre_site_name = ''
+        name = 'custom'
+        jd_inds = None
+        ra_inds = None
+        loop_inds = [-1,-1]
+        for i in range(end_ind,len(eph)):
+            if 'Center-site name' in eph[i]:
+                s = eph[i].split(': ')[-1]
+                if 'Mauna Kea' in s:
+                    centre_site_name = '568'
+                elif 'Haleakala' in s:
+                    centre_site_name = 'T04'
+                elif 'McDonald' in s:
+                    centre_site_name = '711'
+                elif 'Tololo' in s:
+                    centre_site_name = 'W85'
+                elif 'Teide' in s:
+                    centre_site_name = '954'
+                elif 'Sunderland' in s:
+                    centre_site_name = 'K91'
+                elif 'Wise' in s:
+                    centre_site_name = '097'
+                elif 'Siding Spring' in s:
+                    centre_site_name = 'Q63'
+                else:
+                    centre_site_name = s
+
+            if 'Target body name' in eph[i]:
+                name = "-".join(eph[i].split(': ')[1].split('{source')[0].split())
+
+            if jpl_ra_key in eph[i] and jpl_jd_key in eph[i]:
+                ra_inds = [eph[i].index(jpl_ra_key),eph[i].index(jpl_ra_key)+len(jpl_ra_key)]
+                jd_inds = [eph[i].index(jpl_jd_key),eph[i].index(jpl_jd_key)+len(jpl_jd_key)]
+
+            if '$$SOE' in eph[i]:
+                if ra_inds  is not None and loop_inds[0]==-1:
+                    loop_inds[0] = i+1
+            if '$$EOE' in eph[i]:
+                if ra_inds is not None and loop_inds[0]!=-1:
+                    loop_inds[1] = i
+                    break
+
+        end_ind = loop_inds[1]+1
+
+        #throw HTML screen of warning if I cannot find the coordinates or ephemerides
+        #here we will put a better error check and correctly thrown warning
+        #for now being lazy
+        if loop_inds == [-1,-1] or ra_inds is None or jd_inds is None:
+            errors.append(Exception('We were not able to understand that ephemeris file.'))
+
+        mjds = []
+        ras = []
+        decs = []
+        R = 0.0
+        D = 0.0
+        n = 0.0
+        for i in range(loop_inds[0],loop_inds[1]):
+            mjds.append(str(float(eph[i][jd_inds[0]:jd_inds[1]])-2400000.5))
+            s = eph[i][ra_inds[0]:ra_inds[1]].split()
+            r = 15.0*float(s[0])+float(s[1])/60.0+float(s[2])/3600.0
+            ras.append("{:11.7f}".format(r))
+            d = abs(float(s[3]))+float(s[4])/60.0+float(s[5])/3600.0
+            if '-' in s[3]:
+                d*=-1.0
+            decs.append("{:10.6f}".format(d))
+
+            R+=r
+            D+=d
+            n+=1.0
+
+        eph_json[centre_site_name] = []
+        for i in range(len(ras)):
+            entry = {}
+            entry['t'] = mjds[i]
+            entry['R'] = ras[i]
+            entry['D'] = decs[i]
+            entry['dR'] = 0.0
+            entry['dD'] = 0.0
+
+            eph_json[centre_site_name].append(entry)
+
+    try:
+        target_fields = {}
+        target_fields['type'] = 'NON_SIDEREAL'
+        target_fields['scheme'] = 'EPHEMERIS'
+        target_fields['name'] = name
+        target_fields['eph_json'] = json.dumps(eph_json)
+
+        target = Target.objects.create(**target_fields)
+        targets.append(target)
+    except Exception as e:
+        errors.append(str(e))
 
     return {'targets': targets, 'errors': errors}

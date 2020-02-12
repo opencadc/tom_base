@@ -14,6 +14,7 @@
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
           <a class="dropdown-item" href="{% url 'targets:create' %}" title="Create a Target">Create a Target</a>
           <a class="dropdown-item" href="{% url 'targets:import' %}" title="Import Targets">Import Targets</a>
+          <a class="dropdown-item" href="{% url 'targets:ephemeris-import' %}" title="Import Ephemeris">Import Ephemeris</a>
           <a class="dropdown-item" href="{% url 'tom_catalogs:query' %}" title="Catalog Search">Catalog Search</a>
         </div>
         <a href="{% url 'dataproducts:update-reduced-data' %}" class="btn btn-primary" title="Update Targets">Update Targets</a>

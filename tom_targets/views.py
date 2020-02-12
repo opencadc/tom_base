@@ -29,7 +29,7 @@ from tom_targets.models import Target, TargetList
 from tom_targets.forms import (
     SiderealTargetCreateForm, NonSiderealTargetCreateForm, TargetExtraFormset, TargetNamesFormset
 )
-from tom_targets.utils import import_targets, export_targets
+from tom_targets.utils import import_targets, import_ephemeris_target, export_targets
 from tom_targets.filters import TargetFilter
 from tom_targets.groups import add_all_to_grouping, add_selected_to_grouping
 from tom_targets.groups import remove_all_from_grouping, remove_selected_from_grouping
@@ -367,6 +367,31 @@ class TargetImportView(LoginRequiredMixin, TemplateView):
         csv_file = request.FILES['target_csv']
         csv_stream = StringIO(csv_file.read().decode('utf-8'), newline=None)
         result = import_targets(csv_stream)
+        messages.success(
+            request,
+            'Targets created: {}'.format(len(result['targets']))
+        )
+        for error in result['errors']:
+            messages.warning(request, error)
+        return redirect(reverse('tom_targets:list'))
+
+
+class TargetImportEphemerisView(LoginRequiredMixin, TemplateView):
+    """
+    View that handles the import of targets from a .eph . Requires authentication.
+    """
+    template_name = 'tom_targets/target_ephemeris_import.html'
+
+    def post(self, request):
+        """
+        Handles the POST requests to this view. Creates a StringIO object and passes it to ``import_ephemeris_targets``.
+
+        :param request: the request object passed to this view
+        :type request: HTTPRequest
+        """
+        eph_file = request.FILES['target_eph']
+        eph_stream = StringIO(eph_file.read().decode('utf-8'), newline=None)
+        result = import_ephemeris_target(eph_stream)
         messages.success(
             request,
             'Targets created: {}'.format(len(result['targets']))

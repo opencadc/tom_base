@@ -17,19 +17,20 @@ SIDEREAL_FIELDS = GLOBAL_TARGET_FIELDS + [
 NON_SIDEREAL_FIELDS = GLOBAL_TARGET_FIELDS + [
     'scheme', 'mean_anomaly', 'arg_of_perihelion', 'lng_asc_node', 'inclination', 'mean_daily_motion', 'semimajor_axis',
     'eccentricity', 'epoch_of_elements', 'epoch_of_perihelion', 'ephemeris_period', 'ephemeris_period_err',
-    'ephemeris_epoch', 'ephemeris_epoch_err', 'perihdist'
+    'ephemeris_epoch', 'ephemeris_epoch_err', 'perihdist', 'centsite', 'eph_json'
 ]
 
 REQUIRED_SIDEREAL_FIELDS = ['ra', 'dec']
 REQUIRED_NON_SIDEREAL_FIELDS = [
-    'scheme', 'epoch_of_elements', 'inclination', 'lng_asc_node', 'arg_of_perihelion', 'eccentricity',
+    'scheme', 'epoch_of_elements',
 ]
 # Additional non-sidereal fields that are required for specific orbital element
 # schemes
 REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME = {
-    'MPC_COMET': ['perihdist', 'epoch_of_perihelion'],
-    'MPC_MINOR_PLANET': ['mean_anomaly', 'semimajor_axis'],
-    'JPL_MAJOR_PLANET': ['mean_daily_motion', 'mean_anomaly', 'semimajor_axis']
+    'MPC_COMET': ['perihdist', 'epoch_of_perihelion', 'inclination', 'lng_asc_node', 'arg_of_perihelion', 'eccentricity'],
+    'MPC_MINOR_PLANET': ['mean_anomaly', 'semimajor_axis', 'inclination', 'lng_asc_node', 'arg_of_perihelion', 'eccentricity'],
+    'JPL_MAJOR_PLANET': ['mean_daily_motion', 'mean_anomaly', 'semimajor_axis', 'inclination', 'lng_asc_node', 'arg_of_perihelion', 'eccentricity'],
+    'EPHEMERIS':['eph_json']
 }
 
 
@@ -120,6 +121,9 @@ class Target(models.Model):
 
     :param ephemeris_epoch_err: Days
     :type ephemeris_epoch_err: float
+
+    :param eph_json:
+    : type eph_json: str
     """
 
     SIDEREAL = 'SIDEREAL'
@@ -129,7 +133,8 @@ class Target(models.Model):
     TARGET_SCHEMES = (
         ('MPC_MINOR_PLANET', 'MPC Minor Planet'),
         ('MPC_COMET', 'MPC Comet'),
-        ('JPL_MAJOR_PLANET', 'JPL Major Planet')
+        ('JPL_MAJOR_PLANET', 'JPL Major Planet'),
+        ('EPHEMERIS', 'Custom Ephemeris')
     )
 
     name = models.CharField(
@@ -225,6 +230,12 @@ class Target(models.Model):
     )
     perihdist = models.FloatField(
         null=True, blank=True, verbose_name='Perihelion Distance', help_text='AU'
+    )
+    centsite = models.CharField(
+        max_length=50, null=True, blank=True, verbose_name='Centre-Site Name', help_text='Observatory Site Code'
+    )
+    eph_json = models.TextField(
+        null=True, blank=True, verbose_name='Ephemeris JSON', help_text='MJD in days, RA and Dec in degress'
     )
 
     class Meta:

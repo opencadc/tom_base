@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import TargetCreateView, TargetUpdateView, TargetDetailView
-from .views import TargetDeleteView, TargetListView, TargetImportView, TargetExportView
+from .views import TargetDeleteView, TargetListView, TargetImportView, TargetImportEphemerisView, TargetExportView
 from .views import TargetGroupingView, TargetGroupingDeleteView, TargetGroupingCreateView, TargetAddRemoveGroupingView
 
 app_name = 'tom_targets'
@@ -11,6 +11,7 @@ urlpatterns = [
     path('targetgrouping/', TargetGroupingView.as_view(), name='targetgrouping'),
     path('create/', TargetCreateView.as_view(), name='create'),
     path('import/', TargetImportView.as_view(), name='import'),
+    path('ephemeris-import/', TargetImportEphemerisView.as_view(), name='ephemeris-import'),
     path('export/', TargetExportView.as_view(), name='export'),
     path('add-remove-grouping/', TargetAddRemoveGroupingView.as_view(), name='add-remove-grouping'),
     path('<pk>/update/', TargetUpdateView.as_view(), name='update'),

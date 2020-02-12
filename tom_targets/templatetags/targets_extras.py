@@ -10,6 +10,8 @@ from tom_targets.models import Target, TargetExtra, TargetList
 from tom_targets.forms import TargetVisibilityForm
 from tom_observations.utils import get_sidereal_visibility
 
+import json
+
 register = template.Library()
 
 
@@ -176,3 +178,36 @@ def aladin(target):
     Displays Aladin skyview of the given target.
     """
     return {'target': target}
+
+@register.filter
+def eph_json_to_value_ra(value):
+    """
+    Returns the middle RA and Dec of the json_ephemeris
+    """
+    eph_json = json.loads(value)
+    keys = list(eph_json.keys())
+    k = keys[0]
+    l = len(eph_json[k][0])
+    return( deg_to_sexigesimal(float(eph_json[k][int(l/2)]['R']),'hms'))
+
+@register.filter
+def eph_json_to_value_dec(value):
+    """
+    Returns the middle RA and Dec of the json_ephemeris
+    """
+    eph_json = json.loads(value)
+    keys = list(eph_json.keys())
+    k = keys[0]
+    l = len(eph_json[k][0])
+    return( deg_to_sexigesimal(float(eph_json[k][int(l/2)]['D']),'dms'))
+
+@register.filter
+def eph_json_to_value_mjd(value):
+    """
+    Returns the middle RA and Dec of the json_ephemeris
+    """
+    eph_json = json.loads(value)
+    keys = list(eph_json.keys())
+    k = keys[0]
+    l = len(eph_json[k][0])
+    return( float(eph_json[k][int(l/2)]['t']))

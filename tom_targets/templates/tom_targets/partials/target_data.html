@@ -12,8 +12,17 @@
   {% endfor %}
   {% for key, value in target.as_dict.items %}
   {% if value and key != 'name' %}
-  <dt class="col-sm-6">{% verbose_name target key %}</dt>
-  <dd class="col-sm-6">{{ value|truncate_number }}</dd>
+    {% if key == 'eph_json' %}
+    <dt class="col-sm-6">Typical RA</dt>
+    <dd class="col-sm-6">{{ value|eph_json_to_value_ra }}</dd>
+    <dt class="col-sm-6">Typical Dec</dt>
+    <dd class="col-sm-6">{{ value|eph_json_to_value_dec }}</dd>
+    <dt class="col-sm-6">At MJD</dt>
+    <dd class="col-sm-6">{{ value|eph_json_to_value_mjd }}</dd>
+    {% else %}
+      <dt class="col-sm-6">{% verbose_name target key %}</dt>
+      <dd class="col-sm-6">{{ value|truncate_number }}</dd>
+    {% endif %}
   {% endif %}
   {% if key == 'ra' %}
     <dt class="col-sm-6">&nbsp;</dt>
