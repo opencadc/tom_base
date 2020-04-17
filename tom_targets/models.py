@@ -235,7 +235,7 @@ class Target(models.Model):
         max_length=50, null=True, blank=True, verbose_name='Centre-Site Name', help_text='Observatory Site Code'
     )
     eph_json = models.TextField(
-        null=True, blank=True, verbose_name='Ephemeris JSON', help_text='MJD in days, RA and Dec in degress'
+        null=True, blank=True, verbose_name='Ephemeris JSON', help_text="Don't fill this in by hand unless you know what you are doing."
     )
 
     class Meta:

@@ -5,6 +5,7 @@ from dateutil.parser import parse
 from crispy_forms.layout import Layout, Div
 from django.core.cache import cache
 from astropy import units as u
+from astropy.time import Time
 
 from tom_observations.facility import GenericObservationForm
 from tom_common.exceptions import ImproperCredentialsException
@@ -13,6 +14,17 @@ from tom_targets.models import (
     Target, REQUIRED_NON_SIDEREAL_FIELDS,
     REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME
 )
+from tom_observations.utils import get_radec_ephemeris
+
+import json
+import numpy as np
+
+import logging
+logger = logging.getLogger('submit_testing.log')
+
+def take_second_element(elem):
+    return elem[1]
+
 
 # Determine settings for this module.
 try:
@@ -46,7 +58,6 @@ def make_request(*args, **kwargs):
     response.raise_for_status()
     return response
 
-
 class LCOBaseObservationForm(GenericObservationForm):
     name = forms.CharField()
     ipp_value = forms.FloatField()
@@ -59,16 +70,42 @@ class LCOBaseObservationForm(GenericObservationForm):
         choices=(('NORMAL', 'Normal'), ('TARGET_OF_OPPORTUNITY', 'Rapid Response'))
     )
 
+    site = forms.ChoiceField(
+        choices = (('all', 'All Sites'),
+                   ('coj','Siding Spring'),
+                   ('cpt','Sutherland'),
+                   ('tfn', 'Teide'),
+                   ('tlv', 'Wise'),
+                   ('lsc','Cerro Tololo'),
+                   ('elp', 'McDonald'),
+                   ('ogg', 'Haleakala'))
+        #widget=forms.CheckboxSelectMultiple()
+    )
+
+    imaging_interval = forms.FloatField(label='Interval (hrs). Will schedule exposure count per interval.')
+
+
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['proposal'] = forms.ChoiceField(choices=self.proposal_choices())
         self.fields['filter'] = forms.ChoiceField(choices=self.filter_choices())
         self.fields['instrument_type'] = forms.ChoiceField(choices=self.instrument_choices())
+
+        self.eph_target = False
+        target = Target.objects.get(pk=kwargs['initial']['target_id'])
+        if target.type == Target.NON_SIDEREAL:
+            if target.scheme == 'EPHEMERIS':
+                self.eph_target = True
+
         self.helper.layout = Layout(
             self.common_layout,
             self.layout(),
             self.extra_layout()
         )
+
+
+
 
     def layout(self):
         return Div(
@@ -84,8 +121,10 @@ class LCOBaseObservationForm(GenericObservationForm):
         )
 
     def extra_layout(self):
+        if self.eph_target:
+            return Div('site','imaging_interval')
         # If you just want to add some fields to the end of the form, add them here.
-        return Div()
+        #return Div()
 
     def _get_instruments(self):
         cached_instruments = cache.get('lco_instruments')
@@ -98,17 +137,17 @@ class LCOBaseObservationForm(GenericObservationForm):
             )
             cached_instruments = {k: v for k, v in response.json().items() if 'SOAR' not in k}
             cache.set('lco_instruments', cached_instruments)
-
         return cached_instruments
 
     def instrument_choices(self):
         return [(k, v['name']) for k, v in self._get_instruments().items()]
 
     def filter_choices(self):
-        return set([
+        return sorted(set([
             (f['code'], f['name']) for ins in self._get_instruments().values() for f in
             ins['optical_elements'].get('filters', []) + ins['optical_elements'].get('slits', [])
-            ])
+            ]),key=take_second_element)
+
 
     def proposal_choices(self):
         response = make_request(
@@ -181,29 +220,84 @@ class LCOBaseObservationForm(GenericObservationForm):
             target_fields['proper_motion_ra'] = target.pm_ra
             target_fields['proper_motion_dec'] = target.pm_dec
             target_fields['epoch'] = target.epoch
-        elif target.type == Target.NON_SIDEREAL:
-            target_fields['type'] = 'ORBITAL_ELEMENTS'
-            # Mapping from TOM field names to LCO API field names, for fields
-            # where there are differences
-            field_mapping = {
-                'inclination': 'orbinc',
-                'lng_asc_node': 'longascnode',
-                'arg_of_perihelion': 'argofperih',
-                'semimajor_axis': 'meandist',
-                'mean_anomaly': 'meananom',
-                'mean_daily_motion': 'dailymot',
-                'epoch_of_elements': 'epochofel',
-                'epoch_of_perihelion': 'epochofperih',
-            }
-            # The fields to include in the payload depend on the scheme. Add
-            # only those that are required
-            fields = (REQUIRED_NON_SIDEREAL_FIELDS
-                      + REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME[target.scheme])
-            for field in fields:
-                lco_field = field_mapping.get(field, field)
-                target_fields[lco_field] = getattr(target, field)
 
-        return target_fields
+        elif target.type == Target.NON_SIDEREAL:
+            if self.eph_target:
+                ephemeris_targets = {}
+                ephemeris_windows = {}
+
+                eph_json = json.loads(target.eph_json)
+
+                site_selection = self.cleaned_data['site']
+                if site_selection !='all':
+                    site_selection = [site_selection]
+                else:
+                    site_selection = ['coj','cpt','tfn','tlv','lsc','elp','ogg']
+
+                for site in site_selection:
+                    if site in eph_json.keys():
+                        ephemeris_targets[site] = []
+                        ephemeris_windows[site] = []
+                        (mjd_vals,ra_vals,dec_vals,air_vals,sun_alt_vals) = get_radec_ephemeris(eph_json[site],
+                                                                                    self.cleaned_data['start'],
+                                                                                    self.cleaned_data['end'],
+                                                                                    self.cleaned_data['imaging_interval'],
+                                                                                    'LCO',
+                                                                                    site)
+                        if mjd_vals is not None:
+                            for i in range(len(ra_vals)-1):
+                                if (air_vals[i]<float(self.cleaned_data['max_airmass']) and
+                                    air_vals[i+1]<float(self.cleaned_data['max_airmass']) and
+                                    air_vals[i]>1.0 and
+                                    air_vals[i+1]>1.0 and
+                                    sun_alt_vals[i]<-30.0 and
+                                    sun_alt_vals[i+1]<-30.0):
+
+                                    new_target_fields = {}
+                                    new_target_fields['type'] = 'ICRS'
+                                    new_target_fields['ra'] = (ra_vals[i]+ra_vals[i+1])/2.0
+                                    new_target_fields['dec'] = (dec_vals[i]+dec_vals[i+1])/2.0
+                                    new_target_fields['proper_motion_ra'] = 0.0#target.pm_ra
+                                    new_target_fields['proper_motion_dec'] = 0.0#target.pm_dec
+                                    new_target_fields['epoch'] = 2000#'2000'
+                                    new_target_fields['parallax'] = 0#'2000'
+
+                                    start = Time(mjd_vals[i], format='mjd')
+                                    end = Time(mjd_vals[i+1], format='mjd')
+
+                                    #print(site,mjd_vals[i],ra_vals[i],dec_vals[i],air_vals[i],start.isot,end.isot,sun_alt_vals[i])
+
+                                    #store start and end times in the target for a matter of convenience in passing this information forward to the request builder
+                                    new_target_fields['name'] = '{}_{}_{}'.format(target.name,site,i)
+                                    ephemeris_targets[site].append(new_target_fields)
+                                    ephemeris_windows[site].append([start.isot, end.isot])
+                        elif mjd_vals is None and sun_alt_vals==-2:
+                            self.add_error(None,'Date range outside range available in the provided ephemeris.')
+                return (ephemeris_targets,ephemeris_windows)
+
+            else:
+                target_fields['type'] = 'ORBITAL_ELEMENTS'
+                # Mapping from TOM field names to LCO API field names, for fields
+                # where there are differences
+                field_mapping = {
+                    'inclination': 'orbinc',
+                    'lng_asc_node': 'longascnode',
+                    'arg_of_perihelion': 'argofperih',
+                    'semimajor_axis': 'meandist',
+                    'mean_anomaly': 'meananom',
+                    'mean_daily_motion': 'dailymot',
+                    'epoch_of_elements': 'epochofel',
+                    'epoch_of_perihelion': 'epochofperih',
+                }
+                # The fields to include in the payload depend on the scheme. Add
+                # only those that are required
+                fields = (REQUIRED_NON_SIDEREAL_FIELDS
+                          + REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME[target.scheme])
+                for field in fields:
+                    lco_field = field_mapping.get(field, field)
+                    target_fields[lco_field] = getattr(target, field)
+
+            return target_fields
 
     def _build_instrument_config(self):
         instrument_config = {
@@ -233,28 +327,119 @@ class LCOBaseObservationForm(GenericObservationForm):
             }
         }
 
-    def observation_payload(self):
-        return {
-            "name": self.cleaned_data['name'],
-            "proposal": self.cleaned_data['proposal'],
-            "ipp_value": self.cleaned_data['ipp_value'],
-            "operator": "SINGLE",
-            "observation_type": self.cleaned_data['observation_mode'],
-            "requests": [
-                {
-                    "configurations": [self._build_configuration()],
-                    "windows": [
-                        {
-                            "start": self.cleaned_data['start'],
-                            "end": self.cleaned_data['end']
-                        }
-                    ],
-                    "location": {
-                        "telescope_class": self._get_instruments()[self.cleaned_data['instrument_type']]['class']
+    """
+    def _valid_site_instrument(self,site,ins):
+        if ins == '1M0-SCICAM-SINISTRO':
+            if site in ['coj','cpt','lsc','elp']:
+                return True
+            else:
+                return False
+
+        return True
+    """
+    def _build_ephemeris_request_parts(self):
+        (new_targets, new_windows) = self._build_target_fields()
+        sites = new_targets.keys()
+        configurations = []
+        windows = []
+        locations = []
+        for site in sites:
+            #if self._valid_site_instrument(site,self.cleaned_data['instrument_type']):
+            #print(self._valid_site_instrument(site,self.cleaned_data['instrument_type']),'weeeee')
+            for i in range(len(new_targets[site])):
+                single_obs_config = {
+                    'type': self.instrument_to_type(self.cleaned_data['instrument_type']),
+                    'instrument_type': self.cleaned_data['instrument_type'],
+                    'target': new_targets[site][i],
+                    'instrument_configs': [self._build_instrument_config()],
+                    'acquisition_config': {
+
+                    },
+                    'guiding_config': {
+
+                    },
+                    'constraints': {
+                        'max_airmass': self.cleaned_data['max_airmass']
                     }
                 }
-            ]
-        }
+                single_location =  {'site': site,
+                                    'telescope_class': self._get_instruments()[self.cleaned_data['instrument_type']]['class']}
+                single_windows = [{'start': new_windows[site][i][0],
+                                    'end': new_windows[site][i][1]}]
+
+
+                configurations.append(single_obs_config)
+                windows.append(single_windows)
+                locations.append(single_location)
+        return (configurations,windows,locations)
+
+    def _build_ephemeris_requests(self):
+        (configurations,windows,locations) =  self._build_ephemeris_request_parts()
+        requests = []
+        for i in range(len(configurations)):
+                req = {'configurations': [configurations[i]],
+                       'location': locations[i],
+                       'windows': windows[i]}
+                requests.append(req)
+        return requests
+
+    def observation_payload(self):
+        if not self.eph_target:
+            return {
+                "name": self.cleaned_data['name'],
+                "proposal": self.cleaned_data['proposal'],
+                "ipp_value": self.cleaned_data['ipp_value'],
+                "operator": "SINGLE",
+                "observation_type": self.cleaned_data['observation_mode'],
+                "requests": [
+                    {
+                        "configurations": [self._build_configuration()],
+                        "windows": [
+                            {
+                                "start": self.cleaned_data['start'],
+                                "end": self.cleaned_data['end']
+                            }
+                        ],
+                        "location": {
+                            "telescope_class": self._get_instruments()[self.cleaned_data['instrument_type']]['class']
+                        }
+                    }
+                ]
+            }
+        else: #ephemeris scheme payload creation
+            #this is inefficient as the request validation is done to check for site+scope
+            #configuration errors, and then is done again later to check for other errors.
+            #
+            #This could be used to estiamte airmass windows instead of using astropy as
+            #is done in tom_base/utils.py.
+            obs_module = get_service_class(self.cleaned_data['facility'])
+            requests = self._build_ephemeris_requests()
+            errors = obs_module().validate_observation({
+                "name": self.cleaned_data['name'],
+                "proposal": self.cleaned_data['proposal'],
+                "ipp_value": self.cleaned_data['ipp_value'],
+                "operator": "MANY",
+                "observation_type": self.cleaned_data['observation_mode'],
+                "requests": requests
+
+            })
+            valid_requests = []
+            for i,e in enumerate(errors['requests']):
+                if e!={}:
+                    if 'non_field_errors' not in e:
+                        valid_requests.append(requests[i])
+                else:
+                    valid_requests.append(requests[i])
+
+            return {
+                "name": self.cleaned_data['name'],
+                "proposal": self.cleaned_data['proposal'],
+                "ipp_value": self.cleaned_data['ipp_value'],
+                "operator": "MANY",
+                "observation_type": self.cleaned_data['observation_mode'],
+                "requests": valid_requests
+
+            }
 
 
 class LCOImagingObservationForm(LCOBaseObservationForm):
@@ -262,10 +447,10 @@ class LCOImagingObservationForm(LCOBaseObservationForm):
         return [(k, v['name']) for k, v in self._get_instruments().items() if 'IMAGE' in v['type']]
 
     def filter_choices(self):
-        return set([
+        return sorted(set([
             (f['code'], f['name']) for ins in self._get_instruments().values() for f in
             ins['optical_elements'].get('filters', [])
-            ])
+            ]),key=take_second_element)
 
 
 class LCOSpectroscopyObservationForm(LCOBaseObservationForm):
@@ -289,10 +474,10 @@ class LCOSpectroscopyObservationForm(LCOBaseObservationForm):
 
     # NRES does not take a slit, and therefore needs an option of None
     def filter_choices(self):
-        return set([
+        return sorted(set([
             (f['code'], f['name']) for ins in self._get_instruments().values() for f in
             ins['optical_elements'].get('slits', [])
-            ] + [('None', 'None')])
+            ] + [('None', 'None')]),key=take_second_element)
 
     def _build_instrument_config(self):
         instrument_config = super()._build_instrument_config()

@@ -5,6 +5,21 @@ from .models import Target, TargetExtra, TargetName
 from io import StringIO
 import json
 
+#this dictionary should contain as key entires text sufficient to uniquely identify
+#the observatory name from the common English names used by JPL for that site.
+#For example, Sunderland is probably unique enough to identify SAAO
+#there may be a better way to handle this.
+site_names = {'Mauna Kea': '568',
+              'Haleakala':'ogg',
+              'McDonald':'elp',
+              'Tololo': 'lsc',
+              'Teide': 'tfn',
+              'Sutherland': 'cpt',
+              'Wise': 'tlv',
+              'Siding Spring': 'coj',
+              }
+
+
 # NOTE: This saves locally. To avoid this, create file buffer.
 # referenced https://www.codingforentrepreneurs.com/blog/django-queryset-to-csv-files-datasets/
 def export_targets(qs):
@@ -127,7 +142,8 @@ def import_ephemeris_target(stream):
     end_ind = 0
     for ns in range(num_sites):
 
-        centre_site_name = ''
+        centre_site_name = None
+        site_name_found = False
         name = 'custom'
         jd_inds = None
         ra_inds = None
@@ -135,23 +151,12 @@ def import_ephemeris_target(stream):
         for i in range(end_ind,len(eph)):
             if 'Center-site name' in eph[i]:
                 s = eph[i].split(': ')[-1]
-                if 'Mauna Kea' in s:
-                    centre_site_name = '568'
-                elif 'Haleakala' in s:
-                    centre_site_name = 'T04'
-                elif 'McDonald' in s:
-                    centre_site_name = '711'
-                elif 'Tololo' in s:
-                    centre_site_name = 'W85'
-                elif 'Teide' in s:
-                    centre_site_name = '954'
-                elif 'Sunderland' in s:
-                    centre_site_name = 'K91'
-                elif 'Wise' in s:
-                    centre_site_name = '097'
-                elif 'Siding Spring' in s:
-                    centre_site_name = 'Q63'
-                else:
+                for j in site_names.keys():
+                    if j in s:
+                        centre_site_name = site_names[j]
+                        site_name_found = True
+                        break
+                if not site_name_found:
                     centre_site_name = s
 
             if 'Target body name' in eph[i]:
@@ -160,7 +165,6 @@ def import_ephemeris_target(stream):
             if jpl_ra_key in eph[i] and jpl_jd_key in eph[i]:
                 ra_inds = [eph[i].index(jpl_ra_key),eph[i].index(jpl_ra_key)+len(jpl_ra_key)]
                 jd_inds = [eph[i].index(jpl_jd_key),eph[i].index(jpl_jd_key)+len(jpl_jd_key)]
-
             if '$$SOE' in eph[i]:
                 if ra_inds  is not None and loop_inds[0]==-1:
                     loop_inds[0] = i+1
@@ -170,6 +174,10 @@ def import_ephemeris_target(stream):
                     break
 
         end_ind = loop_inds[1]+1
+
+        #throw an HTML warning if I cannot understand the centre site name
+        if not site_name_found:
+            errors.append(Exception(f'Site name {centre_site_name} not understood.'))
 
         #throw HTML screen of warning if I cannot find the coordinates or ephemerides
         #here we will put a better error check and correctly thrown warning
@@ -186,7 +194,7 @@ def import_ephemeris_target(stream):
         for i in range(loop_inds[0],loop_inds[1]):
             mjds.append(str(float(eph[i][jd_inds[0]:jd_inds[1]])-2400000.5))
             s = eph[i][ra_inds[0]:ra_inds[1]].split()
-            r = 15.0*float(s[0])+float(s[1])/60.0+float(s[2])/3600.0
+            r = 15.0*(float(s[0])+float(s[1])/60.0+float(s[2])/3600.0)
             ras.append("{:11.7f}".format(r))
             d = abs(float(s[3]))+float(s[4])/60.0+float(s[5])/3600.0
             if '-' in s[3]:

@@ -184,30 +184,39 @@ def eph_json_to_value_ra(value):
     """
     Returns the middle RA and Dec of the json_ephemeris
     """
-    eph_json = json.loads(value)
-    keys = list(eph_json.keys())
-    k = keys[0]
-    l = len(eph_json[k][0])
-    return( deg_to_sexigesimal(float(eph_json[k][int(l/2)]['R']),'hms'))
+    if value != 'None':
+        eph_json = json.loads(value)
+        keys = list(eph_json.keys())
+        k = keys[0]
+        l = len(eph_json[k][0])
+        return( deg_to_sexigesimal(float(eph_json[k][int(l/2)]['R']),'hms'))
+    else:
+        return -32768.0
 
 @register.filter
 def eph_json_to_value_dec(value):
     """
     Returns the middle RA and Dec of the json_ephemeris
     """
-    eph_json = json.loads(value)
-    keys = list(eph_json.keys())
-    k = keys[0]
-    l = len(eph_json[k][0])
-    return( deg_to_sexigesimal(float(eph_json[k][int(l/2)]['D']),'dms'))
+    if value != 'None':
+        eph_json = json.loads(value)
+        keys = list(eph_json.keys())
+        k = keys[0]
+        l = len(eph_json[k][0])
+        return( deg_to_sexigesimal(float(eph_json[k][int(l/2)]['D']),'dms'))
+    else:
+        return -32768.0
 
 @register.filter
 def eph_json_to_value_mjd(value):
     """
     Returns the middle RA and Dec of the json_ephemeris
     """
-    eph_json = json.loads(value)
-    keys = list(eph_json.keys())
-    k = keys[0]
-    l = len(eph_json[k][0])
-    return( float(eph_json[k][int(l/2)]['t']))
+    if value != 'None':
+        eph_json = json.loads(value)
+        keys = list(eph_json.keys())
+        k = keys[0]
+        l = len(eph_json[k][0])
+        return( float(eph_json[k][int(l/2)]['t']))
+    else:
+        return -32768.0
