@@ -2,6 +2,7 @@ import logging
 
 from datetime import datetime
 from io import StringIO
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
@@ -10,6 +11,7 @@ from django.contrib.auth.models import Group
 from django.core.management import call_command
 from django.db import transaction
 from django.http import QueryDict, StreamingHttpResponse
+from django.forms import HiddenInput
 from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.utils.text import slugify
@@ -20,11 +22,14 @@ from django.views.generic.list import ListView
 from django.views.generic import TemplateView, View
 from django_filters.views import FilterView
 
-from guardian.mixins import PermissionRequiredMixin, PermissionListMixin
+from guardian.mixins import PermissionListMixin
 from guardian.shortcuts import get_objects_for_user, get_groups_with_perms, assign_perm
 
 from tom_common.hints import add_hint
 from tom_common.hooks import run_hook
+from tom_common.mixins import Raise403PermissionRequiredMixin
+from tom_observations.observing_strategy import RunStrategyForm
+from tom_observations.models import ObservingStrategy
 from tom_targets.models import Target, TargetList
 from tom_targets.forms import (
     SiderealTargetCreateForm, NonSiderealTargetCreateForm, TargetExtraFormset, TargetNamesFormset
@@ -33,7 +38,6 @@ from tom_targets.utils import import_targets, export_targets
 from tom_targets.filters import TargetFilter
 from tom_targets.groups import add_all_to_grouping, add_selected_to_grouping
 from tom_targets.groups import remove_all_from_grouping, remove_selected_from_grouping
-from tom_dataproducts.forms import DataProductUploadForm
 
 logger = logging.getLogger(__name__)
 
@@ -194,7 +198,7 @@ class TargetCreateView(LoginRequiredMixin, CreateView):
         return form
 
 
-class TargetUpdateView(PermissionRequiredMixin, UpdateView):
+class TargetUpdateView(Raise403PermissionRequiredMixin, UpdateView):
     """
     View that handles updating a target. Requires authorization.
     """
@@ -293,7 +297,7 @@ class TargetUpdateView(PermissionRequiredMixin, UpdateView):
         return form
 
 
-class TargetDeleteView(PermissionRequiredMixin, DeleteView):
+class TargetDeleteView(Raise403PermissionRequiredMixin, DeleteView):
     """
     View for deleting a target. Requires authorization.
     """
@@ -302,7 +306,7 @@ class TargetDeleteView(PermissionRequiredMixin, DeleteView):
     model = Target
 
 
-class TargetDetailView(PermissionRequiredMixin, DetailView):
+class TargetDetailView(Raise403PermissionRequiredMixin, DetailView):
     """
     View that handles the display of the target details. Requires authorization.
     """
@@ -317,13 +321,15 @@ class TargetDetailView(PermissionRequiredMixin, DetailView):
         :rtype: dict
         """
         context = super().get_context_data(*args, **kwargs)
-        data_product_upload_form = DataProductUploadForm(
-            initial={
-                'target': self.get_object(),
-                'referrer': reverse('tom_targets:detail', args=(self.get_object().id,))
-            }
-        )
-        context['data_product_form'] = data_product_upload_form
+        observing_strategy_form = RunStrategyForm(initial={'target': self.get_object()})
+        if any(self.request.GET.get(x) for x in ['observing_strategy', 'cadence_strategy', 'cadence_frequency']):
+            initial = {'target': self.object}
+            initial.update(self.request.GET)
+            observing_strategy_form = RunStrategyForm(
+                initial=initial
+            )
+        observing_strategy_form.fields['target'].widget = HiddenInput()
+        context['observing_strategy_form'] = observing_strategy_form
         return context
 
     def get(self, request, *args, **kwargs):
@@ -348,6 +354,17 @@ class TargetDetailView(PermissionRequiredMixin, DetailView):
                               '<a href=https://tom-toolkit.readthedocs.io/en/stable/customization/automation.html>'
                               ' the docs.</a>'))
             return redirect(reverse('tom_targets:detail', args=(target_id,)))
+
+        run_strategy_form = RunStrategyForm(request.GET)
+        if run_strategy_form.is_valid():
+            obs_strat = ObservingStrategy.objects.get(pk=run_strategy_form.cleaned_data['observing_strategy'].id)
+            target_id = kwargs.get('pk', None)
+            params = urlencode(obs_strat.parameters_as_dict)
+            params += urlencode(request.GET)
+            return redirect(
+                reverse('tom_observations:create',
+                        args=(obs_strat.facility,)) + f'?target_id={self.get_object().id}&' + params)
+
         return super().get(request, *args, **kwargs)
 
 
@@ -449,7 +466,7 @@ class TargetGroupingView(PermissionListMixin, ListView):
     paginate_by = 25
 
 
-class TargetGroupingDeleteView(PermissionRequiredMixin, DeleteView):
+class TargetGroupingDeleteView(Raise403PermissionRequiredMixin, DeleteView):
     """
     View that handles the deletion of ``TargetList`` objects, also known as target groups. Requires authorization.
     """

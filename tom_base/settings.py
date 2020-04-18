@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'tom_catalogs',
     'tom_observations',
     'tom_dataproducts',
+    'tom_publications',
 ]
 
 SITE_ID = 1
@@ -64,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'tom_common.middleware.Raise403Middleware',
     'tom_common.middleware.ExternalServiceMiddleware',
     'tom_common.middleware.AuthStrategyMiddleware',
 ]
@@ -201,9 +203,19 @@ DATA_PROCESSORS = {
     'spectroscopy': 'tom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor',
 }
 
+TOM_LATEX_PROCESSORS = {
+    'ObservationGroup': 'tom_publications.processors.observation_group_latex_processor.ObservationGroupLatexProcessor',
+    'TargetList': 'tom_publications.processors.target_list_latex_processor.TargetListLatexProcessor'
+}
+
 TOM_FACILITY_CLASSES = [
     'tom_observations.facilities.lco.LCOFacility',
     'tom_observations.facilities.gemini.GEMFacility'
+]
+
+TOM_CADENCE_STRATEGIES = [
+    'tom_observations.cadence.RetryFailedObservationsStrategy',
+    'tom_observations.cadence.ResumeCadenceAfterFailureStrategy'
 ]
 
 # Define extra target fields here. Types can be any of "number", "string", "boolean" or "datetime"
@@ -223,6 +235,12 @@ EXTRA_FIELDS = []
 # Authentication strategy can either be LOCKED (required login for all views)
 # or READ_ONLY (read only access to views)
 AUTH_STRATEGY = 'READ_ONLY'
+
+# Row-level data permissions restrict users from viewing certain objects unless they are a member of the group to which
+# the object belongs. Setting this value to True will allow all `ObservationRecord`, `DataProduct`, and `ReducedDatum`
+# objects to be seen by everyone. Setting it to False will allow users to specify which groups can access
+# `ObservationRecord`, `DataProduct`, and `ReducedDatum` objects.
+TARGET_PERMISSIONS_ONLY = True
 
 # URLs that should be allowed access even with AUTH_STRATEGY = LOCKED
 # for example: OPEN_URLS = ['/', '/about']
