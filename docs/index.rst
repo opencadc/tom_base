@@ -16,6 +16,8 @@ Introduction
 
 The TOM (Target and Observation Manager) Toolkit project was started in early 2018 with the goal of simplifying the development of next generation software for the rapidly evolving field of astronomy. Read more :doc:`about TOMs<about>` and the motivation for them.
 
+Interested in seeing what a TOM can do? Take a look at our `demonstration TOM <https://tom-demo.lco.global>`_, where we show off the features of the TOM Toolkit.
+
 Are you looking to run a TOM of your own? This documentation is a good place to get started. The source code for the project is also available on Github.
 
 Start with the :doc:`introduction<introduction/index>` if you are new to using the TOM Toolkit.
@@ -83,6 +85,12 @@ within your TOM (for example, an observation completes).
 
 :doc:`Scripting your TOM with Jupyter Notebooks <advanced/scripts>` - Use a Jupyter notebook (or just a python
 console/scripts) to interact directly with your TOM.
+
+:doc:`Observing and cadence strategies <advanced/strategies>` - Learn about observing and cadence strategies and how to write a
+custom cadence strategy to automate a series of observations.
+
+:doc:`LaTeX table generation <advanced/latex_generation>` - Learn how to generate LaTeX for certain models and add LaTeX 
+generators for other models.
 
 Deployment
 ----------

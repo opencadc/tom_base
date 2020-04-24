@@ -7,7 +7,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='tomtoolkit',
-    version='1.2.5',
+    version='1.4.0',
     description='The TOM Toolkit and base modules',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -27,11 +27,11 @@ setup(
     keywords=['tomtoolkit', 'astronomy', 'astrophysics', 'cosmology', 'science', 'fits', 'observatory'],
     packages=find_packages(),
     install_requires=[
-        'django<3.0',
+        'django>=2.2',  # TOM Toolkit requires db math functions
         'django-bootstrap4',
         'django-extensions',
         'django-filter',
-        'django-contrib-comments',
+        'django-contrib-comments>=1.9.2',  # Earlier version are incompatible with Django >= 3.0
         'django-gravatar2',
         'django-crispy-forms',
         'django-guardian',
@@ -39,13 +39,13 @@ setup(
         'python-dateutil',
         'requests',
         'astroquery',
-        'astropy',
+        'astropy==4.0',
         'astroplan',
         'plotly',
         'matplotlib',
         'pillow',
         'fits2image',
-        'specutils',
+        'specutils==0.7',
         'dataclasses; python_version < "3.7"',
     ],
     extras_require={
