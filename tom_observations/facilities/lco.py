@@ -505,28 +505,43 @@ class LCOBaseObservationForm(GenericObservationForm, LCOBaseForm, CadenceForm):
             #is done in tom_base/utils.py.
             obs_module = get_service_class(self.cleaned_data['facility'])
             requests = self._build_ephemeris_requests()
+            locations = []
+            for j in range(len(requests)):
+                if requests[j]['location'] not in locations:
+                    locations.append(requests[j]['location'])
+            if len(locations)>1:
+                operator = "MANY"
+            else:
+                operator = "SINGLE"
+
             errors = obs_module().validate_observation({
                 "name": self.cleaned_data['name'],
                 "proposal": self.cleaned_data['proposal'],
                 "ipp_value": self.cleaned_data['ipp_value'],
-                "operator": "MANY",
+                "operator": operator,
                 "observation_type": self.cleaned_data['observation_mode'],
                 "requests": requests
 
             })
-            valid_requests = []
-            for i,e in enumerate(errors['requests']):
-                if e!={}:
-                    if 'non_field_errors' not in e:
+            print(requests,len(requests))
+            print(errors)
+            print()
+            if len(errors)>0:
+                valid_requests = []
+                for i,e in enumerate(errors['requests']):
+                    if e!={}:
+                        if 'non_field_errors' not in e:
+                            valid_requests.append(requests[i])
+                    else:
                         valid_requests.append(requests[i])
-                else:
-                    valid_requests.append(requests[i])
+            else:
+                valid_requests = requests
 
             return {
                 "name": self.cleaned_data['name'],
                 "proposal": self.cleaned_data['proposal'],
                 "ipp_value": self.cleaned_data['ipp_value'],
-                "operator": "MANY",
+                "operator": operator,
                 "observation_type": self.cleaned_data['observation_mode'],
                 "requests": valid_requests
 
