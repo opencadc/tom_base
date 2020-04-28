@@ -5,13 +5,13 @@ from .models import Target, TargetExtra, TargetName
 from io import StringIO
 import json
 
-#this dictionary should contain as key entires text sufficient to uniquely identify
-#the observatory name from the common English names used by JPL for that site.
-#For example, Sunderland is probably unique enough to identify SAAO
-#there may be a better way to handle this.
+# this dictionary should contain as key entires text sufficient to uniquely
+# identify the observatory name from the common English names used by JPL for
+# that site. For example, Sunderland is probably unique enough to identify SAAO
+# there may be a better way to handle this.
 site_names = {'Mauna Kea': '568',
-              'Haleakala':'ogg',
-              'McDonald':'elp',
+              'Haleakala': 'ogg',
+              'McDonald': 'elp',
               'Tololo': 'lsc',
               'Teide': 'tfn',
               'Sutherland': 'cpt',
@@ -111,6 +111,7 @@ def import_targets(targets):
 
     return {'targets': targets, 'errors': errors}
 
+
 def import_ephemeris_target(stream):
     """
     Reads in a custom ephemeris from provided file stream.
@@ -118,13 +119,11 @@ def import_ephemeris_target(stream):
     Currently only reads in the first site-code ephemeris.
     """
 
-
-    #need to make robust to input date type
-    #need to make robuest to input coordinate type
+    # TO-DO: need to make robust to input date type
+    # TO-DO: need to make robust to input coordinate type
 
     errors = []
     targets = []
-
 
     jpl_ra_key = 'R.A._____(ICRF)_____DEC'
     jpl_jd_key = 'Date_________JDUT'
@@ -134,11 +133,10 @@ def import_ephemeris_target(stream):
     num_sites = 0
     for i in range(len(eph)):
         if 'Center-site name' in eph[i]:
-            num_sites+=1
+            num_sites += 1
 
-    if num_sites!=8:
+    if num_sites != 8:
         errors.append(Warning('WARNING: Provided file does not have ephemerides for all 7 LCO sites.'))
-
 
     eph_json = {}
     end_ind = 0
@@ -149,8 +147,8 @@ def import_ephemeris_target(stream):
         name = 'custom'
         jd_inds = None
         ra_inds = None
-        loop_inds = [-1,-1]
-        for i in range(end_ind,len(eph)):
+        loop_inds = [-1, -1]
+        for i in range(end_ind, len(eph)):
             if 'Center-site name' in eph[i]:
                 s = eph[i].split(': ')[-1]
                 for j in site_names.keys():
@@ -165,26 +163,26 @@ def import_ephemeris_target(stream):
                 name = "-".join(eph[i].split(': ')[1].split('{source')[0].split())
 
             if jpl_ra_key in eph[i] and jpl_jd_key in eph[i]:
-                ra_inds = [eph[i].index(jpl_ra_key),eph[i].index(jpl_ra_key)+len(jpl_ra_key)]
-                jd_inds = [eph[i].index(jpl_jd_key),eph[i].index(jpl_jd_key)+len(jpl_jd_key)]
+                ra_inds = [eph[i].index(jpl_ra_key), eph[i].index(jpl_ra_key)+len(jpl_ra_key)]
+                jd_inds = [eph[i].index(jpl_jd_key), eph[i].index(jpl_jd_key)+len(jpl_jd_key)]
             if '$$SOE' in eph[i]:
-                if ra_inds  is not None and loop_inds[0]==-1:
+                if ra_inds is not None and loop_inds[0] == -1:
                     loop_inds[0] = i+1
             if '$$EOE' in eph[i]:
-                if ra_inds is not None and loop_inds[0]!=-1:
+                if ra_inds is not None and loop_inds[0] != -1:
                     loop_inds[1] = i
                     break
 
         end_ind = loop_inds[1]+1
 
-        #throw an HTML warning if I cannot understand the centre site name
+        # throw an HTML warning if I cannot understand the centre site name
         if not site_name_found:
             errors.append(Exception(f'Site name {centre_site_name} not understood.'))
 
-        #throw HTML screen of warning if I cannot find the coordinates or ephemerides
-        #here we will put a better error check and correctly thrown warning
-        #for now being lazy
-        if loop_inds == [-1,-1] or ra_inds is None or jd_inds is None:
+        # throw HTML screen of warning if I cannot find the coordinates or
+        # ephemerides. TO-DO: put a better error check and correctly thrown
+        # warning for now being lazy
+        if loop_inds == [-1, -1] or ra_inds is None or jd_inds is None:
             errors.append(Exception('We were not able to understand that ephemeris file.'))
 
         mjds = []
@@ -193,19 +191,19 @@ def import_ephemeris_target(stream):
         R = 0.0
         D = 0.0
         n = 0.0
-        for i in range(loop_inds[0],loop_inds[1]):
+        for i in range(loop_inds[0], loop_inds[1]):
             mjds.append(str(float(eph[i][jd_inds[0]:jd_inds[1]])-2400000.5))
             s = eph[i][ra_inds[0]:ra_inds[1]].split()
             r = 15.0*(float(s[0])+float(s[1])/60.0+float(s[2])/3600.0)
             ras.append("{:11.7f}".format(r))
             d = abs(float(s[3]))+float(s[4])/60.0+float(s[5])/3600.0
             if '-' in s[3]:
-                d*=-1.0
+                d *= -1.0
             decs.append("{:10.6f}".format(d))
 
-            R+=r
-            D+=d
-            n+=1.0
+            R += r
+            D += d
+            n += 1.0
 
         eph_json[centre_site_name] = []
         for i in range(len(ras)):

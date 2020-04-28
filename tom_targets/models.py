@@ -30,7 +30,7 @@ REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME = {
     'MPC_COMET': ['perihdist', 'epoch_of_perihelion', 'inclination', 'lng_asc_node', 'arg_of_perihelion', 'eccentricity'],
     'MPC_MINOR_PLANET': ['mean_anomaly', 'semimajor_axis', 'inclination', 'lng_asc_node', 'arg_of_perihelion', 'eccentricity'],
     'JPL_MAJOR_PLANET': ['mean_daily_motion', 'mean_anomaly', 'semimajor_axis', 'inclination', 'lng_asc_node', 'arg_of_perihelion', 'eccentricity'],
-    'EPHEMERIS':['eph_json']
+    'EPHEMERIS': ['eph_json']
 }
 
 
