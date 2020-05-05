@@ -8,15 +8,8 @@ import logging
 
 from tom_observations import facility
 
-#Work-around necessary until the NOAO main service upgrades are complete.
-#Would be sufficient to update astropy to v4 which handles this internally. But Wes doesn't want to do this to his work environment yet.
-#In future remove the two following lines and require an up to date astropy
-from astropy.utils import iers
-iers.Conf.iers_auto_url.set('ftp://cddis.gsfc.nasa.gov/pub/products/iers/finals2000A.all')
 
 logger = logging.getLogger(__name__)
-
-d2r = np.pi/180.0
 
 def get_radec_ephemeris(eph_json_single, start_time, end_time, interval, observing_facility, observing_site):
     observing_facility_class = facility.get_service_class(observing_facility)
@@ -30,8 +23,8 @@ def get_radec_ephemeris(eph_json_single, start_time, end_time, interval, observi
                                                  lon=obs_site.get('longitude')*units.deg,
                                                  height=obs_site.get('elevation')*units.m)
     if observer is None:
-        #this condition occurs if the facility being requested isn't in the site list provided.
-        return (None,None,None,None,-1)
+        # this condition occurs if the facility being requested isn't in the site list provided.
+        return (None, None, None, None, -1)
     ra = []
     dec = []
     mjd = []
@@ -43,36 +36,33 @@ def get_radec_ephemeris(eph_json_single, start_time, end_time, interval, observi
     dec = np.array(dec)
     mjd = np.array(mjd)
 
-    fra = interp.interp1d(mjd,ra)
-    fdec = interp.interp1d(mjd,dec)
+    fra = interp.interp1d(mjd, ra)
+    fdec = interp.interp1d(mjd, dec)
 
     start = Time(start_time)
     end = Time(end_time)
 
-
     time_range = time_grid_from_range(time_range=[start, end], time_resolution=interval*units.hour)
     tr_mjd = time_range.mjd
-    #tr_mjd += interval/(24.0*2.0)
-
 
     airmasses = []
     sun_alts = []
     for i in range(len(tr_mjd)):
         c = SkyCoord(fra(time_range[i].mjd), fdec(time_range[i].mjd), frame="icrs", unit="deg")
-        t = Time(tr_mjd[i],format='mjd')#-8*units.h
+        t = Time(tr_mjd[i], format='mjd')
         sun = coordinates.get_sun(t)
-        altaz = c.transform_to(AltAz(obstime=t,location=observer))
-        sun_altaz = sun.transform_to(AltAz(obstime=t,location=observer))
+        altaz = c.transform_to(AltAz(obstime=t, location=observer))
+        sun_altaz = sun.transform_to(AltAz(obstime=t, location=observer))
         airmass = altaz.secz
         airmasses.append(airmass)
         sun_alts.append(sun_altaz.alt.value)
     airmasses = np.array(airmasses)
     sun_alts = np.array(sun_alts)
 
-    if np.min(tr_mjd)>=np.min(mjd) and np.max(tr_mjd)<=np.max(mjd):
-        return (tr_mjd,fra(tr_mjd),fdec(tr_mjd),airmasses,sun_alts)
+    if np.min(tr_mjd) >= np.min(mjd) and np.max(tr_mjd) <= np.max(mjd):
+        return (tr_mjd, fra(tr_mjd), fdec(tr_mjd), airmasses, sun_alts)
     else:
-        return (None,None,None,None,-2)
+        return (None, None, None, None, -2)
 
 
 def get_sidereal_visibility(target, start_time, end_time, interval, airmass_limit):

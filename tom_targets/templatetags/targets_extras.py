@@ -248,6 +248,7 @@ def aladin(target):
     """
     return {'target': target}
 
+
 @register.filter
 def eph_json_to_value_ra(value):
     """
@@ -257,8 +258,8 @@ def eph_json_to_value_ra(value):
         eph_json = json.loads(value)
         keys = list(eph_json.keys())
         k = keys[0]
-        l = len(eph_json[k][0])
-        return( deg_to_sexigesimal(float(eph_json[k][int(l/2)]['R']),'hms'))
+        eph_len = len(eph_json[k][0])
+        return deg_to_sexigesimal(float(eph_json[k][int(eph_len/2)]['R']),'hms')
     else:
         return -32768.0
 
@@ -272,7 +273,7 @@ def eph_json_to_value_dec(value):
         keys = list(eph_json.keys())
         k = keys[0]
         l = len(eph_json[k][0])
-        return( deg_to_sexigesimal(float(eph_json[k][int(l/2)]['D']),'dms'))
+        return deg_to_sexigesimal(float(eph_json[k][int(l/2)]['D']),'dms')
     else:
         return -32768.0
 
@@ -286,6 +287,6 @@ def eph_json_to_value_mjd(value):
         keys = list(eph_json.keys())
         k = keys[0]
         l = len(eph_json[k][0])
-        return( float(eph_json[k][int(l/2)]['t']))
+        return round(float(eph_json[k][int(l/2)]['t']),5)
     else:
         return -32768.0

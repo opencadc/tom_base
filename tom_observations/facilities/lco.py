@@ -19,13 +19,8 @@ from tom_targets.models import (
     Target, REQUIRED_NON_SIDEREAL_FIELDS,
     REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME
     )
-from tom_targets.models import (
-    Target, REQUIRED_NON_SIDEREAL_FIELDS,
-    REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME
-)
 from tom_observations.utils import get_radec_ephemeris
 import json
-import numpy as np
 
 
 # Determine settings for this module.
@@ -365,7 +360,7 @@ class LCOBaseObservationForm(GenericObservationForm, LCOBaseForm, CadenceForm):
                                     new_target_fields['name'] = '{}_{}_{}'.format(target.name, site, i)
                                     ephemeris_targets[site].append(new_target_fields)
                                     ephemeris_windows[site].append([start.isot, end.isot])
-                        elif mjd_vals is None and sun_alt_vals==-2:
+                        elif mjd_vals is None and sun_alt_vals == -2:
                             self.add_error(None, 'Date range outside range available in the provided ephemeris.')
 
                 return (ephemeris_targets, ephemeris_windows)
