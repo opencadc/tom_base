@@ -11,6 +11,7 @@ from tom_observations import facility
 
 logger = logging.getLogger(__name__)
 
+
 def get_radec_ephemeris(eph_json_single, start_time, end_time, interval, observing_facility, observing_site):
     observing_facility_class = facility.get_service_class(observing_facility)
     sites = observing_facility_class().get_observing_sites()

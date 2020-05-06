@@ -27,9 +27,13 @@ REQUIRED_NON_SIDEREAL_FIELDS = [
 # Additional non-sidereal fields that are required for specific orbital element
 # schemes
 REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME = {
-    'MPC_COMET': ['perihdist', 'epoch_of_perihelion', 'inclination', 'lng_asc_node', 'arg_of_perihelion', 'eccentricity'],
-    'MPC_MINOR_PLANET': ['mean_anomaly', 'semimajor_axis', 'inclination', 'lng_asc_node', 'arg_of_perihelion', 'eccentricity'],
-    'JPL_MAJOR_PLANET': ['mean_daily_motion', 'mean_anomaly', 'semimajor_axis', 'inclination', 'lng_asc_node', 'arg_of_perihelion', 'eccentricity'],
+    'MPC_COMET': ['perihdist', 'epoch_of_perihelion', 'inclination',
+                  'lng_asc_node', 'arg_of_perihelion', 'eccentricity'],
+    'MPC_MINOR_PLANET': ['mean_anomaly', 'semimajor_axis', 'inclination',
+                         'lng_asc_node', 'arg_of_perihelion', 'eccentricity'],
+    'JPL_MAJOR_PLANET': ['mean_daily_motion', 'mean_anomaly', 'semimajor_axis',
+                         'inclination', 'lng_asc_node', 'arg_of_perihelion',
+                         'eccentricity'],
     'EPHEMERIS': ['eph_json']
 }
 
@@ -235,7 +239,8 @@ class Target(models.Model):
         max_length=50, null=True, blank=True, verbose_name='Centre-Site Name', help_text='Observatory Site Code'
     )
     eph_json = models.TextField(
-        null=True, blank=True, verbose_name='Ephemeris JSON', help_text="Don't fill this in by hand unless you know what you are doing."
+        null=True, blank=True, verbose_name='Ephemeris JSON',
+        help_text="Don't fill this in by hand unless you know what you are doing."
     )
 
     class Meta:

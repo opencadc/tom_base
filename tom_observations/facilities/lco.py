@@ -329,20 +329,21 @@ class LCOBaseObservationForm(GenericObservationForm, LCOBaseForm, CadenceForm):
                     if site in eph_json.keys():
                         ephemeris_targets[site] = []
                         ephemeris_windows[site] = []
-                        (mjd_vals, ra_vals, dec_vals, air_vals, sun_alt_vals) = get_radec_ephemeris(eph_json[site],
-                                                                                                    self.cleaned_data['start'],
-                                                                                                    self.cleaned_data['end'],
-                                                                                                    self.cleaned_data['imaging_interval'],
-                                                                                                    'LCO',
-                                                                                                    site)
+                        (mjd_vals, ra_vals, dec_vals, air_vals, sun_alt_vals) = \
+                            get_radec_ephemeris(eph_json[site],
+                                                self.cleaned_data['start'],
+                                                self.cleaned_data['end'],
+                                                self.cleaned_data['imaging_interval'],
+                                                'LCO',
+                                                site)
                         if mjd_vals is not None:
                             for i in range(len(ra_vals)-1):
                                 if (air_vals[i] < float(self.cleaned_data['max_airmass']) and
-                                    air_vals[i+1] < float(self.cleaned_data['max_airmass']) and
-                                    air_vals[i] > 1.0 and
-                                    air_vals[i+1] > 1.0 and
-                                    sun_alt_vals[i] < -30.0 and
-                                    sun_alt_vals[i+1] < -30.0):
+                                        air_vals[i+1] < float(self.cleaned_data['max_airmass']) and
+                                        air_vals[i] > 1.0 and
+                                        air_vals[i+1] > 1.0 and
+                                        sun_alt_vals[i] < -30.0 and
+                                        sun_alt_vals[i+1] < -30.0):
 
                                     new_target_fields = {}
                                     new_target_fields['type'] = 'ICRS'
@@ -356,7 +357,9 @@ class LCOBaseObservationForm(GenericObservationForm, LCOBaseForm, CadenceForm):
                                     start = Time(mjd_vals[i], format='mjd')
                                     end = Time(mjd_vals[i+1], format='mjd')
 
-                                    # store start and end times in the target for a matter of convenience in passing this information forward to the request builder
+                                    # store start and end times in the target for
+                                    # a matter of convenience in passing this
+                                    # information forward to the request builder
                                     new_target_fields['name'] = '{}_{}_{}'.format(target.name, site, i)
                                     ephemeris_targets[site].append(new_target_fields)
                                     ephemeris_windows[site].append([start.isot, end.isot])
@@ -440,8 +443,9 @@ class LCOBaseObservationForm(GenericObservationForm, LCOBaseForm, CadenceForm):
                         'max_airmass': self.cleaned_data['max_airmass']
                     }
                 }
+                i_type = self.cleaned_data['instrument_type']
                 single_location = {'site': site,
-                                   'telescope_class': self._get_instruments()[self.cleaned_data['instrument_type']]['class']}
+                                   'telescope_class': self._get_instruments()[i_type]['class']}
                 single_windows = [{'start': new_windows[site][i][0],
                                    'end': new_windows[site][i][1]}
                                   ]
