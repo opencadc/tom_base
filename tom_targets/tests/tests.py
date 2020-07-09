@@ -1,5 +1,6 @@
 import pytz
 from datetime import datetime
+from io import StringIO
 
 from django.contrib.auth.models import User, Group
 from django.contrib.messages import get_messages
@@ -9,7 +10,8 @@ from django.urls import reverse
 
 from .factories import SiderealTargetFactory, NonSiderealTargetFactory, TargetGroupingFactory, TargetNameFactory
 from tom_targets.models import Target, TargetExtra, TargetList, TargetName
-from tom_targets.utils import import_targets
+from tom_targets.utils import import_targets, import_ephemeris_target
+import tom_targets
 from guardian.shortcuts import assign_perm
 
 
@@ -35,6 +37,54 @@ base_data_Major_Planet = {
     'aliases-MIN_NUM_FORMS': 0,
     'aliases-MAX_NUM_FORMS': 1000,
 }
+
+base_data_Comet = {
+    'name': 'nonsidereal_target',
+    'identifier': 'nonsidereal_identifier',
+    'type': Target.NON_SIDEREAL,
+    'epoch_of_elements': 100,
+    'perihdist': 1.0,
+    'epoch_of_perihelion': 100.0,
+    'arg_of_perihelion': 100,
+    'eccentricity': 100,
+    'lng_asc_node': 100,
+    'semimajor_axis': 100,
+    'inclination': 100,
+    'targetextra_set-TOTAL_FORMS': 1,
+    'targetextra_set-INITIAL_FORMS': 0,
+    'targetextra_set-MIN_NUM_FORMS': 0,
+    'targetextra_set-MAX_NUM_FORMS': 1000,
+    'targetextra_set-0-key': '',
+    'targetextra_set-0-value': '',
+    'aliases-TOTAL_FORMS': 1,
+    'aliases-INITIAL_FORMS': 0,
+    'aliases-MIN_NUM_FORMS': 0,
+    'aliases-MAX_NUM_FORMS': 1000,
+}
+
+base_data_EPH = {
+    'name': 'nonsidereal_target',
+    'identifier': 'nonsidereal_identifier',
+    'type': Target.NON_SIDEREAL,
+    'eph_json': {'568': [{'t': '58940.0', 'R': '196.9809167', 'D': ' 23.904639', 'dR': 0.0, 'dD': 0.0},
+                         {'t': '58940.1', 'R': '196.9806667', 'D': ' 23.904722', 'dR': 0.0, 'dD': 0.0},
+                         {'t': '58940.2', 'R': '196.9804167', 'D': ' 23.904833', 'dR': 0.0, 'dD': 0.0}]
+                 },
+    'epoch_of_elements': 100,
+    'targetextra_set-TOTAL_FORMS': 1,
+    'targetextra_set-INITIAL_FORMS': 0,
+    'targetextra_set-MIN_NUM_FORMS': 0,
+    'targetextra_set-MAX_NUM_FORMS': 1000,
+    'targetextra_set-0-key': '',
+    'targetextra_set-0-value': '',
+    'aliases-TOTAL_FORMS': 1,
+    'aliases-INITIAL_FORMS': 0,
+    'aliases-MIN_NUM_FORMS': 0,
+    'aliases-MAX_NUM_FORMS': 1000,
+
+}
+
+#{'568': [{'t': '58940.0', 'R': '196.9809167', 'D': ' 23.904639', 'dR': 0.0, 'dD': 0.0}, {'t': '58940.01388888899', 'R': '196.9806667', 'D': ' 23.904722', 'dR': 0.0, 'dD': 0.0}, {'t': '58940.027777777985', 'R': '196.9804167', 'D': ' 23.904833', 'dR': 0.0, 'dD': 0.0}
 
 class TestTargetListUserPermissions(TestCase):
     def setUp(self):
@@ -314,6 +364,28 @@ class TestTargetCreate(TestCase):
         errors = response.context['form'].errors
         self.assertEqual(errors, {})
 
+    def test_non_sidereal_required_fields_Comet(self):
+        print('here Comet')
+
+        create_url = reverse('targets:create') + '?type=NON_SIDEREAL'
+
+        # Use the same data for minor planet: should be no errors
+        min_planet_data = dict(**base_data_Comet, scheme='MPC_COMET')
+        response = self.client.post(create_url, data=min_planet_data, follow=True)
+        errors = response.context['form'].errors
+        self.assertEqual(errors, {})
+
+    def test_non_sidereal_required_fields_EPHEMERIS(self):
+        print('here Ephemeris')
+
+        create_url = reverse('targets:create') + '?type=NON_SIDEREAL'
+
+        # Use the same data for minor planet: should be no errors
+        min_planet_data = dict(**base_data_EPH, scheme='EPHEMERIS')
+        response = self.client.post(create_url, data=min_planet_data, follow=True)
+        errors = response.context['form'].errors
+        self.assertEqual(errors, {})
+
     def test_create_form_failure(self):
         """
         If a failure occurs when creating a non-sidereal target, make sure the
@@ -459,6 +531,13 @@ class TestTargetImport(TestCase):
             for alias in aliases[target_name].split(','):
                 self.assertTrue(TargetName.objects.filter(target=target, name=alias).exists())
 
+    def test_import_ephemeris_csv(self):
+        root = tom_targets.__file__.split('__')[0]
+        eph_file = open(root + 'static/tom_targets/target_ephemeris_import.eph')
+        eph_stream = StringIO(eph_file.read(), newline='\n')
+        result = import_ephemeris_target(eph_stream)
+        eph_file.close()
+        self.assertEqual(len(result['targets']), 1)
 
 class TestTargetExport(TestCase):
     """
