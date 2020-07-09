@@ -32,7 +32,7 @@ class NonSiderealTargetFactory(factory.django.DjangoModelFactory):
     ephemeris_period_err = factory.Faker('pyfloat')
     ephemeris_epoch = factory.Faker('pyfloat')
     ephemeris_epoch_err = factory.Faker('pyfloat')
-
+    eph_json = factory.Faker('pystr')
 
 class TargetNameFactory(factory.django.DjangoModelFactory):
     class Meta:
