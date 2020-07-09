@@ -393,7 +393,8 @@ class TargetImportView(LoginRequiredMixin, TemplateView):
 
 class TargetImportEphemerisView(LoginRequiredMixin, TemplateView):
     """
-    View that handles the import of targets from a .eph . Requires authentication.
+    View that handles the import of targets from a .eph file for EPHEMERIS scheme.
+    Requires authentication.
     """
     template_name = 'tom_targets/target_ephemeris_import.html'
 
