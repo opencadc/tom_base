@@ -110,20 +110,6 @@ class LCOBaseForm(forms.Form):
     exposure_time = forms.FloatField(min_value=0.1)
     max_airmass = forms.FloatField()
 
-    site = forms.ChoiceField(
-        choices=(('all', 'All Sites'),
-                 ('coj', 'Siding Spring'),
-                 ('cpt', 'Sutherland'),
-                 ('tfn', 'Teide'),
-                 ('tlv', 'Wise'),
-                 ('lsc', 'Cerro Tololo'),
-                 ('elp', 'McDonald'),
-                 ('ogg', 'Haleakala'))
-    )
-
-    imaging_interval = forms.FloatField(
-        label='Interval (hrs). Will schedule exposure count per interval.'
-        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -136,12 +122,6 @@ class LCOBaseForm(forms.Form):
         self.fields['instrument_type'] = forms.ChoiceField(
             choices=self.instrument_choices()
             )
-
-        self.eph_target = False
-        target = Target.objects.get(pk=kwargs['initial']['target_id'])
-        if target.type == Target.NON_SIDEREAL:
-            if target.scheme == 'EPHEMERIS':
-                self.eph_target = True
 
     def _get_instruments(self):
         cached_instruments = cache.get('lco_instruments')
@@ -203,7 +183,30 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
         help_text=observation_mode_help
     )
 
+    site = forms.ChoiceField(
+        choices=(('all', 'All Sites'),
+                 ('coj', 'Siding Spring'),
+                 ('cpt', 'Sutherland'),
+                 ('tfn', 'Teide'),
+                 ('tlv', 'Wise'),
+                 ('lsc', 'Cerro Tololo'),
+                 ('elp', 'McDonald'),
+                 ('ogg', 'Haleakala'))
+    )
+
+    imaging_interval = forms.FloatField(
+        label='Interval (hrs). Will schedule exposure count per interval.'
+        )
+
     def __init__(self, *args, **kwargs):
+        # the ephemeris target stuff must come before super()
+        self.eph_target = False
+        if 'initial' in kwargs:
+            target = Target.objects.get(pk=kwargs['initial']['target_id'])
+            if target.type == Target.NON_SIDEREAL:
+                if target.scheme == 'EPHEMERIS':
+                    self.eph_target = True
+
         super().__init__(*args, **kwargs)
         self.helper.layout = Layout(
             self.common_layout,
@@ -211,6 +214,8 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
             self.cadence_layout,
             self.button_layout()
         )
+
+
 
     def layout(self):
         return Div(
@@ -239,6 +244,7 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
                 ),
                 css_class='form-row'
             ),
+            self.extra_layout()
         )
 
     def extra_layout(self):
