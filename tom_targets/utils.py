@@ -127,6 +127,8 @@ def import_ephemeris_target(stream):
 
     jpl_ra_key = 'R.A._____(ICRF)_____DEC'
     jpl_jd_key = 'Date_________JDUT'
+    jpl_dr_key = 'RA_3sigma'
+    jpl_dd_key = 'DEC_3sigma'
 
     eph = stream.getvalue().split('\n')
 
@@ -147,6 +149,8 @@ def import_ephemeris_target(stream):
         name = 'custom'
         jd_inds = None
         ra_inds = None
+        dr_inds = None
+        dd_inds = None
         loop_inds = [-1, -1]
         for i in range(end_ind, len(eph)):
             if 'Center-site name' in eph[i]:
@@ -162,9 +166,11 @@ def import_ephemeris_target(stream):
             if 'Target body name' in eph[i]:
                 name = "-".join(eph[i].split(': ')[1].split('{source')[0].split())
 
-            if jpl_ra_key in eph[i] and jpl_jd_key in eph[i]:
+            if jpl_ra_key in eph[i] and jpl_jd_key in eph[i] and jpl_dr_key in eph[i] and jpl_dd_key in eph[i]:
                 ra_inds = [eph[i].index(jpl_ra_key), eph[i].index(jpl_ra_key)+len(jpl_ra_key)]
                 jd_inds = [eph[i].index(jpl_jd_key), eph[i].index(jpl_jd_key)+len(jpl_jd_key)]
+                dr_inds = [eph[i].index(jpl_dr_key), eph[i].index(jpl_dr_key)+len(jpl_dr_key)]
+                dd_inds = [eph[i].index(jpl_dd_key), eph[i].index(jpl_dd_key)+len(jpl_dd_key)]
             if '$$SOE' in eph[i]:
                 if ra_inds is not None and loop_inds[0] == -1:
                     loop_inds[0] = i+1
@@ -188,18 +194,24 @@ def import_ephemeris_target(stream):
         mjds = []
         ras = []
         decs = []
+        drs = []
+        dds = []
         R = 0.0
         D = 0.0
         n = 0.0
         for i in range(loop_inds[0], loop_inds[1]):
             mjds.append(str(float(eph[i][jd_inds[0]:jd_inds[1]])-2400000.5))
+
             s = eph[i][ra_inds[0]:ra_inds[1]].split()
             r = 15.0*(float(s[0])+float(s[1])/60.0+float(s[2])/3600.0)
-            ras.append("{:11.7f}".format(r))
+            ras.append("{:.7f}".format(r))
             d = abs(float(s[3]))+float(s[4])/60.0+float(s[5])/3600.0
             if '-' in s[3]:
                 d *= -1.0
-            decs.append("{:10.6f}".format(d))
+            decs.append("{:.6f}".format(d))
+
+            drs.append('{:.7f}'.format( float(eph[i][dr_inds[0]:dr_inds[1]])/3600.0 ))
+            dds.append('{:.6f}'.format( float(eph[i][dd_inds[0]:dd_inds[1]])/3600.0 ))
 
             R += r
             D += d
@@ -211,8 +223,8 @@ def import_ephemeris_target(stream):
             entry['t'] = mjds[i]
             entry['R'] = ras[i]
             entry['D'] = decs[i]
-            entry['dR'] = 0.0
-            entry['dD'] = 0.0
+            entry['dR'] = drs[i]
+            entry['dD'] = dds[i]
 
             eph_json[centre_site_name].append(entry)
 
