@@ -22,6 +22,7 @@ class TargetFactory(factory.django.DjangoModelFactory):
     epoch = factory.Faker('pyfloat')
     pm_ra = factory.Faker('pyfloat')
     pm_dec = factory.Faker('pyfloat')
+    # WF: probably need to add variables here
 
 
 class ObservingRecordFactory(factory.django.DjangoModelFactory):
