@@ -437,11 +437,11 @@ class GEMObservationForm(BaseRoboticObservationForm):
 
                 if obs[:2] == 'GN':
                     note_text = self.eph_GN[0][0:4] + self.eph_GN[0][mjd_k:mjd_K] + self.eph_GN[0][-2:]
-                    payload['note'] += "\n"
+                    payload['note'] += "\n\n"
                     payload['note'] += "\n".join(note_text)
                 elif obs[:2] == 'GS':
                     note_text = self.eph_GS[0][0:4] + self.eph_GS[0][mjd_k:mjd_K] + self.eph_GS[0][-2:]
-                    payload['note'] += "\n"
+                    payload['note'] += "\n\n"
                     payload['note'] += "\n".join(note_text)
                 print(payload['note'])
             if self.cleaned_data['brightness'] is not None:

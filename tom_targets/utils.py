@@ -138,7 +138,7 @@ def import_ephemeris_target(stream):
             num_sites += 1
 
     if num_sites != 8:
-        errors.append(Warning('WARNING: Provided file does not have ephemerides for all 7 LCO sites.'))
+        errors.append(Warning('WARNING: Provided file does not have ephemerides for all 8 LCO sites.'))
 
     eph_json = {}
     end_ind = 0
@@ -189,6 +189,7 @@ def import_ephemeris_target(stream):
         # ephemerides. TO-DO: put a better error check and correctly thrown
         # warning for now being lazy
         if loop_inds == [-1, -1] or ra_inds is None or jd_inds is None:
+            print(name, loop_inds , ra_inds , jd_inds)
             errors.append(Exception('We were not able to understand that ephemeris file.'))
 
         mjds = []

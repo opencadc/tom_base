@@ -1,0 +1,11 @@
+{% load bootstrap4 %}
+<div id="tile-panel">
+  <form action="{% url 'targets:detail' target.id %}" method="GET" class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    {% buttons %}
+    <input type="submit" class="btn btn-primary" value="Tile">
+    {% endbuttons %}
+  </form>
+  {{ tile_graph|safe }} 
+</div>

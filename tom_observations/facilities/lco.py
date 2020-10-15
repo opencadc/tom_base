@@ -342,15 +342,21 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
                                                 self.cleaned_data['imaging_interval'],
                                                 'LCO',
                                                 site)
+
                         if mjd_vals is not None:
                             for i in range(len(ra_vals)-1):
+                                print((air_vals[i] < float(self.cleaned_data['max_airmass']),
+                                        air_vals[i+1] < float(self.cleaned_data['max_airmass']),
+                                        air_vals[i] > 1.0,
+                                        air_vals[i+1] > 1.0,
+                                        sun_alt_vals[i] < -30.0,
+                                        sun_alt_vals[i+1] < -30.0))
                                 if (air_vals[i] < float(self.cleaned_data['max_airmass']) and
                                         air_vals[i+1] < float(self.cleaned_data['max_airmass']) and
                                         air_vals[i] > 1.0 and
                                         air_vals[i+1] > 1.0 and
                                         sun_alt_vals[i] < -30.0 and
                                         sun_alt_vals[i+1] < -30.0):
-
                                     new_target_fields = {}
                                     new_target_fields['type'] = 'ICRS'
                                     new_target_fields['ra'] = (ra_vals[i]+ra_vals[i+1])/2.0
@@ -371,7 +377,6 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
                                     ephemeris_windows[site].append([start.isot, end.isot])
                         elif mjd_vals is None and sun_alt_vals == -2:
                             self.add_error(None, 'Date range outside range available in the provided ephemeris.')
-
                 return (ephemeris_targets, ephemeris_windows)
 
             else:
@@ -434,6 +439,7 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
         locations = []
         for site in sites:
             for i in range(len(new_targets[site])):
+                print(self._build_instrument_config())
                 single_obs_config = {
                     'type': self.instrument_to_type(self.cleaned_data['instrument_type']),
                     'instrument_type': self.cleaned_data['instrument_type'],

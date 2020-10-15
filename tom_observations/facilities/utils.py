@@ -24,7 +24,7 @@ def get_hex(ra, dec):
     rs = (s-rm)*60.0
 
     s = abs(dec)
-    dh = int(dec)
+    dh = int(s)
     s -= dh
     s *= 60.0
     dm = int(s)

@@ -4,6 +4,7 @@ from astropy.time import Time
 from astroplan import Observer, FixedTarget, time_grid_from_range
 import numpy as np
 from scipy import interpolate as interp
+import json
 import logging
 
 from tom_observations import facility
@@ -11,6 +12,58 @@ from tom_observations import facility
 
 logger = logging.getLogger(__name__)
 
+
+def get_ellipse(a, b):
+    ang = np.linspace(0, 2*np.pi, 200)
+    return (a*np.cos(ang), b*np.sin(ang))
+
+def get_astrom_uncert_ephemeris(target, selected_time):
+    """
+    Get the astrometric uncertainty of a EPHEMERIS target.
+    """
+    if target.type == target.NON_SIDEREAL:
+        if target.scheme == 'EPHEMERIS':
+            eph_json = json.loads(target.eph_json)
+            sites = list(eph_json)
+
+            mk = eph_json[sites[0]]
+
+            ras = []
+            decs = []
+            dras = []
+            ddecs = []
+            mjds = []
+            times = []
+            for i, e in enumerate(mk):
+                mjds.append(float(e['t']))
+                ras.append(float(e['R']))
+                decs.append(float(e['D']))
+                dras.append(float(e['dR']))
+                ddecs.append(float(e['dD']))
+
+            mjds, ras, decs, dras, ddecs = np.array(mjds), np.array(ras), np.array(decs), np.array(dras), np.array(ddecs)
+
+            fra = interp.interp1d(mjds, ras)
+            fdec = interp.interp1d(mjds, decs)
+            fdra = interp.interp1d(mjds, dras)
+            fddec = interp.interp1d(mjds, ddecs)
+
+            if selected_time == '':
+                selected_mjd = Time.now().mjd
+            else:
+                selected_mjd = Time(selected_time).mjd
+            try:
+                out = (fra(selected_mjd),
+                        fdec(selected_mjd),
+                        fdra(selected_mjd),
+                        fddec(selected_mjd))
+                return out
+            except:
+                raise('Selected time outside ephemeris range.')
+
+        raise Exception("Target type does not contain astrometric uncertainty information. Please specify.")
+    else:
+        raise Exception("Target type does not contain astrometric uncertainty information. Please specify.")
 
 def get_radec_ephemeris(eph_json_single, start_time, end_time, interval, observing_facility, observing_site):
     observing_facility_class = facility.get_service_class(observing_facility)

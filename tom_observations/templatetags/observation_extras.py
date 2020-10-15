@@ -8,11 +8,12 @@ from guardian.shortcuts import get_objects_for_user
 from plotly import offline
 import plotly.graph_objs as go
 
-from tom_observations.forms import AddExistingObservationForm, UpdateObservationId
+from tom_observations.forms import AddExistingObservationForm, UpdateObservationId, TileForm
 from tom_observations.models import ObservationRecord
 from tom_observations.facility import get_service_class, get_service_classes
 from tom_observations.observing_strategy import RunStrategyForm
-from tom_observations.utils import get_sidereal_visibility
+from tom_observations.utils import get_sidereal_visibility, get_ellipse, get_astrom_uncert_ephemeris
+from tom_observations.tiler import make_tiles
 from tom_targets.models import Target
 
 
@@ -261,3 +262,70 @@ def facility_status():
         facility_statuses.append(status)
 
     return {'facilities': facility_statuses}
+
+
+@register.inclusion_tag('tom_observations/partials/tile_plan.html', takes_context=True)
+def tile_plan(context):
+    """
+    Displays a figure showing the uncertainty ellipse, and the tiled observation sequence
+    on the ellipse.
+    """
+    request = context['request']
+    tile_form = TileForm()
+
+    tile_graph = ''
+
+    if all(request.GET.get(x) for x in ['field_overlap']):
+        tile_form = TileForm({
+            'field_overlap': request.GET.get('field_overlap'),
+            'min_fill_fraction': request.GET.get('min_fill_fraction'),
+            'shimmy_factor': request.GET.get('shimmy_factor'),
+            'target': context['object']
+        })
+        if tile_form.is_valid():
+            field_overlap = float(request.GET['field_overlap'])
+            min_fill_fraction = float(request.GET.get('min_fill_fraction'))
+            shimmy_factor = float(request.GET.get('shimmy_factor'))
+            if request.GET.get('ra_uncertainty') and request.GET.get('dec_uncertainty'):
+                ra_uncertainty = float(request.GET.get('ra_uncertainty'))/3600.0
+                dec_uncertainty = float(request.GET.get('dec_uncertainty'))/3600.0
+            else:
+                selected_date = request.GET['selected_date']
+                selected_time = request.GET['selected_time']
+                if selected_date != '' and selected_time != '':
+                    date_str = selected_date+'T'+selected_time+':00'
+                else:
+                    date_str = ''
+                (ra, dec, ra_uncertainty, dec_uncertainty) = get_astrom_uncert_ephemeris(context['object'], date_str)
+
+
+            fov = 6.0/60.0
+            if shimmy_factor>0:
+                allowShimmy = True
+                n_shimmy = int(shimmy_factor)
+            else:
+                allowShimmy = False
+                n_shimmy = 0
+            tiles = make_tiles(fov, ra_uncertainty, dec_uncertainty,
+                               overlap = field_overlap, min_fill_fraction = min_fill_fraction,
+                               allowShimmy = allowShimmy, n_shimmy = n_shimmy )
+
+            plot_data = []
+            for i, tile in enumerate(tiles):
+                x = [tile[0]-fov/2, tile[0]-fov/2, tile[0]+fov/2, tile[0]+fov/2, tile[0]-fov/2]
+                y = [tile[1]-fov/2, tile[1]+fov/2, tile[1]+fov/2, tile[1]-fov/2, tile[1]-fov/2]
+                plot_data.append(go.Scatter(x=x, y=y, mode='lines', line_color='red', name=str(i)))
+            (ellip_x, ellip_y) = get_ellipse(ra_uncertainty, dec_uncertainty)
+            plot_data.append(go.Scatter(x=ellip_x, y=ellip_y, mode='lines', line_color='black', name='Uncertainty Ellipse'))
+            layout = go.Layout(title='{} tiles in mosaic'.format(len(tiles)), xaxis=dict(title="RA"), yaxis=dict(title='Dec.'), showlegend=False)
+            tile_graph = offline.plot({
+                                       "data": plot_data,
+                                       "layout": layout
+                                       },
+                                       output_type='div', show_link=False)
+
+    return {
+        'form': tile_form,
+        'target': context['object'],
+        'tile_graph': tile_graph
+    }

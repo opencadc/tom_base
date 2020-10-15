@@ -267,6 +267,11 @@ def eph_json_to_value_ra(value):
         eph_json = json.loads(value)
         keys = list(eph_json.keys())
         k = keys[0]
+
+        # bug catch for truly empty ephemerides, which can happen if a user provides a poorly formatted ephemeris file
+        if len(eph_json[k]) == 0:
+            return -32768.0
+
         eph_len = len(eph_json[k][0])
         return deg_to_sexigesimal(float(eph_json[k][int(eph_len/2)]['R']), 'hms')
     else:
@@ -282,6 +287,11 @@ def eph_json_to_value_dec(value):
         eph_json = json.loads(value)
         keys = list(eph_json.keys())
         k = keys[0]
+
+        # bug catch for truly empty ephemerides, which can happen if a user provides a poorly formatted ephemeris file
+        if len(eph_json[k]) == 0:
+            return -32768.0
+
         eph_len = len(eph_json[k][0])
         return deg_to_sexigesimal(float(eph_json[k][int(eph_len/2)]['D']), 'dms')
     else:
@@ -297,6 +307,11 @@ def eph_json_to_value_mjd(value):
         eph_json = json.loads(value)
         keys = list(eph_json.keys())
         k = keys[0]
+
+        # bug catch for truly empty ephemerides, which can happen if a user provides a poorly formatted ephemeris file
+        if len(eph_json[k]) == 0:
+            return -32768.0
+
         eph_len = len(eph_json[k][0])
         return round(float(eph_json[k][int(eph_len/2)]['t']), 5)
     else:

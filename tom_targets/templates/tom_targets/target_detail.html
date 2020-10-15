@@ -1,5 +1,5 @@
 {% extends 'tom_common/base.html' %}
-{% load comments bootstrap4 tom_common_extras targets_extras observation_extras dataproduct_extras publication_extras static cache %}
+{% load comments bootstrap4 tom_common_extras targets_extras observation_extras dataproduct_extras publication_extras static cache nonsidereal_airmass_extras%}
 {% block title %}Target {{ object.name }}{% endblock %}
 {% block additional_css %}
 <link rel="stylesheet" href="{% static 'tom_targets/css/main.css' %}">
@@ -21,7 +21,7 @@
       {% if object.type == 'SIDEREAL' %}
       {% aladin object %}
       {% endif %}
-      
+
     </div>
   </div>
   <div class="col-md-8">
@@ -55,12 +55,17 @@
         <hr/>
         {% observingstrategy_run object %}
         <hr/>
+        {% if object.type == 'NON_SIDEREAL' %}
+          <h4>Tile</h4>
+          {% tile_plan %}
+        {% endif %}
         <h4>Plan</h4>
         {% if object.type == 'SIDEREAL' %}
           {% target_plan %}
           {% moon_distance object %}
         {% elif target.type == 'NON_SIDEREAL' %}
-          <p>Airmass plotting for non-sidereal targets is not currently supported. If you would like to add this functionality, please check out the <a href="https://github.com/TOMToolkit/tom_nonsidereal_airmass" target="_blank">non-sidereal airmass plugin.</a></p>
+          {% nonsidereal_target_plan %}
+          <! <p>Airmass plotting for non-sidereal targets is not currently supported. If you would like to add this functionality, please check out the <a href="https://github.com/TOMToolkit/tom_nonsidereal_airmass" target="_blank">non-sidereal airmass plugin.</a></p>>
         {% endif %}
       </div>
       <div class="tab-pane" id="observations">

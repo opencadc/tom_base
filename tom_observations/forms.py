@@ -1,7 +1,7 @@
 from django import forms
 from django.urls import reverse
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import ButtonHolder, Column, Layout, Row, Submit
+from crispy_forms.layout import ButtonHolder, Column, Layout, Row, Submit, Div
 
 from tom_observations.facility import get_service_classes
 
@@ -68,3 +68,38 @@ class UpdateObservationId(forms.Form):
                 )
             )
         )
+
+class TileForm(forms.Form):
+    field_overlap = forms.DecimalField(required=True, label='Field Overlap', initial=0.3)
+    min_fill_fraction = forms.DecimalField(required=True, label='Minimum Fill Fraction', initial=0.5)
+    shimmy_factor = forms.DecimalField(required=True, label='Shimmy Factor', initial=0.0)
+    ra_uncertainty = forms.DecimalField(required=False, label='R.A. Uncertainty (")')
+    dec_uncertainty = forms.DecimalField(required=False, label='Dec. Uncertainty (")')
+    selected_date = forms.DateTimeField(required=False, label='Date', widget=forms.TextInput(attrs={'type': 'date'}))
+    selected_time = forms.DateTimeField(required=False, label='Time', widget=forms.TextInput(attrs={'type': 'time'}))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        field_overlap = cleaned_data.get('field_overlap')
+        min_fill_fraction = cleaned_data.get('min_fill_fraction')
+        target = self.data['target']
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            self.layout()
+        )
+
+    def layout(self):
+        return Div(
+                    Div(
+                        Div('field_overlap', css_class='col'),
+                        Div('ra_uncertainty', css_class='col'),
+                        Div('dec_uncertainty', css_class='col'),
+                        Div('min_fill_fraction', css_class='col'),
+                        Div('shimmy_factor', css_class='col'),
+                        css_class='form-row'),
+                    Div('selected_date', 'selected_time'),
+                )
