@@ -2,7 +2,7 @@ import factory
 import json
 
 from tom_targets.models import Target, TargetName
-from tom_observations.models import ObservationRecord, ObservingStrategy
+from tom_observations.models import ObservationRecord, ObservationTemplate
 
 
 class TargetNameFactory(factory.django.DjangoModelFactory):
@@ -17,8 +17,8 @@ class TargetFactory(factory.django.DjangoModelFactory):
         model = Target
 
     name = factory.Faker('pystr')
-    ra = factory.Faker('pyfloat')
-    dec = factory.Faker('pyfloat')
+    ra = factory.Faker('pyfloat', min_value=-90, max_value=90)
+    dec = factory.Faker('pyfloat', min_value=-90, max_value=90)
     epoch = factory.Faker('pyfloat')
     pm_ra = factory.Faker('pyfloat')
     pm_dec = factory.Faker('pyfloat')
@@ -51,9 +51,9 @@ class ObservingRecordFactory(factory.django.DjangoModelFactory):
     })
 
 
-class ObservingStrategyFactory(factory.django.DjangoModelFactory):
+class ObservationTemplateFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = ObservingStrategy
+        model = ObservationTemplate
 
     facility = 'LCO'
     parameters = json.dumps({
