@@ -307,6 +307,8 @@ class TargetDeleteView(Raise403PermissionRequiredMixin, DeleteView):
     success_url = reverse_lazy('targets:list')
     model = Target
 
+# class TargetSSOISView(ListView):
+#     model = Target
 
 class TargetDetailView(Raise403PermissionRequiredMixin, DetailView):
     """

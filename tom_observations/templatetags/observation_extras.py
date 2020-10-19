@@ -11,7 +11,7 @@ import plotly.graph_objs as go
 from tom_observations.forms import AddExistingObservationForm, UpdateObservationId, TileForm
 from tom_observations.models import ObservationRecord
 from tom_observations.facility import get_service_class, get_service_classes
-from tom_observations.observing_strategy import RunStrategyForm
+#from tom_observations.observing_strategy import RunStrategyForm
 from tom_observations.observation_template import ApplyObservationTemplateForm
 from tom_observations.utils import get_sidereal_visibility, get_ellipse, get_astrom_uncert_ephemeris
 from tom_observations.tiler import make_tiles

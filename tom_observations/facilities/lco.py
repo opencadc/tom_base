@@ -20,7 +20,6 @@ from tom_observations.facility import (
     )
 from tom_observations.observation_template import GenericTemplateForm
 from tom_observations.widgets import FilterField
-from tom_observations.observing_strategy import GenericStrategyForm
 from tom_targets.models import (
     Target, REQUIRED_NON_SIDEREAL_FIELDS,
     REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME
@@ -354,12 +353,6 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
 
                         if mjd_vals is not None:
                             for i in range(len(ra_vals)-1):
-                                print((air_vals[i] < float(self.cleaned_data['max_airmass']),
-                                        air_vals[i+1] < float(self.cleaned_data['max_airmass']),
-                                        air_vals[i] > 1.0,
-                                        air_vals[i+1] > 1.0,
-                                        sun_alt_vals[i] < -30.0,
-                                        sun_alt_vals[i+1] < -30.0))
                                 if (air_vals[i] < float(self.cleaned_data['max_airmass']) and
                                         air_vals[i+1] < float(self.cleaned_data['max_airmass']) and
                                         air_vals[i] > 1.0 and
@@ -385,7 +378,7 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
                                     ephemeris_targets[site].append(new_target_fields)
                                     ephemeris_windows[site].append([start.isot, end.isot])
                         elif mjd_vals is None and sun_alt_vals == -2:
-                            self.add_error(None, 'Date range outside range available in the provided ephemeris.')
+                            self.add_error(None, 'Date range outside range available in the stored ephemeris.')
                 return (ephemeris_targets, ephemeris_windows)
 
             else:
@@ -454,12 +447,11 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
         locations = []
         for site in sites:
             for i in range(len(new_targets[site])):
-                print(self._build_instrument_config())
                 single_obs_config = {
                     'type': self.instrument_to_type(self.cleaned_data['instrument_type']),
                     'instrument_type': self.cleaned_data['instrument_type'],
                     'target': new_targets[site][i],
-                    'instrument_configs': [self._build_instrument_config()],
+                    'instrument_configs': self._build_instrument_config(),
                     'acquisition_config': {
 
                     },
@@ -538,7 +530,7 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
             # this is inefficient as the request validation is done to check for site+scope
             # configuration errors, and then is done again later to check for other errors.
             #
-            # This could be used to estiamte airmass windows instead of using astropy as
+            # This could be used to estimate airmass windows instead of using astropy as
             # is done in tom_base/utils.py.
             obs_module = get_service_class(self.cleaned_data['facility'])
             requests = self._build_ephemeris_requests()
@@ -546,10 +538,15 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
             for j in range(len(requests)):
                 if requests[j]['location'] not in locations:
                     locations.append(requests[j]['location'])
+            """
+            # I dont understand why the following is inappropriate when selecting a single
+            # telescope location, but MANY seems to always be required now.
             if len(locations) > 1:
                 operator = "MANY"
             else:
-                operator = "SINGLE"
+                operator = "MANY"#"SINGLE"
+            """
+            operator = "MANY"
 
             errors = obs_module().validate_observation({
                 "name": self.cleaned_data['name'],
@@ -560,6 +557,7 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
                 "requests": requests
 
             })
+
             if len(errors) > 0:
                 valid_requests = []
                 for i, e in enumerate(errors['requests']):

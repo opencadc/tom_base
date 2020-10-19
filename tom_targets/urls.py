@@ -16,6 +16,7 @@ urlpatterns = [
     path('add-remove-grouping/', TargetAddRemoveGroupingView.as_view(), name='add-remove-grouping'),
     path('<int:pk>/update/', TargetUpdateView.as_view(), name='update'),
     path('<int:pk>/delete/', TargetDeleteView.as_view(), name='delete'),
+    path('<int:pk>/ssois/', TargetUpdateView.as_view(), name='ssois'),
     path('<int:pk>/', TargetDetailView.as_view(), name='detail'),
     path('targetgrouping/<int:pk>/delete/', TargetGroupingDeleteView.as_view(), name='delete-group'),
     path('targetgrouping/create/', TargetGroupingCreateView.as_view(), name='create-group')

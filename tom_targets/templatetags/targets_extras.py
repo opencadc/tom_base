@@ -18,6 +18,11 @@ from tom_targets.forms import TargetVisibilityForm
 
 import json
 
+from astroquery.jplhorizons import Horizons
+
+# global ephemeris object such that the horizons query doesn't happen twice
+eph_obj_coords = None
+
 register = template.Library()
 
 
@@ -318,3 +323,29 @@ def eph_json_to_value_mjd(value):
         return round(float(eph_json[k][int(eph_len/2)]['t']), 5)
     else:
         return -32768.0
+
+
+@register.filter
+def non_sidereal_ra(target_name):
+    global eph_obj_coords
+
+    if eph_obj_coords is None:
+        try:
+            # if there is a space in the nane, assume the first string is an acceptable name
+            obj = Horizons(id=target_name[0].split()[0], epochs=Time.now().jd)
+            eph_obj_coords = [obj.ephemerides()['RA'][0], obj.ephemerides()['DEC'][0]]
+            return eph_obj_coords[0]
+        except:
+            pass
+    return None
+
+
+@register.filter
+def non_sidereal_dec(target_name):
+    global eph_obj_coords
+
+    if eph_obj_coords is not None:
+        dec = eph_obj_coords[1]
+        eph_obj_coords = None
+        return dec
+    return None
