@@ -12,7 +12,7 @@ from django.core.management import call_command
 from django.db import transaction
 from django.http import QueryDict, StreamingHttpResponse
 from django.forms import HiddenInput
-from django.shortcuts import redirect
+from django.shortcuts import redirect, redirect
 from django.urls import reverse_lazy, reverse
 from django.utils.text import slugify
 from django.utils.safestring import mark_safe
@@ -20,6 +20,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.views.generic import TemplateView, View
+from django.views.generic.base import RedirectView
 from django_filters.views import FilterView
 
 from guardian.mixins import PermissionListMixin
@@ -307,8 +308,22 @@ class TargetDeleteView(Raise403PermissionRequiredMixin, DeleteView):
     success_url = reverse_lazy('targets:list')
     model = Target
 
-# class TargetSSOISView(ListView):
-#     model = Target
+
+class TargetSSOISView(RedirectView):
+    """
+    View that redirect to SSOIS
+    """
+
+    model = Target
+
+    def get_redirect_url(*args, **kwargs):
+
+        now = datetime.now()
+        targ_name_guess = kwargs['pk'].split()[0].split('-')[0]
+        url = 'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/ssos/ssosclf.pl?lang=en&object={}'.format(targ_name_guess.split()[0])
+        url += '%0D%0A&search=bynameall&epoch1=1990+01+01&epoch2={}+{}+{}'.format(now.year, now.month, now.day)
+        url += '&eellipse=&eunits=arcseconds&extres=no&xyres=no'
+        return url
 
 class TargetDetailView(Raise403PermissionRequiredMixin, DetailView):
     """

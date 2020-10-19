@@ -60,6 +60,14 @@ def target_buttons(target):
     return {'target': target}
 
 
+@register.inclusion_tag('tom_targets/partials/target_ssois.html')
+def target_ssois(target):
+    """
+    Displays the ssois query button.
+    """
+    return {'target': target}
+
+
 @register.inclusion_tag('tom_targets/partials/target_data.html')
 def target_data(target):
     """
