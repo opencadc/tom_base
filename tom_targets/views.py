@@ -40,7 +40,6 @@ from tom_targets.groups import (
 )
 from tom_targets.models import Target, TargetList
 from tom_targets.utils import import_targets, export_targets, import_ephemeris_target
-from tom_targets.filters import TargetFilter
 
 logger = logging.getLogger(__name__)
 
@@ -317,13 +316,17 @@ class TargetSSOISView(RedirectView):
     model = Target
 
     def get_redirect_url(*args, **kwargs):
-
+        """
+        Produce a redirect to the Solar System Object Image Search at the
+        Canadian Astronomy Data Centre, for the target.
+        """
         now = datetime.now()
         targ_name_guess = kwargs['pk'].split()[0].split('-')[0]
         url = 'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/ssos/ssosclf.pl?lang=en&object={}'.format(targ_name_guess.split()[0])
         url += '%0D%0A&search=bynameall&epoch1=1990+01+01&epoch2={}+{}+{}'.format(now.year, now.month, now.day)
         url += '&eellipse=&eunits=arcseconds&extres=no&xyres=no'
         return url
+
 
 class TargetDetailView(Raise403PermissionRequiredMixin, DetailView):
     """

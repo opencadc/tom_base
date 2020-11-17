@@ -1,10 +1,17 @@
 from django import forms
 from astropy.coordinates import Angle
 from astropy import units as u
+from astropy.time import Time
 from django.forms import ValidationError, inlineformset_factory
 from django.conf import settings
 from django.contrib.auth.models import Group
 from guardian.shortcuts import assign_perm, get_groups_with_perms, remove_perm
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Column, Layout, Row, Div
+
+import datetime
+import json
+import numpy as np
 
 from .models import (
     Target, TargetExtra, TargetName, SIDEREAL_FIELDS, NON_SIDEREAL_FIELDS, REQUIRED_SIDEREAL_FIELDS,
@@ -161,6 +168,41 @@ class TargetVisibilityForm(forms.Form):
         if target.type == 'NON_SIDEREAL':
             raise forms.ValidationError('Airmass plotting is only supported for sidereal targets')
 
+class AladinNonSiderealForm(forms.Form):
+    #selected_date = forms.DateTimeField(required=True, label='Date', widget=forms.TextInput(attrs={'type': 'date', 'value': datetime.datetime.now().strftime("%d-%m-%Y")}))
+    #selected_time = forms.DateTimeField(required=True, label='Time', widget=forms.TextInput(attrs={'type': 'time', 'value': datetime.now().strftime("%H:%M:%S")}))
+    selected_date = forms.DateTimeField(required=True, label='Date (UTC)', widget=forms.TextInput(attrs={'type': 'date'}), initial=datetime.date.today)
+    selected_time = forms.TimeField(required=True, label='Start Time (UTC)', widget=forms.TextInput(attrs={'type': 'time'}), initial=datetime.datetime.now().strftime("%H:%M"))
+    duration = forms.DecimalField(required=True, label='Duration (hrs)', initial=24.0)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        selected_date = cleaned_data.get('selected_date')
+        selected_time = cleaned_data.get('selected_time')
+        duration = cleaned_data.get('duration')
+        target = self.data['target']
+
+        if self.data['target'].scheme == 'EPHEMERIS':
+            t = Time(selected_date.strftime("%Y-%m-%dT")+selected_time.strftime("%H:%M:00.0"))
+
+            eph_json = json.loads(self.data['target'].eph_json)
+            keys = list(eph_json.keys())
+            mjd = []
+            for i in eph_json[keys[0]]:
+                mjd.append(i['t'])
+            mjd = np.array(mjd, dtype='float64')
+            min_mjd, max_mjd = np.min(mjd), np.max(mjd)
+
+            if t.mjd < min_mjd or t.mjd > max_mjd:
+                raise ValidationError('The selected date must be between {} and {} utc.'.format(Time(min_mjd, format='mjd').isot, Time(max_mjd, format='mjd').isot))
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Row(Column('selected_date'), Column('selected_time'))
+        )
 
 
 

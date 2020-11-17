@@ -1,5 +1,5 @@
 {% extends 'tom_common/base.html' %}
-{% load bootstrap4 static crispy_forms_tags observation_extras targets_extras %}
+{% load bootstrap4 static crispy_forms_tags observation_extras targets_extras nonsidereal_airmass_extras %}
 {% block title %}Submit Observation{% endblock %}
 {% block additional_css %}
 <link rel="stylesheet" href="{% static 'tom_common/css/main.css' %}">
@@ -11,7 +11,13 @@
 {% if target.type == 'SIDEREAL' %}
 <div class="row">
     <div class="col">
-    {% observation_plan target form.facility.value %}
+      {% observation_plan target form.facility.value %}
+    </div>
+</div>
+{% elif target.type == 'NON_SIDEREAL' %}
+<div class="row">
+    <div class="col">
+      {% observation_plan_nonsidereal target form.facility.value %}
     </div>
 </div>
 {% endif %}

@@ -1,15 +1,17 @@
 from django.db.models import Count
-
+from django.conf import settings
 import csv
 from .models import Target, TargetExtra, TargetName
 from io import StringIO
+
 import json
+
 
 # this dictionary should contain as key entires text sufficient to uniquely
 # identify the observatory name from the common English names used by JPL for
 # that site. For example, Sunderland is probably unique enough to identify SAAO
 # there may be a better way to handle this.
-site_names = {'Mauna Kea': '568',
+SITE_NAMES = {'Mauna Kea': 'mko',
               'Haleakala': 'ogg',
               'McDonald': 'elp',
               'Tololo': 'lsc',
@@ -17,7 +19,141 @@ site_names = {'Mauna Kea': '568',
               'Sutherland': 'cpt',
               'Wise': 'tlv',
               'Siding Spring': 'coj',
+              'Gemini South': 'cpo',
+              'SOAR': 'sor',
               }
+
+
+def import_ephemeris_target(stream):
+    """
+    Reads in a custom ephemeris from provided file stream.
+
+    Currently only reads in the first site-code ephemeris.
+    """
+
+    # TO-DO: need to make robust to input date type
+    # TO-DO: need to make robust to input coordinate type
+
+    errors = []
+    targets = []
+
+    jpl_ra_key = 'R.A._____(ICRF)_____DEC'
+    jpl_jd_key = 'Date_________JDUT'
+    jpl_dr_key = 'RA_3sigma'
+    jpl_dd_key = 'DEC_3sigma'
+
+    eph = stream.getvalue().split('\n')
+
+    num_sites = 0
+    for i in range(len(eph)):
+        if 'Center-site name' in eph[i]:
+            num_sites += 1
+
+    if num_sites < 8:
+        errors.append(Warning('WARNING: Provided file does not have ephemerides for all 8 LCO sites.'))
+
+    eph_json = {}
+    end_ind = 0
+    for ns in range(num_sites):
+
+        centre_site_name = None
+        site_name_found = False
+        name = 'custom'
+        jd_inds = None
+        ra_inds = None
+        dr_inds = None
+        dd_inds = None
+        loop_inds = [-1, -1]
+        for i in range(end_ind, len(eph)):
+            if 'Center-site name' in eph[i]:
+                s = eph[i].split(': ')[-1]
+                for j in SITE_NAMES.keys():
+                    if j in s:
+                        centre_site_name = SITE_NAMES[j]
+                        site_name_found = True
+                        break
+                if not site_name_found:
+                    centre_site_name = s
+
+            if 'Target body name' in eph[i]:
+                name = "-".join(eph[i].split(': ')[1].split('{source')[0].split())
+
+            if jpl_ra_key in eph[i] and jpl_jd_key in eph[i] and jpl_dr_key in eph[i] and jpl_dd_key in eph[i]:
+                ra_inds = [eph[i].index(jpl_ra_key), eph[i].index(jpl_ra_key)+len(jpl_ra_key)]
+                jd_inds = [eph[i].index(jpl_jd_key), eph[i].index(jpl_jd_key)+len(jpl_jd_key)]
+                dr_inds = [eph[i].index(jpl_dr_key), eph[i].index(jpl_dr_key)+len(jpl_dr_key)]
+                dd_inds = [eph[i].index(jpl_dd_key), eph[i].index(jpl_dd_key)+len(jpl_dd_key)]
+            if '$$SOE' in eph[i]:
+                if ra_inds is not None and loop_inds[0] == -1:
+                    loop_inds[0] = i+1
+            if '$$EOE' in eph[i]:
+                if ra_inds is not None and loop_inds[0] != -1:
+                    loop_inds[1] = i
+                    break
+
+        end_ind = loop_inds[1]+1
+
+        # throw an HTML warning if I cannot understand the centre site name
+        if not site_name_found:
+            errors.append(Exception(f'Site name {centre_site_name} not understood.'))
+
+        # throw HTML screen of warning if I cannot find the coordinates or
+        # ephemerides. TO-DO: put a better error check and correctly thrown
+        # warning for now being lazy
+        if loop_inds == [-1, -1] or ra_inds is None or jd_inds is None:
+            print(name, loop_inds , ra_inds , jd_inds)
+            errors.append(Exception('We were not able to understand that ephemeris file.'))
+
+        mjds = []
+        ras = []
+        decs = []
+        drs = []
+        dds = []
+        R = 0.0
+        D = 0.0
+        n = 0.0
+        for i in range(loop_inds[0], loop_inds[1]):
+            mjds.append(str(float(eph[i][jd_inds[0]:jd_inds[1]])-2400000.5))
+
+            s = eph[i][ra_inds[0]:ra_inds[1]].split()
+            r = 15.0*(float(s[0])+float(s[1])/60.0+float(s[2])/3600.0)
+            ras.append("{:.7f}".format(r))
+            d = abs(float(s[3]))+float(s[4])/60.0+float(s[5])/3600.0
+            if '-' in s[3]:
+                d *= -1.0
+            decs.append("{:.6f}".format(d))
+
+            drs.append('{:.7f}'.format( float(eph[i][dr_inds[0]:dr_inds[1]])/3600.0 ))
+            dds.append('{:.6f}'.format( float(eph[i][dd_inds[0]:dd_inds[1]])/3600.0 ))
+
+            R += r
+            D += d
+            n += 1.0
+
+        eph_json[centre_site_name] = []
+        for i in range(len(ras)):
+            entry = {}
+            entry['t'] = mjds[i]
+            entry['R'] = ras[i]
+            entry['D'] = decs[i]
+            entry['dR'] = drs[i]
+            entry['dD'] = dds[i]
+
+            eph_json[centre_site_name].append(entry)
+
+    try:
+        target_fields = {}
+        target_fields['type'] = 'NON_SIDEREAL'
+        target_fields['scheme'] = 'EPHEMERIS'
+        target_fields['name'] = name
+        target_fields['eph_json'] = json.dumps(eph_json)
+
+        target = Target.objects.create(**target_fields)
+        targets.append(target)
+    except Exception as e:
+        errors.append(str(e))
+
+    return {'targets': targets, 'errors': errors}
 
 
 # NOTE: This saves locally. To avoid this, create file buffer.
@@ -108,137 +244,5 @@ def import_targets(targets):
         except Exception as e:
             error = 'Error on line {0}: {1}'.format(index + 2, str(e))
             errors.append(error)
-
-    return {'targets': targets, 'errors': errors}
-
-
-def import_ephemeris_target(stream):
-    """
-    Reads in a custom ephemeris from provided file stream.
-
-    Currently only reads in the first site-code ephemeris.
-    """
-
-    # TO-DO: need to make robust to input date type
-    # TO-DO: need to make robust to input coordinate type
-
-    errors = []
-    targets = []
-
-    jpl_ra_key = 'R.A._____(ICRF)_____DEC'
-    jpl_jd_key = 'Date_________JDUT'
-    jpl_dr_key = 'RA_3sigma'
-    jpl_dd_key = 'DEC_3sigma'
-
-    eph = stream.getvalue().split('\n')
-
-    num_sites = 0
-    for i in range(len(eph)):
-        if 'Center-site name' in eph[i]:
-            num_sites += 1
-
-    if num_sites != 8:
-        errors.append(Warning('WARNING: Provided file does not have ephemerides for all 8 LCO sites.'))
-
-    eph_json = {}
-    end_ind = 0
-    for ns in range(num_sites):
-
-        centre_site_name = None
-        site_name_found = False
-        name = 'custom'
-        jd_inds = None
-        ra_inds = None
-        dr_inds = None
-        dd_inds = None
-        loop_inds = [-1, -1]
-        for i in range(end_ind, len(eph)):
-            if 'Center-site name' in eph[i]:
-                s = eph[i].split(': ')[-1]
-                for j in site_names.keys():
-                    if j in s:
-                        centre_site_name = site_names[j]
-                        site_name_found = True
-                        break
-                if not site_name_found:
-                    centre_site_name = s
-
-            if 'Target body name' in eph[i]:
-                name = "-".join(eph[i].split(': ')[1].split('{source')[0].split())
-
-            if jpl_ra_key in eph[i] and jpl_jd_key in eph[i] and jpl_dr_key in eph[i] and jpl_dd_key in eph[i]:
-                ra_inds = [eph[i].index(jpl_ra_key), eph[i].index(jpl_ra_key)+len(jpl_ra_key)]
-                jd_inds = [eph[i].index(jpl_jd_key), eph[i].index(jpl_jd_key)+len(jpl_jd_key)]
-                dr_inds = [eph[i].index(jpl_dr_key), eph[i].index(jpl_dr_key)+len(jpl_dr_key)]
-                dd_inds = [eph[i].index(jpl_dd_key), eph[i].index(jpl_dd_key)+len(jpl_dd_key)]
-            if '$$SOE' in eph[i]:
-                if ra_inds is not None and loop_inds[0] == -1:
-                    loop_inds[0] = i+1
-            if '$$EOE' in eph[i]:
-                if ra_inds is not None and loop_inds[0] != -1:
-                    loop_inds[1] = i
-                    break
-
-        end_ind = loop_inds[1]+1
-
-        # throw an HTML warning if I cannot understand the centre site name
-        if not site_name_found:
-            errors.append(Exception(f'Site name {centre_site_name} not understood.'))
-
-        # throw HTML screen of warning if I cannot find the coordinates or
-        # ephemerides. TO-DO: put a better error check and correctly thrown
-        # warning for now being lazy
-        if loop_inds == [-1, -1] or ra_inds is None or jd_inds is None:
-            print(name, loop_inds , ra_inds , jd_inds)
-            errors.append(Exception('We were not able to understand that ephemeris file.'))
-
-        mjds = []
-        ras = []
-        decs = []
-        drs = []
-        dds = []
-        R = 0.0
-        D = 0.0
-        n = 0.0
-        for i in range(loop_inds[0], loop_inds[1]):
-            mjds.append(str(float(eph[i][jd_inds[0]:jd_inds[1]])-2400000.5))
-
-            s = eph[i][ra_inds[0]:ra_inds[1]].split()
-            r = 15.0*(float(s[0])+float(s[1])/60.0+float(s[2])/3600.0)
-            ras.append("{:.7f}".format(r))
-            d = abs(float(s[3]))+float(s[4])/60.0+float(s[5])/3600.0
-            if '-' in s[3]:
-                d *= -1.0
-            decs.append("{:.6f}".format(d))
-
-            drs.append('{:.7f}'.format( float(eph[i][dr_inds[0]:dr_inds[1]])/3600.0 ))
-            dds.append('{:.6f}'.format( float(eph[i][dd_inds[0]:dd_inds[1]])/3600.0 ))
-
-            R += r
-            D += d
-            n += 1.0
-
-        eph_json[centre_site_name] = []
-        for i in range(len(ras)):
-            entry = {}
-            entry['t'] = mjds[i]
-            entry['R'] = ras[i]
-            entry['D'] = decs[i]
-            entry['dR'] = drs[i]
-            entry['dD'] = dds[i]
-
-            eph_json[centre_site_name].append(entry)
-
-    try:
-        target_fields = {}
-        target_fields['type'] = 'NON_SIDEREAL'
-        target_fields['scheme'] = 'EPHEMERIS'
-        target_fields['name'] = name
-        target_fields['eph_json'] = json.dumps(eph_json)
-
-        target = Target.objects.create(**target_fields)
-        targets.append(target)
-    except Exception as e:
-        errors.append(str(e))
 
     return {'targets': targets, 'errors': errors}

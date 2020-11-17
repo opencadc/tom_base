@@ -132,6 +132,7 @@ class Target(models.Model):
 
     SIDEREAL = 'SIDEREAL'
     NON_SIDEREAL = 'NON_SIDEREAL'
+    EPHEMERIS = 'EPHEMERIS'
     TARGET_TYPES = ((SIDEREAL, 'Sidereal'), (NON_SIDEREAL, 'Non-sidereal'))
 
     TARGET_SCHEMES = (

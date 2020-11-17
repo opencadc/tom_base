@@ -14,8 +14,9 @@ from plotly import graph_objs as go
 
 from tom_observations.utils import get_sidereal_visibility
 from tom_targets.models import Target, TargetExtra, TargetList
-from tom_targets.forms import TargetVisibilityForm
+from tom_targets.forms import TargetVisibilityForm, AladinNonSiderealForm
 
+from scipy import interpolate as interp
 import json
 
 from astroquery.jplhorizons import Horizons
@@ -271,6 +272,84 @@ def aladin(target):
     and a scale bar. The resulting image is downloadable. This templatetag only works for sidereal targets.
     """
     return {'target': target}
+
+
+@register.inclusion_tag('tom_targets/partials/aladin_nonsidereal.html', takes_context=True)
+def aladin_nonsidereal(context):
+    """
+    Testing in prep of aladin_nonsidereal
+    """
+    request = context['request']
+    aladin_form = AladinNonSiderealForm()
+
+    selected_date = datetime.now().strftime("%d-%m-%Y")
+    selected_time = datetime.now().strftime("%H:%M")
+    duration = 24.0
+
+    if all(request.GET.get(x) for x in ['selected_date']):
+        aladin_form = AladinNonSiderealForm({
+            'selected_date': request.GET.get('selected_date'),
+            'selected_time': request.GET.get('selected_time'),
+            'duration': request.GET.get('duration'),
+            'target': context['object']
+        })
+        if aladin_form.is_valid():
+            selected_date = request.GET.get('selected_date')
+            selected_time = request.GET.get('selected_time')
+            duration = float(request.GET.get('duration'))
+
+            if context['object'].type == 'NON_SIDEREAL':
+                if context['object'].scheme == 'EPHEMERIS':
+
+                    # this logic can probably be pulled from tom_observations.utils
+                    # but this is actually lighter weight
+                    eph_json = json.loads(context['object'].eph_json)
+                    keys = list(eph_json.keys())
+                    mjd, ra, dec = [], [], []
+                    for i in eph_json[keys[0]]:
+                        mjd.append(i['t'])
+                        ra.append(i['R'])
+                        dec.append(i['D'])
+                    mjd = np.array(mjd, dtype='float64')
+                    ra = np.array(ra, dtype='float64')
+                    dec = np.array(dec, dtype='float64')
+
+                    fra = interp.interp1d(mjd, ra)
+                    fdec = interp.interp1d(mjd, dec)
+                    try:
+                        fra = interp.interp1d(mjd, ra)
+                        fdec = interp.interp1d(mjd, dec)
+                        t = Time(selected_date+'T'+selected_time+':00')
+                        context['object'].ra = fra(t.mjd)
+                        context['object'].dec = fdec(t.mjd)
+                        context['object'].ra1 = fra(t.mjd+duration/24.0)
+                        context['object'].dec1 = fdec(t.mjd+duration/24.0)
+
+                    except:
+                        context['object'].ra = None
+                        context['object'].dec = None
+                else:
+                    try:
+                        t = Time(selected_date+'T'+selected_time+':00')
+
+                        # if there is a space in the nane, assume the first string is an acceptable name
+                        obj = Horizons(id=context['object'].names[0].split()[0], epochs=[t.jd, (t+duration/24.0).jd])
+                        context['object'].ra = obj.ephemerides()['RA'][0]
+                        context['object'].dec = obj.ephemerides()['DEC'][0]
+                        context['object'].ra1 = obj.ephemerides()['RA'][1]
+                        context['object'].dec1 = obj.ephemerides()['DEC'][1]
+                    except:
+                        context['object'].ra = None
+                        context['object'].dec = None
+                        context['object'].ra1 = None
+                        context['object'].dec1 = None
+                        pass
+
+    # return the html you need
+    return {
+        'form': aladin_form,
+        'target': context['object'],
+    }
 
 
 @register.filter

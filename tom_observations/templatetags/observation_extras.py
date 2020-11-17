@@ -293,7 +293,7 @@ def tile_plan(context):
             'target': context['object']
         })
         if tile_form.is_valid():
-            field_overlap = float(request.GET['field_overlap'])
+            field_overlap = float(request.GET.get('field_overlap'))
             min_fill_fraction = float(request.GET.get('min_fill_fraction'))
             shimmy_factor = float(request.GET.get('shimmy_factor'))
             if request.GET.get('ra_uncertainty') and request.GET.get('dec_uncertainty'):

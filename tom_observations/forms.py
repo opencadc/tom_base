@@ -76,7 +76,7 @@ class TileForm(forms.Form):
     ra_uncertainty = forms.DecimalField(required=False, label='R.A. Uncertainty (")')
     dec_uncertainty = forms.DecimalField(required=False, label='Dec. Uncertainty (")')
     selected_date = forms.DateTimeField(required=False, label='Date', widget=forms.TextInput(attrs={'type': 'date'}))
-    selected_time = forms.DateTimeField(required=False, label='Time', widget=forms.TextInput(attrs={'type': 'time'}))
+    selected_time = forms.TimeField(required=False, label='Time', widget=forms.TextInput(attrs={'type': 'time'}))
 
     def clean(self):
         cleaned_data = super().clean()
@@ -94,12 +94,17 @@ class TileForm(forms.Form):
 
     def layout(self):
         return Div(
-                    Div(
-                        Div('field_overlap', css_class='col'),
-                        Div('ra_uncertainty', css_class='col'),
-                        Div('dec_uncertainty', css_class='col'),
-                        Div('min_fill_fraction', css_class='col'),
-                        Div('shimmy_factor', css_class='col'),
-                        css_class='form-row'),
-                    Div('selected_date', 'selected_time'),
+                    Row(
+                        Column('field_overlap', css_class='col'),
+                        Column('ra_uncertainty', css_class='col'),
+                        Column('dec_uncertainty', css_class='col'),
+                        ),
+                    Row(
+                        Column('min_fill_fraction', css_class='col'),
+                        Column('shimmy_factor', css_class='col'),
+                        ),
+                    Row(
+                        Column('selected_date'),
+                        Column('selected_time'),
+                        ),
                 )
