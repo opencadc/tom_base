@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/2.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
-
+import logging.config
 import os
 import tempfile
 
@@ -21,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'dxja^_6p35x46dx0rx+c$(^31(10^n(twe1#ax3o8xl=n^p37q'
+SECRET_KEY = os.getenv('SECRET_KEY', 'testkey')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     'tom_catalogs',
     'tom_observations',
     'tom_dataproducts',
-    'tom_publications',
 ]
 
 SITE_ID = 1
@@ -182,6 +181,7 @@ LOGGING = {
         }
     }
 }
+logging.config.dictConfig(LOGGING)
 
 TARGET_TYPE = 'SIDEREAL'
 FACILITIES = {
@@ -205,11 +205,6 @@ DATA_PROCESSORS = {
     'spectroscopy': 'tom_dataproducts.processors.spectroscopy_processor.SpectroscopyProcessor',
 }
 
-TOM_LATEX_PROCESSORS = {
-    'ObservationGroup': 'tom_publications.processors.observation_group_latex_processor.ObservationGroupLatexProcessor',
-    'TargetList': 'tom_publications.processors.target_list_latex_processor.TargetListLatexProcessor'
-}
-
 TOM_FACILITY_CLASSES = [
     'tom_observations.facilities.lco.LCOFacility',
     'tom_observations.facilities.gemini.GEMFacility',
@@ -217,8 +212,8 @@ TOM_FACILITY_CLASSES = [
 ]
 
 TOM_CADENCE_STRATEGIES = [
-    'tom_observations.cadence.RetryFailedObservationsStrategy',
-    'tom_observations.cadence.ResumeCadenceAfterFailureStrategy'
+    'tom_observations.cadences.retry_failed_observations.RetryFailedObservationsStrategy',
+    'tom_observations.cadences.resume_cadence_after_failure.ResumeCadenceAfterFailureStrategy'
 ]
 
 # Define extra target fields here. Types can be any of "number", "string", "boolean" or "datetime"

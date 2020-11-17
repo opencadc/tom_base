@@ -1,4 +1,6 @@
+import logging
 import requests
+
 from django.conf import settings
 from django import forms
 from dateutil.parser import parse
@@ -13,6 +15,8 @@ from tom_observations.facilities.utils import reconstruct_gemini_eph_note, add_m
 
 import json
 
+
+logger = logging.getLogger(__name__)
 
 try:
     GEM_SETTINGS = settings.FACILITIES['GEM']
@@ -40,6 +44,7 @@ except KeyError:
     }
 
 PORTAL_URL = GEM_SETTINGS['portal_url']
+VALID_OBSERVING_STATES = ['TRIGGERED', 'ON_HOLD']
 TERMINAL_OBSERVING_STATES = ['TRIGGERED', 'ON_HOLD']
 
 # Units of flux and wavelength for converting to Specutils Spectrum1D objects
@@ -65,7 +70,7 @@ SITES = {
 def make_request(*args, **kwargs):
     response = requests.request(*args, **kwargs)
     if 400 <= response.status_code < 500:
-        print('Request failed: {}'.format(response.content))
+        logger.log(msg=f'Gemini request failed: {response.content}', level=logging.WARN)
         raise ImproperCredentialsException('GEM')
     response.raise_for_status()
     return response
