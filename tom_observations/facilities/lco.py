@@ -524,7 +524,6 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm):
         return response.json()
 
     def observation_payload(self):
-<<<<<<< HEAD
         if not self.eph_target:
             payload = {
                 "name": self.cleaned_data['name'],
@@ -539,8 +538,13 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm):
                             {
                                 "start": self.cleaned_data['start'],
                                 "end": self.cleaned_data['end']
-                                }]}]
+                            }
+                        ],
+                        'location': self._build_location()
+                    }
+                ]
             }
+
             if self.cleaned_data.get('period') and self.cleaned_data.get('jitter'):
                 payload = self._expand_cadence_request(payload)
 
@@ -555,11 +559,11 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm):
             # is done in tom_base/utils.py.
             obs_module = get_service_class(self.cleaned_data['facility'])
             requests = self._build_ephemeris_requests()
+            """
             locations = []
             for j in range(len(requests)):
                 if requests[j]['location'] not in locations:
                     locations.append(requests[j]['location'])
-            """
             # I dont understand why the following is inappropriate when selecting a single
             # telescope location, but MANY seems to always be required now.
             if len(locations) > 1:
@@ -576,30 +580,6 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm):
                 "operator": operator,
                 "observation_type": self.cleaned_data['observation_mode'],
                 "requests": requests
-=======
-        payload = {
-            'name': self.cleaned_data['name'],
-            'proposal': self.cleaned_data['proposal'],
-            'ipp_value': self.cleaned_data['ipp_value'],
-            'operator': 'SINGLE',
-            'observation_type': self.cleaned_data['observation_mode'],
-            'requests': [
-                {
-                    'configurations': [self._build_configuration()],
-                    'windows': [
-                        {
-                            'start': self.cleaned_data['start'],
-                            'end': self.cleaned_data['end']
-                        }
-                    ],
-                    'location': self._build_location()
-                }
-            ]
-        }
-        if self.cleaned_data.get('period') and self.cleaned_data.get('jitter'):
-            payload = self._expand_cadence_request(payload)
->>>>>>> 275f15939e4af36ee898d7a8deee67bca9053b5c
-
             })
 
             if len(errors) > 0:

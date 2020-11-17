@@ -1,9 +1,5 @@
 {% extends 'tom_common/base.html' %}
-<<<<<<< HEAD
-{% load comments bootstrap4 tom_common_extras targets_extras observation_extras dataproduct_extras publication_extras static cache nonsidereal_airmass_extras %}
-=======
-{% load comments bootstrap4 tom_common_extras targets_extras observation_extras dataproduct_extras static cache %}
->>>>>>> 275f15939e4af36ee898d7a8deee67bca9053b5c
+{% load comments bootstrap4 tom_common_extras targets_extras observation_extras publication_extras static cache nonsidereal_airmass_extras %}
 {% block title %}Target {{ object.name }}{% endblock %}
 {% block additional_css %}
 <link rel="stylesheet" href="{% static 'tom_common/css/main.css' %}">
