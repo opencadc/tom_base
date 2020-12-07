@@ -169,11 +169,9 @@ class TargetVisibilityForm(forms.Form):
             raise forms.ValidationError('Airmass plotting is only supported for sidereal targets')
 
 class AladinNonSiderealForm(forms.Form):
-    #selected_date = forms.DateTimeField(required=True, label='Date', widget=forms.TextInput(attrs={'type': 'date', 'value': datetime.datetime.now().strftime("%d-%m-%Y")}))
-    #selected_time = forms.DateTimeField(required=True, label='Time', widget=forms.TextInput(attrs={'type': 'time', 'value': datetime.now().strftime("%H:%M:%S")}))
     selected_date = forms.DateTimeField(required=True, label='Date (UTC)', widget=forms.TextInput(attrs={'type': 'date'}), initial=datetime.date.today)
     selected_time = forms.TimeField(required=True, label='Start Time (UTC)', widget=forms.TextInput(attrs={'type': 'time'}), initial=datetime.datetime.now().strftime("%H:%M"))
-    duration = forms.DecimalField(required=True, label='Duration (hrs)', initial=24.0)
+    duration = forms.DecimalField(required=True, label='Duration (hrs)', initial=24.0*7)
 
     def clean(self):
         cleaned_data = super().clean()

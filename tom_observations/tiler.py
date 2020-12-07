@@ -4,9 +4,13 @@ from plotly import offline
 import plotly.graph_objs as go
 import time
 
+
 def checkThoseCorners(cx, cy, fov, a, b, min_fraction = 0.9):
-    # determine if enough of the fov is filled by the error ellipse at this point
-    # to include it in the final tiled grid
+    """
+    This routine determines if >min_fraction of the fov is filled by the error
+    ellipse. If yes, true is returned.
+    """
+
     fov2 = fov/2.0
 
     X = np.linspace(cx-fov2, cx+fov2, 10)
@@ -19,6 +23,7 @@ def checkThoseCorners(cx, cy, fov, a, b, min_fraction = 0.9):
         return True
     else:
         return False
+
 
 def get_ellipse(a, b):
     ang = np.linspace(0, 2*np.pi, 200)
@@ -139,9 +144,6 @@ def make_tiles(fov, a, b, overlap = 0.3, min_fill_fraction = 0.3,
         pyl.show()
 
     return frames
-
-
-
 
 
 if __name__ == "__main__":

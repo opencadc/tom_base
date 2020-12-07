@@ -1,0 +1,8 @@
+{% load bootstrap4 crispy_forms_tags %}
+<div id="tile-panel-observations">
+  <form action="{% url 'tom_observations:create' facility=facility %}?target_id={{ target.id }}" method="GET" class="form">
+    {% csrf_token %}
+    {% crispy form %}
+  </form>
+  {{ tile_graph|safe }}
+</div>

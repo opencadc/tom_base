@@ -285,14 +285,20 @@ def aladin(target):
 @register.inclusion_tag('tom_targets/partials/aladin_nonsidereal.html', takes_context=True)
 def aladin_nonsidereal(context):
     """
-    Testing in prep of aladin_nonsidereal
+    Displays Aladin skyview of the given non-sidereal target along with basic finder chart
+    annotations including a compass and a scale bar. The resulting image is downloadable.
+    This templatetag only works for non-sidereal targets.
     """
+
     request = context['request']
     aladin_form = AladinNonSiderealForm()
 
-    selected_date = datetime.now().strftime("%d-%m-%Y")
+    selected_date = datetime.now().strftime("%Y-%m-%d")
     selected_time = datetime.now().strftime("%H:%M")
-    duration = 24.0
+    duration = 24.0*7 # 7 day default duration to match the airmass plot in the observation plan panel
+
+    if 'object' not in context:
+        context['object'] = context['target']
 
     if all(request.GET.get(x) for x in ['selected_date']):
         aladin_form = AladinNonSiderealForm({
@@ -306,52 +312,51 @@ def aladin_nonsidereal(context):
             selected_time = request.GET.get('selected_time')
             duration = float(request.GET.get('duration'))
 
-            if context['object'].type == 'NON_SIDEREAL':
-                if context['object'].scheme == 'EPHEMERIS':
+    if context['object'].type == 'NON_SIDEREAL':
+        if context['object'].scheme == 'EPHEMERIS':
+            # this logic can probably be pulled from tom_observations.utils
+            # but this is actually lighter weight
+            eph_json = json.loads(context['object'].eph_json)
+            keys = list(eph_json.keys())
+            mjd, ra, dec = [], [], []
+            for i in eph_json[keys[0]]:
+                mjd.append(i['t'])
+                ra.append(i['R'])
+                dec.append(i['D'])
+            mjd = np.array(mjd, dtype='float64')
+            ra = np.array(ra, dtype='float64')
+            dec = np.array(dec, dtype='float64')
 
-                    # this logic can probably be pulled from tom_observations.utils
-                    # but this is actually lighter weight
-                    eph_json = json.loads(context['object'].eph_json)
-                    keys = list(eph_json.keys())
-                    mjd, ra, dec = [], [], []
-                    for i in eph_json[keys[0]]:
-                        mjd.append(i['t'])
-                        ra.append(i['R'])
-                        dec.append(i['D'])
-                    mjd = np.array(mjd, dtype='float64')
-                    ra = np.array(ra, dtype='float64')
-                    dec = np.array(dec, dtype='float64')
+            fra = interp.interp1d(mjd, ra)
+            fdec = interp.interp1d(mjd, dec)
+            try:
+                fra = interp.interp1d(mjd, ra)
+                fdec = interp.interp1d(mjd, dec)
+                t = Time(selected_date+'T'+selected_time+':00')
+                if 'object' in context:
+                    context['object'].ra = fra(t.mjd)
+                    context['object'].dec = fdec(t.mjd)
+                    context['object'].ra1 = fra(t.mjd+duration/24.0)
+                    context['object'].dec1 = fdec(t.mjd+duration/24.0)
+            except:
+                context['object'].ra = None
+                context['object'].dec = None
+        else:
+            try:
+                t = Time(selected_date+'T'+selected_time+':00')
 
-                    fra = interp.interp1d(mjd, ra)
-                    fdec = interp.interp1d(mjd, dec)
-                    try:
-                        fra = interp.interp1d(mjd, ra)
-                        fdec = interp.interp1d(mjd, dec)
-                        t = Time(selected_date+'T'+selected_time+':00')
-                        context['object'].ra = fra(t.mjd)
-                        context['object'].dec = fdec(t.mjd)
-                        context['object'].ra1 = fra(t.mjd+duration/24.0)
-                        context['object'].dec1 = fdec(t.mjd+duration/24.0)
-
-                    except:
-                        context['object'].ra = None
-                        context['object'].dec = None
-                else:
-                    try:
-                        t = Time(selected_date+'T'+selected_time+':00')
-
-                        # if there is a space in the nane, assume the first string is an acceptable name
-                        obj = Horizons(id=context['object'].names[0].split()[0], epochs=[t.jd, (t+duration/24.0).jd])
-                        context['object'].ra = obj.ephemerides()['RA'][0]
-                        context['object'].dec = obj.ephemerides()['DEC'][0]
-                        context['object'].ra1 = obj.ephemerides()['RA'][1]
-                        context['object'].dec1 = obj.ephemerides()['DEC'][1]
-                    except:
-                        context['object'].ra = None
-                        context['object'].dec = None
-                        context['object'].ra1 = None
-                        context['object'].dec1 = None
-                        pass
+                # if there is a space in the nane, assume the first string is an acceptable name
+                obj = Horizons(id=context['object'].names[0].split()[0], epochs=[t.jd, (t+duration/24.0).jd])
+                context['object'].ra = obj.ephemerides()['RA'][0]
+                context['object'].dec = obj.ephemerides()['DEC'][0]
+                context['object'].ra1 = obj.ephemerides()['RA'][1]
+                context['object'].dec1 = obj.ephemerides()['DEC'][1]
+            except:
+                context['object'].ra = None
+                context['object'].dec = None
+                context['object'].ra1 = None
+                context['object'].dec1 = None
+                pass
 
     # return the html you need
     return {

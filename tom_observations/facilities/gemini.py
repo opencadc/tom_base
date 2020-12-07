@@ -277,8 +277,8 @@ class GEMObservationForm(BaseRoboticObservationForm):
                 if target.scheme == 'EPHEMERIS':
                     self.eph_target = True
                     eph_json = json.loads(target.eph_json)
-                    self.eph_GN = reconstruct_gemini_eph_note(eph_json, site='568')
-                    self.eph_GS = reconstruct_gemini_eph_note(eph_json, site='lsc')
+                    self.eph_GN = reconstruct_gemini_eph_note(eph_json, site='mko')
+                    self.eph_GS = reconstruct_gemini_eph_note(eph_json, site='cpo')
 
         super().__init__(*args, **kwargs)
         self.helper.layout = Layout(
@@ -448,7 +448,6 @@ class GEMObservationForm(BaseRoboticObservationForm):
                     note_text = self.eph_GS[0][0:4] + self.eph_GS[0][mjd_k:mjd_K] + self.eph_GS[0][-2:]
                     payload['note'] += "\n\n"
                     payload['note'] += "\n".join(note_text)
-                print(payload['note'])
             if self.cleaned_data['brightness'] is not None:
                 smags = str(self.cleaned_data['brightness']).strip() + '/' + \
                     self.cleaned_data['brightness_band'] + '/' + \

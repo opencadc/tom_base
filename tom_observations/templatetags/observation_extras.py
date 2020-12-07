@@ -283,19 +283,44 @@ def facility_status():
 def tile_plan(context):
     """
     Displays a figure showing the uncertainty ellipse, and the tiled observation sequence
-    on the ellipse.
+    on the ellipse, on the target detail page.
     """
     request = context['request']
     tile_form = TileForm()
 
+    return tile_plan_logic(context, request, tile_form)
+
+
+@register.inclusion_tag('tom_observations/partials/tile_plan_observations.html', takes_context=True)
+def tile_plan_observations(context):
+    """
+    Displays a figure showing the uncertainty ellipse, and the tiled observation sequence
+    on the ellipse, on the observation creation page.
+    """
+    print(context)
+    print(context['object'].id)
+    print()
+    request = context['request']
+    tile_form = TileForm()
+    tile_plan_logic(context, request, tile_form)
+
+
+    return_dict = tile_plan_logic(context, request, tile_form)
+    return_dict['target_id'] = context['object'].id
+    return_dict['facility'] = 'LCO'
+    return return_dict
+
+
+def tile_plan_logic(context, request, tile_form):
     tile_graph = ''
 
-    if all(request.GET.get(x) for x in ['field_overlap']):
+    if all(request.GET.get(x) for x in ['field_overlap', 'instrument', 'min_fill_fraction', 'shimmy_factor']):
         tile_form = TileForm({
             'field_overlap': request.GET.get('field_overlap'),
             'min_fill_fraction': request.GET.get('min_fill_fraction'),
             'shimmy_factor': request.GET.get('shimmy_factor'),
-            'target': context['object']
+            'target': context['object'],
+            'instrument': request.GET.get('instrument')
         })
         if tile_form.is_valid():
             field_overlap = float(request.GET.get('field_overlap'))
@@ -313,8 +338,7 @@ def tile_plan(context):
                     date_str = ''
                 (ra, dec, ra_uncertainty, dec_uncertainty) = get_astrom_uncert_ephemeris(context['object'], date_str)
 
-
-            fov = 6.0/60.0
+            fov = float(request.GET.get('instrument'))/60.0
             if shimmy_factor>0:
                 allowShimmy = True
                 n_shimmy = int(shimmy_factor)
@@ -332,7 +356,8 @@ def tile_plan(context):
                 plot_data.append(go.Scatter(x=x, y=y, mode='lines', line_color='red', name=str(i)))
             (ellip_x, ellip_y) = get_ellipse(ra_uncertainty, dec_uncertainty)
             plot_data.append(go.Scatter(x=ellip_x, y=ellip_y, mode='lines', line_color='black', name='Uncertainty Ellipse'))
-            layout = go.Layout(title='{} tiles in mosaic'.format(len(tiles)), xaxis=dict(title="RA"), yaxis=dict(title='Dec.'), showlegend=False)
+            layout = go.Layout(title='{} tiles in mosaic, dRA={:.2f}", dDec={:.2f}"'.format(len(tiles), ra_uncertainty*3600.0, dec_uncertainty*3600.0),
+                               xaxis=dict(title="RA"), yaxis=dict(title='Dec.'), showlegend=False)
             tile_graph = offline.plot({
                                        "data": plot_data,
                                        "layout": layout
@@ -342,5 +367,5 @@ def tile_plan(context):
     return {
         'form': tile_form,
         'target': context['object'],
-        'tile_graph': tile_graph
+        'tile_graph': tile_graph,
     }

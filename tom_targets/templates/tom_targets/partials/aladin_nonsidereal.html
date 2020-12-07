@@ -47,13 +47,13 @@
     <input type="submit" class="btn btn-primary" value="Update">
     {% endbuttons %}
   </form>
-  * - The line is the approximate ephemeris assuming linear path, with the start shown in the red circle.
+  * - The line is the approximate ephemeris assuming linear path.
 </div>
 <script type="text/javascript" src="//aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.js" charset="utf-8"></script>
 <script type="text/javascript">
 
     let aladin = A.aladin('#aladin-lite-div', {
-      survey: "P/DSS2/color",
+      survey: "P/PanSTARRS/DR1/color/z/zg/g",
       fov: getFovAsDegreesFromForm(),
       showReticle: false,
       target: "{{ target.ra }} {{ target.dec }}",
@@ -62,7 +62,7 @@
     });
 
     aladin.on('positionChanged', function() {
-      annotateChart({{ target.ra }}, {{ target.dec }});
+      annotateChart({{ target.ra }}, {{ target.dec }}, {{ target.ra1 }}, {{ target.dec1 }});
     });
 
     aladin.on('zoomChanged', function() {
@@ -122,8 +122,9 @@
       const scaleBarEndPix = aladin.world2pix(scaleBarEnd[0], scaleBarEnd[1]);
       const scaleBarLength = Math.abs(scaleBarEndPix[0] - scaleBarStartPix[0]);
       //approximate MOPS trajectory
-      const ephemerisStart = [targetRa, targetDec]
-      const ephemerisEnd = [targetRa1, targetDec1]
+      const ephemerisStart = [targetRa, targetDec];
+      const ephemerisEnd = [targetRa1, targetDec1];
+      const ephemerisStartPix = aladin.world2pix(ephemerisStart[0], ephemerisStart[1]);
       // Re-draw the annotations on the chart
       const color = '#f72525';
       const scaleBarTextSpacing = 7;
@@ -133,11 +134,11 @@
       aladin.addOverlay(layer);
       layer.add(A.polyline([compassNorthArm, compassCenter, compassEastArm]));
       layer.add(A.polyline([scaleBarStart, scaleBarEnd]));
-      layer.add(A.circle(targetRa, targetDec, fovDegrees / 30, {color: color}));
-      layer.add(A.polyline([ephemerisStart, ephemerisEnd], {color: color}));
       layer.add(new Text(scaleBarStartPix[0] + scaleBarLength / 2, scaleBarStartPix[1] - scaleBarTextSpacing, scaleBar.label, {color: color}));
       layer.add(new Text(compassNorthArmPix[0], compassNorthArmPix[1] - compassTextSpacing, 'N', {color: color}));
       layer.add(new Text(compassEastArmPix[0] - compassTextSpacing, compassEastArmPix[1], 'E', {color: color, align: 'end', baseline: 'middle'}));
+      layer.add(new Text(ephemerisStartPix[0], ephemerisStartPix[1]-10, 'Start', {color: color}));
+      layer.add(A.polyline([ephemerisStart, ephemerisEnd], {color: color}));
     }
 
     function downloadImage() {

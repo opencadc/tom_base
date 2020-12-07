@@ -42,7 +42,7 @@ def add_month(t):
     T = T.replace('-06-','-Jun-').replace('-07-','-Jul-').replace('-08-','-Aug-').replace('-09-','-Sep-').replace('-10-','-Oct-')
     return T.replace('-11-', '-Nov-').replace('-12-', '-Dec-')
 
-def reconstruct_gemini_eph_note(eph, site='568'):
+def reconstruct_gemini_eph_note(eph, site='mko'):
     mk = eph[site]
 
     ras = []

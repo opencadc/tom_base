@@ -26,6 +26,8 @@ from tom_targets.models import (
     )
 from tom_observations.utils import get_radec_ephemeris
 import json
+from tom_observations.forms import TileForm, camera_fovs
+from tom_observations.tiler import *
 
 
 # Determine settings for this module.
@@ -219,6 +221,9 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm):
     imaging_interval = forms.FloatField(
         label='Interval (hrs). Will schedule exposure count per interval.'
         )
+    min_fill_fraction = forms.DecimalField(required=True, label='Minimum Fill Fraction', initial=0.5)
+    field_overlap = forms.DecimalField(required=True, label='Field Overlap', initial=0.3)
+
 
     def __init__(self, *args, **kwargs):
         # the ephemeris target stuff must come before super()
@@ -274,7 +279,10 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm):
     def extra_layout(self):
         # If you just want to add some fields to the end of the form, add them here.
         if self.eph_target:
-            return Div('site', 'imaging_interval')
+            return Div(
+                       Div('site', 'imaging_interval'),
+                       #Div('field_overlap', 'min_fill_fraction'),
+                       )
         return Div()
 
     def clean_start(self):
@@ -559,18 +567,6 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm):
             # is done in tom_base/utils.py.
             obs_module = get_service_class(self.cleaned_data['facility'])
             requests = self._build_ephemeris_requests()
-            """
-            locations = []
-            for j in range(len(requests)):
-                if requests[j]['location'] not in locations:
-                    locations.append(requests[j]['location'])
-            # I dont understand why the following is inappropriate when selecting a single
-            # telescope location, but MANY seems to always be required now.
-            if len(locations) > 1:
-                operator = "MANY"
-            else:
-                operator = "MANY"#"SINGLE"
-            """
             operator = "MANY"
 
             errors = obs_module().validate_observation({
@@ -998,7 +994,7 @@ class LCOFacility(BaseRoboticObservationFacility):
         'IMAGING': LCOImagingObservationForm,
         'SPECTRA': LCOSpectroscopyObservationForm,
         'PHOTOMETRIC_SEQUENCE': LCOPhotometricSequenceForm,
-        'SPECTROSCOPIC_SEQUENCE': LCOSpectroscopicSequenceForm
+        'SPECTROSCOPIC_SEQUENCE': LCOSpectroscopicSequenceForm,
     }
     # The SITES dictionary is used to calculate visibility intervals in the
     # planning tool. All entries should contain latitude, longitude, elevation
