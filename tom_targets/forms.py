@@ -172,6 +172,8 @@ class AladinNonSiderealForm(forms.Form):
     selected_date = forms.DateTimeField(required=True, label='Date (UTC)', widget=forms.TextInput(attrs={'type': 'date'}), initial=datetime.date.today)
     selected_time = forms.TimeField(required=True, label='Start Time (UTC)', widget=forms.TextInput(attrs={'type': 'time'}), initial=datetime.datetime.now().strftime("%H:%M"))
     duration = forms.DecimalField(required=True, label='Duration (hrs)', initial=24.0*7)
+    facility = forms.CharField(required=False, label='facility', widget=forms.HiddenInput())
+    target_id = forms.CharField(required=False, label='target_id', widget=forms.HiddenInput())
 
     def clean(self):
         cleaned_data = super().clean()
@@ -179,6 +181,7 @@ class AladinNonSiderealForm(forms.Form):
         selected_time = cleaned_data.get('selected_time')
         duration = cleaned_data.get('duration')
         target = self.data['target']
+        target_id = target.id
 
         if self.data['target'].scheme == 'EPHEMERIS':
             t = Time(selected_date.strftime("%Y-%m-%dT")+selected_time.strftime("%H:%M:00.0"))
@@ -199,7 +202,7 @@ class AladinNonSiderealForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Row(Column('selected_date'), Column('selected_time'))
+            Row(Column('selected_date'), Column('selected_time'), Column('target_id'), Column('facility'))
         )
 
 

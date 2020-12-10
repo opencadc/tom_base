@@ -86,6 +86,7 @@ class TileForm(forms.Form):
     dec_uncertainty = forms.DecimalField(required=False, label='Dec. Uncertainty (")')
     selected_date = forms.DateTimeField(required=False, label='Date', widget=forms.TextInput(attrs={'type': 'date'}))
     selected_time = forms.TimeField(required=False, label='Time', widget=forms.TextInput(attrs={'type': 'time'}))
+    target_id = forms.CharField(label='target_id', widget=forms.HiddenInput())
 
     def clean(self):
         cleaned_data = super().clean()
@@ -107,6 +108,7 @@ class TileForm(forms.Form):
                     Row(
                         Column('field_overlap', css_class='col'),
                         Column('instrument', css_class='col'),
+                        Column('target_id', css_class='col')
                         ),
                     Row(
                         Column('min_fill_fraction', css_class='col'),

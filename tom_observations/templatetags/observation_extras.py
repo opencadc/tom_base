@@ -297,17 +297,23 @@ def tile_plan_observations(context):
     Displays a figure showing the uncertainty ellipse, and the tiled observation sequence
     on the ellipse, on the observation creation page.
     """
-    print(context)
-    print(context['object'].id)
-    print()
     request = context['request']
-    tile_form = TileForm()
+    facility = request.GET.get('facility')
+    if facility is None:
+        url = str(request).split()[2]
+        facility = url.split('/')[2]
+    obj = context['target']
+    if isinstance(obj, Target):
+        target_id = obj.id
+    else:
+        target_id = context['target_id']
+    tile_form = TileForm(initial={'target_id': target_id})
+    context['object'] = context['target']
     tile_plan_logic(context, request, tile_form)
-
 
     return_dict = tile_plan_logic(context, request, tile_form)
     return_dict['target_id'] = context['object'].id
-    return_dict['facility'] = 'LCO'
+    return_dict['facility'] = facility
     return return_dict
 
 
@@ -315,12 +321,18 @@ def tile_plan_logic(context, request, tile_form):
     tile_graph = ''
 
     if all(request.GET.get(x) for x in ['field_overlap', 'instrument', 'min_fill_fraction', 'shimmy_factor']):
+        obj = context['target']
+        if isinstance(obj, Target):
+            target_id = obj.id
+        else:
+            target_id = context['target_id']
         tile_form = TileForm({
             'field_overlap': request.GET.get('field_overlap'),
             'min_fill_fraction': request.GET.get('min_fill_fraction'),
             'shimmy_factor': request.GET.get('shimmy_factor'),
             'target': context['object'],
-            'instrument': request.GET.get('instrument')
+            'instrument': request.GET.get('instrument'),
+            'target_id': target_id,
         })
         if tile_form.is_valid():
             field_overlap = float(request.GET.get('field_overlap'))
