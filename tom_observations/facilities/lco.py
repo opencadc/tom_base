@@ -1,17 +1,34 @@
+from datetime import datetime, timedelta
 import requests
 
 from astropy import units as u
-from crispy_forms.layout import Div, HTML, Layout
+from crispy_forms.bootstrap import AppendedText, PrependedText
+from crispy_forms.layout import Column, Div, HTML, Layout, Row
 from dateutil.parser import parse
 from django import forms
 from django.conf import settings
 from django.core.cache import cache
+from astropy import units as u
+from astropy.time import Time
 
 from tom_common.exceptions import ImproperCredentialsException
 from tom_observations.cadence import CadenceForm
-from tom_observations.facility import BaseRoboticObservationFacility, BaseRoboticObservationForm, get_service_class
-from tom_observations.observing_strategy import GenericStrategyForm
-from tom_targets.models import Target, REQUIRED_NON_SIDEREAL_FIELDS, REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME
+from tom_observations.facility import (
+    GenericObservationFacility, GenericObservationForm,
+    BaseRoboticObservationFacility, BaseRoboticObservationForm,
+    get_service_class
+    )
+from tom_observations.observation_template import GenericTemplateForm
+from tom_observations.widgets import FilterField
+from tom_targets.models import (
+    Target, REQUIRED_NON_SIDEREAL_FIELDS,
+    REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME
+    )
+from tom_observations.utils import get_radec_ephemeris
+import json
+from tom_observations.forms import TileForm, camera_fovs
+from tom_observations.tiler import *
+
 
 # Determine settings for this module.
 try:
@@ -24,6 +41,9 @@ except (AttributeError, KeyError):
 
 # Module specific settings.
 PORTAL_URL = LCO_SETTINGS['portal_url']
+# Valid observing states at LCO are defined here: https://developers.lco.global/#data-format-definition
+VALID_OBSERVING_STATES = ['PENDING', 'COMPLETED', 'WINDOW_EXPIRED', 'CANCELED']
+PENDING_OBSERVING_STATES = ['PENDING']
 SUCCESSFUL_OBSERVING_STATES = ['COMPLETED']
 FAILED_OBSERVING_STATES = ['WINDOW_EXPIRED', 'CANCELED']
 TERMINAL_OBSERVING_STATES = SUCCESSFUL_OBSERVING_STATES + FAILED_OBSERVING_STATES
@@ -79,6 +99,17 @@ max_airmass_help = """
     </a>
 """
 
+static_cadencing_help = """
+    For information on static cadencing with LCO,
+    <a href="https://lco.global/documentation/">
+        check the Observation Portal getting started guide, starting on page 18.
+    </a>
+"""
+
+
+def take_second_element(elem):
+    return elem[1]
+
 
 def make_request(*args, **kwargs):
     response = requests.request(*args, **kwargs)
@@ -94,13 +125,21 @@ class LCOBaseForm(forms.Form):
     exposure_time = forms.FloatField(min_value=0.1)
     max_airmass = forms.FloatField()
 
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['proposal'] = forms.ChoiceField(choices=self.proposal_choices())
-        self.fields['filter'] = forms.ChoiceField(choices=self.filter_choices())
-        self.fields['instrument_type'] = forms.ChoiceField(choices=self.instrument_choices())
+        self.fields['proposal'] = forms.ChoiceField(
+            choices=self.proposal_choices()
+            )
+        self.fields['filter'] = forms.ChoiceField(
+            choices=self.filter_choices()
+            )
+        self.fields['instrument_type'] = forms.ChoiceField(
+            choices=self.instrument_choices()
+            )
 
-    def _get_instruments(self):
+    @staticmethod
+    def _get_instruments():
         cached_instruments = cache.get('lco_instruments')
 
         if not cached_instruments:
@@ -111,19 +150,21 @@ class LCOBaseForm(forms.Form):
             )
             cached_instruments = {k: v for k, v in response.json().items() if 'SOAR' not in k}
             cache.set('lco_instruments', cached_instruments)
-
         return cached_instruments
 
-    def instrument_choices(self):
-        return [(k, v['name']) for k, v in self._get_instruments().items()]
+    @staticmethod
+    def instrument_choices():
+        return sorted([(k, v['name']) for k, v in LCOBaseForm._get_instruments().items()], key=lambda inst: inst[1])
 
-    def filter_choices(self):
-        return set([
-            (f['code'], f['name']) for ins in self._get_instruments().values() for f in
+    @staticmethod
+    def filter_choices():
+        return sorted(set([
+            (f['code'], f['name']) for ins in LCOBaseForm._get_instruments().values() for f in
             ins['optical_elements'].get('filters', []) + ins['optical_elements'].get('slits', [])
-            ])
+            ]), key=lambda filter_tuple: filter_tuple[1])
 
-    def proposal_choices(self):
+    @staticmethod
+    def proposal_choices():
         response = make_request(
             'GET',
             PORTAL_URL + '/api/profile/',
@@ -136,7 +177,13 @@ class LCOBaseForm(forms.Form):
         return choices
 
 
-class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceForm):
+class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm):
+    """
+    The LCOBaseObservationForm provides the base set of utilities to construct an observation at Las Cumbres
+    Observatory. While the forms that inherit from it provide a subset of instruments and filters, the
+    LCOBaseObservationForm presents the user with all of the instrument and filter options that the facility has to
+    offer.
+    """
     name = forms.CharField()
     ipp_value = forms.FloatField(label='Intra Proposal Priority (IPP factor)',
                                  min_value=0.5,
@@ -147,24 +194,56 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
                           help_text=end_help)
     exposure_count = forms.IntegerField(min_value=1)
     exposure_time = forms.FloatField(min_value=0.1,
-                                     widget=forms.TextInput(attrs={'placeholder': 'Seconds'}),
+                                     widget=forms.TextInput(
+                                         attrs={'placeholder': 'Seconds'}
+                                         ),
                                      help_text=exposure_time_help)
-    max_airmass = forms.FloatField(help_text=max_airmass_help)
+    max_airmass = forms.FloatField(help_text=max_airmass_help, min_value=0)
+    min_lunar_distance = forms.IntegerField(min_value=0, label='Minimum Lunar Distance', required=False)
     period = forms.FloatField(required=False)
     jitter = forms.FloatField(required=False)
     observation_mode = forms.ChoiceField(
-        choices=(('NORMAL', 'Normal'), ('TARGET_OF_OPPORTUNITY', 'Rapid Response')),
+        choices=(('NORMAL', 'Normal'), ('RAPID_RESPONSE', 'Rapid-Response'), ('TIME_CRITICAL', 'Time-Critical')),
         help_text=observation_mode_help
     )
 
+    site = forms.ChoiceField(
+        choices=(('all', 'All Sites'),
+                 ('coj', 'Siding Spring'),
+                 ('cpt', 'Sutherland'),
+                 ('tfn', 'Teide'),
+                 ('tlv', 'Wise'),
+                 ('lsc', 'Cerro Tololo'),
+                 ('elp', 'McDonald'),
+                 ('ogg', 'Haleakala'))
+    )
+
+    imaging_interval = forms.FloatField(
+        label='Interval (hrs). Will schedule exposure count per interval.'
+        )
+    min_fill_fraction = forms.DecimalField(required=True, label='Minimum Fill Fraction', initial=0.5)
+    field_overlap = forms.DecimalField(required=True, label='Field Overlap', initial=0.3)
+
+
     def __init__(self, *args, **kwargs):
+        # the ephemeris target stuff must come before super()
+        self.eph_target = False
+        if 'initial' in kwargs:
+            target = Target.objects.get(pk=kwargs['initial']['target_id'])
+            if target.type == Target.NON_SIDEREAL:
+                if target.scheme == 'EPHEMERIS':
+                    self.eph_target = True
+
         super().__init__(*args, **kwargs)
         self.helper.layout = Layout(
             self.common_layout,
             self.layout(),
-            self.cadence_layout,
             self.button_layout()
         )
+        if isinstance(self, CadenceForm):
+            self.helper.layout.insert(2, self.cadence_layout())
+
+
 
     def layout(self):
         return Div(
@@ -174,13 +253,14 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
                     css_class='col'
                 ),
                 Div(
-                    'filter', 'instrument_type', 'exposure_count', 'exposure_time', 'max_airmass',
+                    'filter', 'instrument_type', 'exposure_count', 'exposure_time', 'max_airmass', 'min_lunar_distance',
                     css_class='col'
                 ),
                 css_class='form-row',
             ),
             Div(
-                HTML('<p>Cadence parameters. Leave blank if no cadencing is desired.</p>'),
+                HTML(f'''<br/><p>Static cadence parameters. Leave blank if no cadencing is desired.
+                         {static_cadencing_help} </p>'''),
             ),
             Div(
                 Div(
@@ -193,7 +273,17 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
                 ),
                 css_class='form-row'
             ),
+            self.extra_layout()
         )
+
+    def extra_layout(self):
+        # If you just want to add some fields to the end of the form, add them here.
+        if self.eph_target:
+            return Div(
+                       Div('site', 'imaging_interval'),
+                       #Div('field_overlap', 'min_fill_fraction'),
+                       )
+        return Div()
 
     def clean_start(self):
         start = self.cleaned_data['start']
@@ -203,13 +293,16 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
         end = self.cleaned_data['end']
         return parse(end).isoformat()
 
-    def is_valid(self):
-        super().is_valid()
+    def validate_at_facility(self):
         obs_module = get_service_class(self.cleaned_data['facility'])
         errors = obs_module().validate_observation(self.observation_payload())
         if errors:
             self.add_error(None, self._flatten_error_dict(errors))
-        return not errors
+
+    def is_valid(self):
+        super().is_valid()
+        self.validate_at_facility()
+        return not self._errors
 
     def _flatten_error_dict(self, error_dict):
         non_field_errors = []
@@ -233,7 +326,8 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
 
         return non_field_errors
 
-    def instrument_to_type(self, instrument_type):
+    @staticmethod
+    def instrument_to_type(instrument_type):
         if 'FLOYDS' in instrument_type:
             return 'SPECTRUM'
         elif 'NRES' in instrument_type:
@@ -253,29 +347,91 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
             target_fields['proper_motion_ra'] = target.pm_ra
             target_fields['proper_motion_dec'] = target.pm_dec
             target_fields['epoch'] = target.epoch
-        elif target.type == Target.NON_SIDEREAL:
-            target_fields['type'] = 'ORBITAL_ELEMENTS'
-            # Mapping from TOM field names to LCO API field names, for fields
-            # where there are differences
-            field_mapping = {
-                'inclination': 'orbinc',
-                'lng_asc_node': 'longascnode',
-                'arg_of_perihelion': 'argofperih',
-                'semimajor_axis': 'meandist',
-                'mean_anomaly': 'meananom',
-                'mean_daily_motion': 'dailymot',
-                'epoch_of_elements': 'epochofel',
-                'epoch_of_perihelion': 'epochofperih',
-            }
-            # The fields to include in the payload depend on the scheme. Add
-            # only those that are required
-            fields = (REQUIRED_NON_SIDEREAL_FIELDS
-                      + REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME[target.scheme])
-            for field in fields:
-                lco_field = field_mapping.get(field, field)
-                target_fields[lco_field] = getattr(target, field)
 
-        return target_fields
+        elif target.type == Target.NON_SIDEREAL:
+            if self.eph_target:
+                ephemeris_targets = {}
+                ephemeris_windows = {}
+
+                eph_json = json.loads(target.eph_json)
+
+                site_selection = self.cleaned_data['site']
+                if site_selection != 'all':
+                    site_selection = [site_selection]
+                else:
+                    site_selection = ['coj',
+                                      'cpt',
+                                      'tfn',
+                                      'tlv',
+                                      'lsc',
+                                      'elp',
+                                      'ogg']
+
+                for site in site_selection:
+                    if site in eph_json.keys():
+                        ephemeris_targets[site] = []
+                        ephemeris_windows[site] = []
+                        (mjd_vals, ra_vals, dec_vals, air_vals, sun_alt_vals) = \
+                            get_radec_ephemeris(eph_json[site],
+                                                self.cleaned_data['start'],
+                                                self.cleaned_data['end'],
+                                                self.cleaned_data['imaging_interval'],
+                                                'LCO',
+                                                site)
+
+                        if mjd_vals is not None:
+                            for i in range(len(ra_vals)-1):
+                                if (air_vals[i] < float(self.cleaned_data['max_airmass']) and
+                                        air_vals[i+1] < float(self.cleaned_data['max_airmass']) and
+                                        air_vals[i] > 1.0 and
+                                        air_vals[i+1] > 1.0 and
+                                        sun_alt_vals[i] < -30.0 and
+                                        sun_alt_vals[i+1] < -30.0):
+                                    new_target_fields = {}
+                                    new_target_fields['type'] = 'ICRS'
+                                    new_target_fields['ra'] = (ra_vals[i]+ra_vals[i+1])/2.0
+                                    new_target_fields['dec'] = (dec_vals[i]+dec_vals[i+1])/2.0
+                                    new_target_fields['proper_motion_ra'] = 0.0
+                                    new_target_fields['proper_motion_dec'] = 0.0
+                                    new_target_fields['epoch'] = 2000
+                                    new_target_fields['parallax'] = 0
+
+                                    start = Time(mjd_vals[i], format='mjd')
+                                    end = Time(mjd_vals[i+1], format='mjd')
+
+                                    # store start and end times in the target for
+                                    # a matter of convenience in passing this
+                                    # information forward to the request builder
+                                    new_target_fields['name'] = '{}_{}_{}'.format(target.name, site, i)
+                                    ephemeris_targets[site].append(new_target_fields)
+                                    ephemeris_windows[site].append([start.isot, end.isot])
+                        elif mjd_vals is None and sun_alt_vals == -2:
+                            self.add_error(None, 'Date range outside range available in the stored ephemeris.')
+                return (ephemeris_targets, ephemeris_windows)
+
+            else:
+                target_fields['type'] = 'ORBITAL_ELEMENTS'
+                # Mapping from TOM field names to LCO API field names,
+                # for fields where there are differences
+                field_mapping = {
+                    'inclination': 'orbinc',
+                    'lng_asc_node': 'longascnode',
+                    'arg_of_perihelion': 'argofperih',
+                    'semimajor_axis': 'meandist',
+                    'mean_anomaly': 'meananom',
+                    'mean_daily_motion': 'dailymot',
+                    'epoch_of_elements': 'epochofel',
+                    'epoch_of_perihelion': 'epochofperih',
+                }
+                # The fields to include in the payload depend on the scheme.
+                # Add only those that are required
+                fields = (REQUIRED_NON_SIDEREAL_FIELDS
+                          + REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME[target.scheme])
+                for field in fields:
+                    lco_field = field_mapping.get(field, field)
+                    target_fields[lco_field] = getattr(target, field)
+
+            return target_fields
 
     def _build_instrument_config(self):
         instrument_config = {
@@ -286,24 +442,78 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
             }
         }
 
-        return instrument_config
+        return [instrument_config]
+
+    def _build_acquisition_config(self):
+        acquisition_config = {}
+
+        return acquisition_config
+
+    def _build_guiding_config(self):
+        guiding_config = {}
+
+        return guiding_config
 
     def _build_configuration(self):
         return {
             'type': self.instrument_to_type(self.cleaned_data['instrument_type']),
             'instrument_type': self.cleaned_data['instrument_type'],
             'target': self._build_target_fields(),
-            'instrument_configs': [self._build_instrument_config()],
-            'acquisition_config': {
-
-            },
-            'guiding_config': {
-
-            },
+            'instrument_configs': self._build_instrument_config(),
+            'acquisition_config': self._build_acquisition_config(),
+            'guiding_config': self._build_guiding_config(),
             'constraints': {
                 'max_airmass': self.cleaned_data['max_airmass']
             }
         }
+
+    def _build_ephemeris_request_parts(self):
+        (new_targets, new_windows) = self._build_target_fields()
+        sites = new_targets.keys()
+        configurations = []
+        windows = []
+        locations = []
+        for site in sites:
+            for i in range(len(new_targets[site])):
+                single_obs_config = {
+                    'type': self.instrument_to_type(self.cleaned_data['instrument_type']),
+                    'instrument_type': self.cleaned_data['instrument_type'],
+                    'target': new_targets[site][i],
+                    'instrument_configs': self._build_instrument_config(),
+                    'acquisition_config': {
+
+                    },
+                    'guiding_config': {
+
+                    },
+                    'constraints': {
+                        'max_airmass': self.cleaned_data['max_airmass']
+                    }
+                }
+                i_type = self.cleaned_data['instrument_type']
+                single_location = {'site': site,
+                                   'telescope_class': self._get_instruments()[i_type]['class']}
+                single_windows = [{'start': new_windows[site][i][0],
+                                   'end': new_windows[site][i][1]}
+                                  ]
+
+                configurations.append(single_obs_config)
+                windows.append(single_windows)
+                locations.append(single_location)
+        return (configurations, windows, locations)
+
+    def _build_ephemeris_requests(self):
+        (configurations, windows, locations) = self._build_ephemeris_request_parts()
+        requests = []
+        for i in range(len(configurations)):
+            req = {'configurations': [configurations[i]],
+                   'location': locations[i],
+                   'windows': windows[i]}
+            requests.append(req)
+        return requests
+
+    def _build_location(self):
+        return {'telescope_class': self._get_instruments()[self.cleaned_data['instrument_type']]['class']}
 
     def _expand_cadence_request(self, payload):
         payload['requests'][0]['cadence'] = {
@@ -322,46 +532,104 @@ class LCOBaseObservationForm(BaseRoboticObservationForm, LCOBaseForm, CadenceFor
         return response.json()
 
     def observation_payload(self):
-        payload = {
-            "name": self.cleaned_data['name'],
-            "proposal": self.cleaned_data['proposal'],
-            "ipp_value": self.cleaned_data['ipp_value'],
-            "operator": "SINGLE",
-            "observation_type": self.cleaned_data['observation_mode'],
-            "requests": [
-                {
-                    "configurations": [self._build_configuration()],
-                    "windows": [
-                        {
-                            "start": self.cleaned_data['start'],
-                            "end": self.cleaned_data['end']
-                        }
-                    ],
-                    "location": {
-                        "telescope_class": self._get_instruments()[self.cleaned_data['instrument_type']]['class']
+        if not self.eph_target:
+            payload = {
+                "name": self.cleaned_data['name'],
+                "proposal": self.cleaned_data['proposal'],
+                "ipp_value": self.cleaned_data['ipp_value'],
+                "operator": "SINGLE",
+                "observation_type": self.cleaned_data['observation_mode'],
+                "requests": [
+                    {
+                        "configurations": [self._build_configuration()],
+                        "windows": [
+                            {
+                                "start": self.cleaned_data['start'],
+                                "end": self.cleaned_data['end']
+                            }
+                        ],
+                        'location': self._build_location()
                     }
-                }
-            ]
-        }
-        if self.cleaned_data.get('period') and self.cleaned_data.get('jitter'):
-            payload = self._expand_cadence_request(payload)
+                ]
+            }
 
-        return payload
+            if self.cleaned_data.get('period') and self.cleaned_data.get('jitter'):
+                payload = self._expand_cadence_request(payload)
+
+            return payload
+
+        else:
+            # ephemeris scheme payload creation
+            # this is inefficient as the request validation is done to check for site+scope
+            # configuration errors, and then is done again later to check for other errors.
+            #
+            # This could be used to estimate airmass windows instead of using astropy as
+            # is done in tom_base/utils.py.
+            obs_module = get_service_class(self.cleaned_data['facility'])
+            requests = self._build_ephemeris_requests()
+            operator = "MANY"
+
+            errors = obs_module().validate_observation({
+                "name": self.cleaned_data['name'],
+                "proposal": self.cleaned_data['proposal'],
+                "ipp_value": self.cleaned_data['ipp_value'],
+                "operator": operator,
+                "observation_type": self.cleaned_data['observation_mode'],
+                "requests": requests
+            })
+
+            if len(errors) > 0:
+                valid_requests = []
+                for i, e in enumerate(errors['requests']):
+                    if e != {}:
+                        if 'non_field_errors' not in e:
+                            valid_requests.append(requests[i])
+                    else:
+                        valid_requests.append(requests[i])
+            else:
+                valid_requests = requests
+
+            return {
+                "name": self.cleaned_data['name'],
+                "proposal": self.cleaned_data['proposal'],
+                "ipp_value": self.cleaned_data['ipp_value'],
+                "operator": operator,
+                "observation_type": self.cleaned_data['observation_mode'],
+                "requests": valid_requests
+
+            }
 
 
 class LCOImagingObservationForm(LCOBaseObservationForm):
-    def instrument_choices(self):
-        return [(k, v['name']) for k, v in self._get_instruments().items() if 'IMAGE' in v['type']]
+    """
+    The LCOImagingObservationForm allows the selection of parameters for observing using LCO's Imagers. The list of
+    Imagers and their details can be found here: https://lco.global/observatory/instruments/
+    """
+    @staticmethod
+    def instrument_choices():
+        return sorted(
+            [(k, v['name']) for k, v in LCOImagingObservationForm._get_instruments().items() if 'IMAGE' in v['type']],
+            key=lambda inst: inst[1]
+        )
 
-    def filter_choices(self):
-        return set([
-            (f['code'], f['name']) for ins in self._get_instruments().values() for f in
+    @staticmethod
+    def filter_choices():
+        return sorted(set([
+            (f['code'], f['name']) for ins in LCOImagingObservationForm._get_instruments().values() for f in
             ins['optical_elements'].get('filters', [])
-            ])
+            ]), key=lambda filter_tuple: filter_tuple[1])
 
 
 class LCOSpectroscopyObservationForm(LCOBaseObservationForm):
+    """
+    The LCOSpectroscopyObservationForm allows the selection of parameters for observing using LCO's Spectrographs. The
+    list of spectrographs and their details can be found here: https://lco.global/observatory/instruments/
+    """
     rotator_angle = forms.FloatField(min_value=0.0, initial=0.0)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['filter'].label = 'Slit'
 
     def layout(self):
         return Div(
@@ -391,39 +659,312 @@ class LCOSpectroscopyObservationForm(LCOBaseObservationForm):
             )
         )
 
-    def instrument_choices(self):
-        return [(k, v['name']) for k, v in self._get_instruments().items() if 'SPECTRA' in v['type']]
+    @staticmethod
+    def instrument_choices():
+        return sorted(
+            [(k, v['name'])
+             for k, v in LCOSpectroscopyObservationForm._get_instruments().items()
+             if 'SPECTRA' in v['type']],
+            key=lambda inst: inst[1])
 
     # NRES does not take a slit, and therefore needs an option of None
-    def filter_choices(self):
-        return set([
-            (f['code'], f['name']) for ins in self._get_instruments().values() for f in
+    @staticmethod
+    def filter_choices():
+        return sorted(set([
+            (f['code'], f['name']) for ins in LCOSpectroscopyObservationForm._get_instruments().values() for f in
             ins['optical_elements'].get('slits', [])
-            ] + [('None', 'None')])
+            ] + [('None', 'None')]),
+            key=lambda filter_tuple: filter_tuple[1])
 
     def _build_instrument_config(self):
-        instrument_config = super()._build_instrument_config()
+        instrument_configs = super()._build_instrument_config()
         if self.cleaned_data['filter'] != 'None':
-            instrument_config['optical_elements'] = {
+            instrument_configs[0]['optical_elements'] = {
                 'slit': self.cleaned_data['filter']
             }
         else:
-            instrument_config.pop('optical_elements')
-        instrument_config['rotator_mode'] = 'VFLOAT'  # TODO: Should be a distinct field, SKY & VFLOAT are both valid
-        instrument_config['extra_params'] = {
+            instrument_configs[0].pop('optical_elements')
+        instrument_configs[0]['rotator_mode'] = 'VFLOAT'  # TODO: Should be distinct field, SKY & VFLOAT are both valid
+        instrument_configs[0]['extra_params'] = {
             'rotator_angle': self.cleaned_data['rotator_angle']
         }
 
+        return instrument_configs
+
+
+class LCOPhotometricSequenceForm(LCOBaseObservationForm):
+    """
+    The LCOPhotometricSequenceForm provides a form offering a subset of the parameters in the LCOImagingObservationForm.
+    The form is modeled after the Supernova Exchange application's Photometric Sequence Request Form, and allows the
+    configuration of multiple filters, as well as a more intuitive proactive cadence form.
+    """
+    valid_instruments = ['1M0-SCICAM-SINISTRO', '0M4-SCICAM-SBIG', '2M0-SPECTRAL-AG']
+    filters = ['U', 'B', 'V', 'R', 'I', 'u', 'g', 'r', 'i', 'z', 'w']
+    cadence_frequency = forms.IntegerField(required=True, help_text='in hours')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Add fields for each available filter as specified in the filters property
+        for filter_name in self.filters:
+            self.fields[filter_name] = FilterField(label=filter_name, required=False)
+
+        # Massage cadence form to be SNEx-styled
+        self.fields['cadence_strategy'] = forms.ChoiceField(
+            choices=[('', 'Once in the next'), ('ResumeCadenceAfterFailureStrategy', 'Repeating every')],
+            required=False,
+        )
+        for field_name in ['exposure_time', 'exposure_count', 'start', 'end', 'filter']:
+            self.fields.pop(field_name)
+        if self.fields.get('groups'):
+            self.fields['groups'].label = 'Data granted to'
+
+        self.helper.layout = Layout(
+            Div(
+                Column('name'),
+                Column('cadence_strategy'),
+                Column('cadence_frequency'),
+                css_class='form-row'
+            ),
+            Layout('facility', 'target_id', 'observation_type'),
+            self.layout(),
+            self.button_layout()
+        )
+
+    def _build_instrument_config(self):
+        """
+        Because the photometric sequence form provides form inputs for 10 different filters, they must be
+        constructed into a list of instrument configurations as per the LCO API. This method constructs the
+        instrument configurations in the appropriate manner.
+        """
+        instrument_config = []
+        for filter_name in self.filters:
+            if len(self.cleaned_data[filter_name]) > 0:
+                instrument_config.append({
+                    'exposure_count': self.cleaned_data[filter_name][1],
+                    'exposure_time': self.cleaned_data[filter_name][0],
+                    'optical_elements': {
+                        'filter': filter_name
+                    }
+                })
+
         return instrument_config
 
+    def clean(self):
+        """
+        This clean method does the following:
+            - Adds a start time of "right now", as the photometric sequence form does not allow for specification
+              of a start time.
+            - Adds an end time that corresponds with the cadence frequency
+            - Adds the cadence strategy to the form if "repeat" was the selected "cadence_type". If "once" was
+              selected, the observation is submitted as a single observation.
+        """
+        cleaned_data = super().clean()
+        now = datetime.now()
+        cleaned_data['start'] = datetime.strftime(now, '%Y-%m-%dT%H:%M:%S')
+        cleaned_data['end'] = datetime.strftime(now + timedelta(hours=cleaned_data['cadence_frequency']),
+                                                '%Y-%m-%dT%H:%M:%S')
 
-class LCOObservingStrategyForm(GenericStrategyForm, LCOBaseForm):
+        return cleaned_data
+
+    @staticmethod
+    def instrument_choices():
+        """
+        This method returns only the instrument choices available in the current SNEx photometric sequence form.
+        """
+        return sorted([(k, v['name'])
+                       for k, v in LCOPhotometricSequenceForm._get_instruments().items()
+                       if k in LCOPhotometricSequenceForm.valid_instruments],
+                      key=lambda inst: inst[1])
+
+    def cadence_layout(self):
+        return Layout(
+            Row(
+                Column('cadence_type'), Column('cadence_frequency')
+            )
+        )
+
+    def layout(self):
+        if settings.TARGET_PERMISSIONS_ONLY:
+            groups = Div()
+        else:
+            groups = Row('groups')
+
+        # Add filters to layout
+        filter_layout = Layout(
+            Row(
+                Column(HTML('Exposure Time')),
+                Column(HTML('No. of Exposures')),
+                Column(HTML('Block No.')),
+            )
+        )
+        for filter_name in self.filters:
+            filter_layout.append(Row(filter_name))
+
+        return Div(
+            Div(
+                filter_layout,
+                css_class='col-md-6'
+            ),
+            Div(
+                Row('max_airmass'),
+                Row(
+                    PrependedText('min_lunar_distance', '>')
+                ),
+                Row('instrument_type'),
+                Row('proposal'),
+                Row('observation_mode'),
+                Row('ipp_value'),
+                groups,
+                css_class='col-md-6'
+            ),
+            css_class='form-row'
+        )
+
+
+class LCOSpectroscopicSequenceForm(LCOBaseObservationForm):
+    site = forms.ChoiceField(choices=(('any', 'Any'), ('ogg', 'Hawaii'), ('coj', 'Australia')))
+    acquisition_radius = forms.FloatField(min_value=0, required=False)
+    guider_mode = forms.ChoiceField(choices=[('on', 'On'), ('off', 'Off'), ('optional', 'Optional')], required=True)
+    guider_exposure_time = forms.IntegerField(min_value=0)
+    cadence_frequency = forms.IntegerField(required=True,
+                                           widget=forms.NumberInput(attrs={'placeholder': 'Hours'}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Massage cadence form to be SNEx-styled
+        self.fields['name'].label = ''
+        self.fields['name'].widget.attrs['placeholder'] = 'Name'
+        self.fields['min_lunar_distance'].widget.attrs['placeholder'] = 'Degrees'
+        self.fields['cadence_strategy'] = forms.ChoiceField(
+            choices=[('', 'Once in the next'), ('ResumeCadenceAfterFailureStrategy', 'Repeating every')],
+            required=False,
+            label=''
+        )
+        self.fields['cadence_frequency'].label = ''
+
+        # Remove start and end because those are determined by the cadence
+        for field_name in ['start', 'end']:
+            self.fields.pop(field_name)
+        if self.fields.get('groups'):
+            self.fields['groups'].label = 'Data granted to'
+
+        self.helper.layout = Layout(
+            Div(
+                Column('name'),
+                Column('cadence_strategy'),
+                Column(AppendedText('cadence_frequency', 'Hours')),
+                css_class='form-row'
+            ),
+            Layout('facility', 'target_id', 'observation_type'),
+            self.layout(),
+            self.button_layout()
+        )
+
+    def _build_instrument_config(self):
+        instrument_configs = super()._build_instrument_config()
+        instrument_configs[0]['optical_elements'].pop('filter')
+        instrument_configs[0]['optical_elements']['slit'] = self.cleaned_data['filter']
+
+        return instrument_configs
+
+    def _build_acquisition_config(self):
+        acquisition_config = super()._build_acquisition_config()
+        # SNEx uses WCS mode if no acquisition radius is specified, and BRIGHTEST otherwise
+        if not self.cleaned_data['acquisition_radius']:
+            acquisition_config['mode'] = 'WCS'
+        else:
+            acquisition_config['mode'] = 'BRIGHTEST'
+            acquisition_config['extra_params'] = {
+                'acquire_radius': self.cleaned_data['acquisition_radius']
+            }
+
+        return acquisition_config
+
+    def _build_guiding_config(self):
+        guiding_config = super()._build_guiding_config()
+        guiding_config['mode'] = 'ON' if self.cleaned_data['guider_mode'] in ['on', 'optional'] else 'OFF'
+        guiding_config['optional'] = 'true' if self.cleaned_data['guider_mode'] == 'optional' else 'false'
+        return guiding_config
+
+    def _build_location(self):
+        location = super()._build_location()
+        site = self.cleaned_data['site']
+        if site != 'any':
+            location['site'] = site
+        return location
+
+    def clean(self):
+        """
+        This clean method does the following:
+            - Hardcodes instrument type as "2M0-FLOYDS-SCICAM" because it's the only instrument this form uses
+            - Adds a start time of "right now", as the spectroscopic sequence form does not allow for specification
+              of a start time.
+            - Adds an end time that corresponds with the cadence frequency
+            - Adds the cadence strategy to the form if "repeat" was the selected "cadence_type". If "once" was
+              selected, the observation is submitted as a single observation.
+        """
+        cleaned_data = super().clean()
+        self.cleaned_data['instrument_type'] = '2M0-FLOYDS-SCICAM'  # SNEx only submits spectra to FLOYDS
+        now = datetime.now()
+        cleaned_data['start'] = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S')
+        cleaned_data['end'] = datetime.strftime(now + timedelta(hours=cleaned_data['cadence_frequency']),
+                                                '%Y-%m-%dT%H:%M:%S')
+
+        return cleaned_data
+
+    @staticmethod
+    def instrument_choices():
+        # SNEx only uses the Spectroscopic Sequence Form with FLOYDS
+        # This doesn't need to be sorted because it will only return one instrument
+        return [(k, v['name'])
+                for k, v in LCOSpectroscopicSequenceForm._get_instruments().items()
+                if k == '2M0-FLOYDS-SCICAM']
+
+    @staticmethod
+    def filter_choices():
+        # SNEx only uses the Spectroscopic Sequence Form with FLOYDS
+        return sorted(set([
+            (f['code'], f['name']) for name, ins in LCOSpectroscopicSequenceForm._get_instruments().items() for f in
+            ins['optical_elements'].get('slits', []) if name == '2M0-FLOYDS-SCICAM'
+            ]), key=lambda filter_tuple: filter_tuple[1])
+
+    def layout(self):
+        if settings.TARGET_PERMISSIONS_ONLY:
+            groups = Div()
+        else:
+            groups = Row('groups')
+        return Div(
+            Row('exposure_count'),
+            Row('exposure_time'),
+            Row('max_airmass'),
+            Row(PrependedText('min_lunar_distance', '>')),
+            Row('site'),
+            Row('filter'),
+            Row('acquisition_radius'),
+            Row('guider_mode'),
+            Row('guider_exposure_time'),
+            Row('proposal'),
+            Row('observation_mode'),
+            Row('ipp_value'),
+            groups,
+        )
+
+
+class LCOObservationTemplateForm(GenericTemplateForm, LCOBaseForm):
+    """
+    The template form modifies the LCOBaseForm in order to only provide fields
+    that make sense to stay the same for the template. For example, there is no
+    point to making start_time an available field, as it will change between
+    observations.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name in ['groups', 'target_id']:
             self.fields.pop(field_name, None)
         for field in self.fields:
-            if field != 'strategy_name':
+            if field != 'template_name':
                 self.fields[field].required = False
         self.helper.layout = Layout(
             self.common_layout,
@@ -448,7 +989,13 @@ class LCOFacility(BaseRoboticObservationFacility):
     """
 
     name = 'LCO'
-    observation_types = [('IMAGING', 'Imaging'), ('SPECTRA', 'Spectroscopy')]
+    # TODO: make the keys the display values instead
+    observation_forms = {
+        'IMAGING': LCOImagingObservationForm,
+        'SPECTRA': LCOSpectroscopyObservationForm,
+        'PHOTOMETRIC_SEQUENCE': LCOPhotometricSequenceForm,
+        'SPECTROSCOPIC_SEQUENCE': LCOSpectroscopicSequenceForm,
+    }
     # The SITES dictionary is used to calculate visibility intervals in the
     # planning tool. All entries should contain latitude, longitude, elevation
     # and a code.
@@ -493,16 +1040,13 @@ class LCOFacility(BaseRoboticObservationFacility):
         }
     }
 
+    # TODO: this should be called get_form_class
     def get_form(self, observation_type):
-        if observation_type == 'IMAGING':
-            return LCOImagingObservationForm
-        elif observation_type == 'SPECTRA':
-            return LCOSpectroscopyObservationForm
-        else:
-            return LCOBaseObservationForm
+        return self.observation_forms.get(observation_type, LCOBaseObservationForm)
 
-    def get_strategy_form(self, observation_type):
-        return LCOObservingStrategyForm
+    # TODO: this should be called get_template_form_class
+    def get_template_form(self, observation_type):
+        return LCOObservationTemplateForm
 
     def submit_observation(self, observation_payload):
         response = make_request(
@@ -587,7 +1131,8 @@ class LCOFacility(BaseRoboticObservationFacility):
         return facility_weather_urls
 
     def get_facility_status(self):
-        """Get the telescope_states from the LCO API endpoint and simply
+        """
+        Get the telescope_states from the LCO API endpoint and simply
         transform the returned JSON into the following dictionary hierarchy
         for use by the facility_status.html template partial.
 

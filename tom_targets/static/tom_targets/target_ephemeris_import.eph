@@ -1,0 +1,1904 @@
+*******************************************************************************
+JPL/HORIZONS             136472 Makemake (2005 FY9)        2020-Feb-11 14:59:30
+Rec #:  136472 (+COV) Soln.date: 2019-May-30_07:13:05   # obs: 1949 (1955-2019)
+
+IAU76/J2000 helio. ecliptic osc. elements (au, days, deg., period=Julian yrs):
+
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+   A= 45.64343693332217    MA= 155.2657054431733   ADIST= 52.84605423886966
+   PER= 308.37256          N= .003196219           ANGMOM= .114761145
+   DAN= 41.50451           DDN= 47.97743           L= 19.8421916
+   B= -25.532549           MOID= 37.54140091       TP= 1881-Jan-27.0732444809
+
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+
+ASTEROID comments:
+1: soln ref.= JPL#91, OCC=2
+2: source=ORB
+*******************************************************************************
+
+
+*******************************************************************************
+Ephemeris / WWW_USER Tue Feb 11 14:59:30 2020 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: 136472 Makemake (2005 FY9)      {source: JPL#91}
+Center body name: Earth (399)                     {source: DE431}
+Center-site name: Mauna Kea
+*******************************************************************************
+Start time      : A.D. 2020-Jan-30 00:00:00.0000 UT
+Stop  time      : A.D. 2020-Feb-29 00:00:00.0000 UT
+Step-size       : 1440 minutes
+*******************************************************************************
+Target pole/equ : No model available
+Target radii    : (unavailable)
+Center geodetic : 204.527800,19.8260847,4.2102393 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 204.527800,6006.35451,2151.0229 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : High-precision EOP model        {East-longitude positive}
+Center radii    : 6378.1 x 6378.1 x 6356.8 km     {Equator, meridian, pole}
+Target primary  : Sun
+Vis. interferer : MOON (R_eq= 1737.400) km        {source: DE431}
+Rel. light bend : Sun, EARTH                      {source: DE431}
+Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2
+Small-body perts: Yes                             {source: SB431-N16}
+Atmos refraction: NO (AIRLESS)
+RA format       : HMS
+Time format     : JD
+EOP file        : eop.200210.p200503
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2020-FEB-10. PREDICTS-> 2020-MAY-02
+Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s
+Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass (>38.000=NO), Daylight (NO )
+Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
+Table cut-offs 3: RA/DEC angular rate (     0.0=NO )
+*******************************************************************************
+Initial IAU76/J2000 heliocentric ecliptic osculating elements (au, days, deg.):
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+  Equivalent ICRF heliocentric equatorial cartesian coordinates (au, au/d):
+   X=-4.594801534867052E+01  Y=-9.620475793810611E+00  Z= 2.316346263166737E+01
+  VX=-2.210217587691426E-04 VY=-1.960899352961049E-03 VZ=-9.635666653763773E-04
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+***************************************************************************************************************************
+Date_________JDUT     R.A._____(ICRF)_____DEC  APmag            delta      deldot    S-O-T /r    S-T-O RA_3sigma DEC_3sigma
+***************************************************************************************************************************
+$$SOE
+2458878.500000000 *m  13 10 55.49 +23 20 00.8  17.24 52.0964446099905 -21.9976367 118.4783 /L   0.9464     0.184      0.134
+2458879.500000000 *m  13 10 54.41 +23 20 37.0  17.24 52.0836517068990 -21.7418719 119.3373 /L   0.9387     0.184      0.133
+2458880.500000000 *m  13 10 53.25 +23 21 13.5  17.23 52.0710113839675 -21.4793565 120.1932 /L   0.9310     0.183      0.133
+2458881.500000000 *m  13 10 52.02 +23 21 50.1  17.23 52.0585275377521 -21.2102653 121.0456 /L   0.9230     0.183      0.132
+2458882.500000000 *m  13 10 50.71 +23 22 26.8  17.23 52.0462039613305 -20.9347792 121.8945 /L   0.9148     0.183      0.132
+2458883.500000000 *m  13 10 49.33 +23 23 03.6  17.23 52.0340443403728 -20.6530863 122.7396 /L   0.9065     0.182      0.131
+2458884.500000000 *m  13 10 47.88 +23 23 40.6  17.23 52.0220522489986 -20.3653812 123.5808 /L   0.8981     0.182      0.131
+2458885.500000000 *   13 10 46.35 +23 24 17.6  17.23 52.0102311475133 -20.0718589 124.4178 /L   0.8895     0.181      0.130
+2458886.500000000 *   13 10 44.74 +23 24 54.7  17.23 51.9985843852066 -19.7727031 125.2505 /L   0.8807     0.181      0.130
+2458887.500000000 *   13 10 43.07 +23 25 31.9  17.22 51.9871152119603 -19.4680675 126.0785 /L   0.8719     0.180      0.129
+2458888.500000000 *   13 10 41.32 +23 26 09.1  17.22 51.9758268014836 -19.1580555 126.9018 /L   0.8628     0.180      0.129
+2458889.500000000 *   13 10 39.51 +23 26 46.4  17.22 51.9647222858040 -18.8427030 127.7200 /L   0.8537     0.179      0.128
+2458890.500000000 *   13 10 37.62 +23 27 23.7  17.22 51.9538047956317 -18.5219763 128.5330 /L   0.8445     0.179      0.128
+2458891.500000000 *   13 10 35.66 +23 28 01.0  17.22 51.9430774969079 -18.1957879 129.3404 /L   0.8351     0.178      0.127
+2458892.500000000 *   13 10 33.64 +23 28 38.3  17.22 51.9325436135004 -17.8640269 130.1420 /L   0.8257     0.177      0.127
+2458893.500000000 *   13 10 31.55 +23 29 15.6  17.22 51.9222064306642 -17.5265934 130.9375 /L   0.8161     0.177      0.126
+2458894.500000000 *   13 10 29.39 +23 29 52.9  17.21 51.9120692807985 -17.1834239 131.7265 /L   0.8065     0.176      0.126
+2458895.500000000 *   13 10 27.16 +23 30 30.1  17.21 51.9021355180121 -16.8345039 132.5088 /L   0.7968     0.175      0.126
+2458896.500000000 *   13 10 24.87 +23 31 07.3  17.21 51.8924084889643 -16.4798694 133.2839 /L   0.7871     0.175      0.125
+2458897.500000000 *   13 10 22.51 +23 31 44.5  17.21 51.8828915053709 -16.1196006 134.0515 /L   0.7773     0.174      0.125
+2458898.500000000 *m  13 10 20.09 +23 32 21.5  17.21 51.8735878206606 -15.7538141 134.8111 /L   0.7675     0.173      0.124
+2458899.500000000 *m  13 10 17.60 +23 32 58.5  17.21 51.8645006111004 -15.3826555 135.5624 /L   0.7576     0.173      0.124
+2458900.500000000 *m  13 10 15.05 +23 33 35.3  17.21 51.8556329607036 -15.0062941 136.3048 /L   0.7477     0.172      0.124
+2458901.500000000 *m  13 10 12.44 +23 34 12.1  17.20 51.8469878491023 -14.6249175 137.0379 /L   0.7379     0.171      0.123
+2458902.500000000 *m  13 10 09.77 +23 34 48.7  17.20 51.8385681418577 -14.2387286 137.7612 /L   0.7280     0.170      0.123
+2458903.500000000 *m  13 10 07.04 +23 35 25.1  17.20 51.8303765830087 -13.8479408 138.4741 /L   0.7181     0.169      0.123
+2458904.500000000 *m  13 10 04.26 +23 36 01.4  17.20 51.8224157898311 -13.4527750 139.1762 /L   0.7083     0.169      0.122
+2458905.500000000 *m  13 10 01.41 +23 36 37.5  17.20 51.8146882497194 -13.0534556 139.8667 /L   0.6986     0.168      0.122
+2458906.500000000 *m  13 09 58.51 +23 37 13.5  17.20 51.8071963188999 -12.6502081 140.5451 /L   0.6889     0.167      0.122
+2458907.500000000 *m  13 09 55.56 +23 37 49.2  17.20 51.7999422224342 -12.2432570 141.2108 /L   0.6793     0.166      0.121
+2458908.500000000 *m  13 09 52.55 +23 38 24.7  17.19 51.7929280548173 -11.8328258 141.8630 /L   0.6698     0.165      0.121
+$$EOE
+***************************************************************************************************************************
+Column meaning:
+
+TIME
+
+  Times PRIOR to 1962 are UT1, a mean-solar time closely related to the
+prior but now-deprecated GMT. Times AFTER 1962 are in UTC, the current
+civil or "wall-clock" time-scale. UTC is kept within 0.9 seconds of UT1
+using integer leap-seconds for 1972 and later years.
+
+  Conversion from the internal Barycentric Dynamical Time (TDB) of solar
+system dynamics to the non-uniform civil UT time-scale requested for output
+has not been determined for UTC times after the next July or January 1st.
+Therefore, the last known leap-second is used as a constant over future
+intervals.
+
+  Time tags refer to the UT time-scale conversion on Earth regardless of
+observer location within the solar system, where clock rates may differ
+due to the local gravity field and there is no precisely defined or adopted
+"UT" analog timescale.
+
+  Any 'b' symbol in the 1st-column denotes a B.C. date. First-column blank
+(" ") denotes an A.D. date. Calendar dates prior to 1582-Oct-15 are in the
+Julian calendar system. Later calendar dates are in the Gregorian system.
+
+  NOTE: "n.a." in output means quantity "not available" at the print-time.
+
+SOLAR PRESENCE (OBSERVING SITE)
+  Time tag is followed by a blank, then a solar-presence symbol:
+
+        '*'  Daylight (refracted solar upper-limb on or above apparent horizon)
+        'C'  Civil twilight/dawn
+        'N'  Nautical twilight/dawn
+        'A'  Astronomical twilight/dawn
+        ' '  Night OR geocentric ephemeris
+
+LUNAR PRESENCE (OBSERVING SITE)
+  The solar-presence symbol is immediately followed by a lunar-presence symbol:
+
+        'm'  Refracted upper-limb of Moon on or above apparent horizon
+        ' '  Refracted upper-limb of Moon below apparent horizon OR geocentric
+             ephemeris
+
+STATISTICAL UNCERTAINTIES
+
+  Output includes formal +/- 3 standard-deviation statistical orbit uncertainty
+quantities. There is a 99.7% chance the actual value is within given bounds.
+These statistical calculations assume observational data errors are random. If
+there are systematic biases (such as timing, reduction or star-catalog errors),
+results can be optimistic. Because the epoch covariance is mapped using
+linearized variational partial derivatives, results can also be optimistic for
+times far from the solution epoch, particularly for objects having close
+planetary encounters.
+
+ R.A._____(ICRF)_____DEC =
+  Astrometric right ascension and declination of the target center with
+respect to the observing site (coordinate origin) in the reference frame of
+the planetary ephemeris (ICRF). Compensated for down-leg light-time delay
+aberration.
+
+  Units: RA  in hours-minutes-seconds of time   (HH MM SS.ff)
+         DEC in degrees-minutes-seconds of arc  (sDD MN SC.f)
+
+ APmag =
+   Asteroid's approximate apparent visual magnitude from the standard
+IAU H-G magnitude relationship:
+   APmag = H + 5*log10(delta) + 5*log10(r) - 2.5*log10((1-G)*phi1 + G*phi2).
+For solar phase angles > 90 deg, the error could exceed 1 magnitude. For phase
+angles > 120 degrees, output values are rounded to the nearest integer to
+indicate error could be large and unknown.
+   Units: MAGNITUDE
+
+ delta  deldot =
+   Range ("delta") and range-rate ("delta-dot") of target center with respect
+to the observer at the instant light seen by the observer at print-time would
+have left the target center (print-time minus down-leg light-time); the
+distance traveled by a light ray emanating from the center of the target and
+recorded by the observer at print-time. "deldot" is a projection of the
+velocity vector along this ray, the light-time-corrected line-of-sight from
+the coordinate center, and indicates relative motion. A positive "deldot"
+means the target center is moving away from the observer (coordinate center).
+A negative "deldot" means the target center is moving toward the observer.
+Units: AU and KM/S
+
+ S-O-T /r =
+    Sun-Observer-Target angle; target's apparent SOLAR ELONGATION seen from
+the observer location at print-time. Angular units: DEGREES
+
+    The '/r' column indicates the target's apparent position relative to
+the Sun in the observer's sky, as described below:
+
+    For an observing location on the surface of a rotating body
+(considering its rotational sense):
+
+    /T indicates target TRAILS Sun (evening sky; rises and sets AFTER Sun)
+    /L indicates target LEADS Sun  (morning sky; rises and sets BEFORE Sun)
+
+For an observing point NOT on a rotating body (such as a spacecraft), the
+"leading" and "trailing" condition is defined by the observer's
+heliocentric orbital motion: if continuing in the observer's current
+direction of heliocentric motion would encounter the target's apparent
+longitude first, followed by the Sun's, the target LEADS the Sun as seen by
+the observer. If the Sun's apparent longitude would be encountered first,
+followed by the target's, the target TRAILS the Sun.
+
+NOTE: The S-O-T solar elongation angle is numerically the minimum
+separation angle of the Sun and target in the sky in any direction. It
+does NOT indicate the amount of separation in the leading or trailing
+directions, which are defined in the equator of a spherical coordinate
+system.
+
+ S-T-O =
+   "S-T-O" is the Sun->Target->Observer angle; the interior vertex angle at
+target center formed by a vector to the apparent center of the Sun at
+reflection time on the target and the apparent vector to the observer at
+print-time. Slightly different from true PHASE ANGLE (requestable separately)
+at the few arcsecond level in that it includes stellar aberration on the
+down-leg from target to observer.  Units: DEGREES
+
+ RA_3sigma DEC_3sigma =
+  Uncertainty in Right-Ascension and Declination. Output values are the formal
++/- 3 standard-deviations (sigmas) around nominal position. Units: ARCSECONDS
+
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+
+*********************************************************************************************************
+*******************************************************************************
+JPL/HORIZONS             136472 Makemake (2005 FY9)        2020-Feb-11 13:53:47
+Rec #:  136472 (+COV) Soln.date: 2019-May-30_07:13:05   # obs: 1949 (1955-2019)
+
+IAU76/J2000 helio. ecliptic osc. elements (au, days, deg., period=Julian yrs):
+
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+   A= 45.64343693332217    MA= 155.2657054431733   ADIST= 52.84605423886966
+   PER= 308.37256          N= .003196219           ANGMOM= .114761145
+   DAN= 41.50451           DDN= 47.97743           L= 19.8421916
+   B= -25.532549           MOID= 37.54140091       TP= 1881-Jan-27.0732444809
+
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+
+ASTEROID comments:
+1: soln ref.= JPL#91, OCC=2
+2: source=ORB
+*******************************************************************************
+
+
+*******************************************************************************
+Ephemeris / WWW_USER Tue Feb 11 13:53:47 2020 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: 136472 Makemake (2005 FY9)      {source: JPL#91}
+Center body name: Earth (399)                     {source: DE431}
+Center-site name: Haleakala-LCOGT OGG B #2
+*******************************************************************************
+Start time      : A.D. 2020-Jan-30 00:00:00.0000 UT
+Stop  time      : A.D. 2020-Feb-29 00:00:00.0000 UT
+Step-size       : 1440 minutes
+*******************************************************************************
+Target pole/equ : No model available
+Target radii    : (unavailable)
+Center geodetic : 203.742500,20.7069361,3.0658029 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 203.742500,5971.48324,2242.1579 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : High-precision EOP model        {East-longitude positive}
+Center radii    : 6378.1 x 6378.1 x 6356.8 km     {Equator, meridian, pole}
+Target primary  : Sun
+Vis. interferer : MOON (R_eq= 1737.400) km        {source: DE431}
+Rel. light bend : Sun, EARTH                      {source: DE431}
+Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2
+Small-body perts: Yes                             {source: SB431-N16}
+Atmos refraction: NO (AIRLESS)
+RA format       : HMS
+Time format     : JD
+EOP file        : eop.200210.p200503
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2020-FEB-10. PREDICTS-> 2020-MAY-02
+Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s
+Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass (>38.000=NO), Daylight (NO )
+Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
+Table cut-offs 3: RA/DEC angular rate (     0.0=NO )
+*******************************************************************************
+Initial IAU76/J2000 heliocentric ecliptic osculating elements (au, days, deg.):
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+  Equivalent ICRF heliocentric equatorial cartesian coordinates (au, au/d):
+   X=-4.594801534867052E+01  Y=-9.620475793810611E+00  Z= 2.316346263166737E+01
+  VX=-2.210217587691426E-04 VY=-1.960899352961049E-03 VZ=-9.635666653763773E-04
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+***************************************************************************************************************************
+Date_________JDUT     R.A._____(ICRF)_____DEC  APmag            delta      deldot    S-O-T /r    S-T-O RA_3sigma DEC_3sigma
+***************************************************************************************************************************
+$$SOE
+2458878.500000000 *m  13 10 55.49 +23 20 00.8  17.24 52.0964438612435 -21.9954126 118.4783 /L   0.9464     0.184      0.134
+2458879.500000000 *m  13 10 54.41 +23 20 37.0  17.24 52.0836509616908 -21.7395525 119.3374 /L   0.9387     0.184      0.133
+2458880.500000000 *m  13 10 53.25 +23 21 13.5  17.23 52.0710106424492 -21.4769424 120.1932 /L   0.9310     0.183      0.133
+2458881.500000000 *m  13 10 52.02 +23 21 50.1  17.23 52.0585268000740 -21.2077572 121.0456 /L   0.9230     0.183      0.132
+2458882.500000000 *m  13 10 50.71 +23 22 26.8  17.23 52.0462032276418 -20.9321779 121.8945 /L   0.9148     0.183      0.132
+2458883.500000000 *m  13 10 49.33 +23 23 03.6  17.23 52.0340436108214 -20.6503926 122.7396 /L   0.9065     0.182      0.131
+2458884.500000000 *m  13 10 47.88 +23 23 40.6  17.23 52.0220515237316 -20.3625958 123.5808 /L   0.8981     0.182      0.131
+2458885.500000000 *   13 10 46.35 +23 24 17.6  17.23 52.0102304266763 -20.0689827 124.4178 /L   0.8895     0.181      0.130
+2458886.500000000 *   13 10 44.74 +23 24 54.7  17.23 51.9985836689442 -19.7697368 125.2505 /L   0.8807     0.181      0.130
+2458887.500000000 *   13 10 43.07 +23 25 31.9  17.22 51.9871145004155 -19.4650121 126.0786 /L   0.8719     0.180      0.129
+2458888.500000000 *   13 10 41.32 +23 26 09.1  17.22 51.9758260947983 -19.1549119 126.9018 /L   0.8628     0.180      0.129
+2458889.500000000 *   13 10 39.51 +23 26 46.4  17.22 51.9647215841187 -18.8394721 127.7201 /L   0.8537     0.179      0.128
+2458890.500000000 *   13 10 37.62 +23 27 23.7  17.22 51.9538040990853 -18.5186591 128.5330 /L   0.8445     0.179      0.128
+2458891.500000000 *   13 10 35.66 +23 28 01.0  17.22 51.9430768056378 -18.1923853 129.3405 /L   0.8351     0.178      0.127
+2458892.500000000 *   13 10 33.64 +23 28 38.3  17.22 51.9325429276428 -17.8605401 130.1421 /L   0.8257     0.177      0.127
+2458893.500000000 *   13 10 31.55 +23 29 15.6  17.22 51.9222057503535 -17.5230233 130.9375 /L   0.8161     0.177      0.126
+2458894.500000000 *   13 10 29.39 +23 29 52.9  17.21 51.9120686061678 -17.1797715 131.7266 /L   0.8065     0.176      0.126
+2458895.500000000 *   13 10 27.16 +23 30 30.1  17.21 51.9021348491925 -16.8307704 132.5088 /L   0.7968     0.175      0.126
+2458896.500000000 *   13 10 24.87 +23 31 07.3  17.21 51.8924078260855 -16.4760559 133.2839 /L   0.7871     0.175      0.125
+2458897.500000000 *   13 10 22.51 +23 31 44.5  17.21 51.8828908485607 -16.1157082 134.0515 /L   0.7773     0.174      0.125
+2458898.500000000 *m  13 10 20.09 +23 32 21.5  17.21 51.8735871700451 -15.7498440 134.8111 /L   0.7675     0.173      0.124
+2458899.500000000 *m  13 10 17.60 +23 32 58.5  17.21 51.8644999668039 -15.3786089 135.5624 /L   0.7576     0.173      0.124
+2458900.500000000 *m  13 10 15.05 +23 33 35.3  17.21 51.8556323228483 -15.0021721 136.3048 /L   0.7477     0.172      0.124
+2458901.500000000 *m  13 10 12.44 +23 34 12.1  17.20 51.8469872178088 -14.6207215 137.0379 /L   0.7379     0.171      0.123
+2458902.500000000 *m  13 10 09.77 +23 34 48.7  17.20 51.8385675172443 -14.2344597 137.7612 /L   0.7280     0.170      0.123
+2458903.500000000 *m  13 10 07.04 +23 35 25.1  17.20 51.8303759651921 -13.8436004 138.4742 /L   0.7181     0.169      0.123
+2458904.500000000 *m  13 10 04.26 +23 36 01.4  17.20 51.8224151789256 -13.4483644 139.1762 /L   0.7083     0.169      0.122
+2458905.500000000 *m  13 10 01.41 +23 36 37.5  17.20 51.8146876458376 -13.0489762 139.8667 /L   0.6986     0.168      0.122
+2458906.500000000 *m  13 09 58.51 +23 37 13.5  17.20 51.8071957221522 -12.6456611 140.5451 /L   0.6889     0.167      0.122
+2458907.500000000 *m  13 09 55.56 +23 37 49.2  17.20 51.7999416329288 -12.2386438 141.2108 /L   0.6793     0.166      0.121
+2458908.500000000 *m  13 09 52.55 +23 38 24.7  17.19 51.7929274726603 -11.8281478 141.8631 /L   0.6698     0.165      0.121
+$$EOE
+***************************************************************************************************************************
+Column meaning:
+
+TIME
+
+  Times PRIOR to 1962 are UT1, a mean-solar time closely related to the
+prior but now-deprecated GMT. Times AFTER 1962 are in UTC, the current
+civil or "wall-clock" time-scale. UTC is kept within 0.9 seconds of UT1
+using integer leap-seconds for 1972 and later years.
+
+  Conversion from the internal Barycentric Dynamical Time (TDB) of solar
+system dynamics to the non-uniform civil UT time-scale requested for output
+has not been determined for UTC times after the next July or January 1st.
+Therefore, the last known leap-second is used as a constant over future
+intervals.
+
+  Time tags refer to the UT time-scale conversion on Earth regardless of
+observer location within the solar system, where clock rates may differ
+due to the local gravity field and there is no precisely defined or adopted
+"UT" analog timescale.
+
+  Any 'b' symbol in the 1st-column denotes a B.C. date. First-column blank
+(" ") denotes an A.D. date. Calendar dates prior to 1582-Oct-15 are in the
+Julian calendar system. Later calendar dates are in the Gregorian system.
+
+  NOTE: "n.a." in output means quantity "not available" at the print-time.
+
+SOLAR PRESENCE (OBSERVING SITE)
+  Time tag is followed by a blank, then a solar-presence symbol:
+
+        '*'  Daylight (refracted solar upper-limb on or above apparent horizon)
+        'C'  Civil twilight/dawn
+        'N'  Nautical twilight/dawn
+        'A'  Astronomical twilight/dawn
+        ' '  Night OR geocentric ephemeris
+
+LUNAR PRESENCE (OBSERVING SITE)
+  The solar-presence symbol is immediately followed by a lunar-presence symbol:
+
+        'm'  Refracted upper-limb of Moon on or above apparent horizon
+        ' '  Refracted upper-limb of Moon below apparent horizon OR geocentric
+             ephemeris
+
+STATISTICAL UNCERTAINTIES
+
+  Output includes formal +/- 3 standard-deviation statistical orbit uncertainty
+quantities. There is a 99.7% chance the actual value is within given bounds.
+These statistical calculations assume observational data errors are random. If
+there are systematic biases (such as timing, reduction or star-catalog errors),
+results can be optimistic. Because the epoch covariance is mapped using
+linearized variational partial derivatives, results can also be optimistic for
+times far from the solution epoch, particularly for objects having close
+planetary encounters.
+
+ R.A._____(ICRF)_____DEC =
+  Astrometric right ascension and declination of the target center with
+respect to the observing site (coordinate origin) in the reference frame of
+the planetary ephemeris (ICRF). Compensated for down-leg light-time delay
+aberration.
+
+  Units: RA  in hours-minutes-seconds of time   (HH MM SS.ff)
+         DEC in degrees-minutes-seconds of arc  (sDD MN SC.f)
+
+ APmag =
+   Asteroid's approximate apparent visual magnitude from the standard
+IAU H-G magnitude relationship:
+   APmag = H + 5*log10(delta) + 5*log10(r) - 2.5*log10((1-G)*phi1 + G*phi2).
+For solar phase angles > 90 deg, the error could exceed 1 magnitude. For phase
+angles > 120 degrees, output values are rounded to the nearest integer to
+indicate error could be large and unknown.
+   Units: MAGNITUDE
+
+ delta  deldot =
+   Range ("delta") and range-rate ("delta-dot") of target center with respect
+to the observer at the instant light seen by the observer at print-time would
+have left the target center (print-time minus down-leg light-time); the
+distance traveled by a light ray emanating from the center of the target and
+recorded by the observer at print-time. "deldot" is a projection of the
+velocity vector along this ray, the light-time-corrected line-of-sight from
+the coordinate center, and indicates relative motion. A positive "deldot"
+means the target center is moving away from the observer (coordinate center).
+A negative "deldot" means the target center is moving toward the observer.
+Units: AU and KM/S
+
+ S-O-T /r =
+    Sun-Observer-Target angle; target's apparent SOLAR ELONGATION seen from
+the observer location at print-time. Angular units: DEGREES
+
+    The '/r' column indicates the target's apparent position relative to
+the Sun in the observer's sky, as described below:
+
+    For an observing location on the surface of a rotating body
+(considering its rotational sense):
+
+    /T indicates target TRAILS Sun (evening sky; rises and sets AFTER Sun)
+    /L indicates target LEADS Sun  (morning sky; rises and sets BEFORE Sun)
+
+For an observing point NOT on a rotating body (such as a spacecraft), the
+"leading" and "trailing" condition is defined by the observer's
+heliocentric orbital motion: if continuing in the observer's current
+direction of heliocentric motion would encounter the target's apparent
+longitude first, followed by the Sun's, the target LEADS the Sun as seen by
+the observer. If the Sun's apparent longitude would be encountered first,
+followed by the target's, the target TRAILS the Sun.
+
+NOTE: The S-O-T solar elongation angle is numerically the minimum
+separation angle of the Sun and target in the sky in any direction. It
+does NOT indicate the amount of separation in the leading or trailing
+directions, which are defined in the equator of a spherical coordinate
+system.
+
+ S-T-O =
+   "S-T-O" is the Sun->Target->Observer angle; the interior vertex angle at
+target center formed by a vector to the apparent center of the Sun at
+reflection time on the target and the apparent vector to the observer at
+print-time. Slightly different from true PHASE ANGLE (requestable separately)
+at the few arcsecond level in that it includes stellar aberration on the
+down-leg from target to observer.  Units: DEGREES
+
+ RA_3sigma DEC_3sigma =
+  Uncertainty in Right-Ascension and Declination. Output values are the formal
++/- 3 standard-deviations (sigmas) around nominal position. Units: ARCSECONDS
+
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+
+************************************************************************************************
+*******************************************************************************
+JPL/HORIZONS             136472 Makemake (2005 FY9)        2020-Feb-11 13:53:47
+Rec #:  136472 (+COV) Soln.date: 2019-May-30_07:13:05   # obs: 1949 (1955-2019)
+
+IAU76/J2000 helio. ecliptic osc. elements (au, days, deg., period=Julian yrs):
+
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+   A= 45.64343693332217    MA= 155.2657054431733   ADIST= 52.84605423886966
+   PER= 308.37256          N= .003196219           ANGMOM= .114761145
+   DAN= 41.50451           DDN= 47.97743           L= 19.8421916
+   B= -25.532549           MOID= 37.54140091       TP= 1881-Jan-27.0732444809
+
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+
+ASTEROID comments:
+1: soln ref.= JPL#91, OCC=2
+2: source=ORB
+*******************************************************************************
+
+
+*******************************************************************************
+Ephemeris / WWW_USER Tue Feb 11 13:53:47 2020 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: 136472 Makemake (2005 FY9)      {source: JPL#91}
+Center body name: Earth (399)                     {source: DE431}
+Center-site name: Haleakala-LCOGT OGG B #2
+*******************************************************************************
+Start time      : A.D. 2020-Jan-30 00:00:00.0000 UT
+Stop  time      : A.D. 2020-Feb-29 00:00:00.0000 UT
+Step-size       : 1440 minutes
+*******************************************************************************
+Target pole/equ : No model available
+Target radii    : (unavailable)
+Center geodetic : 203.742500,20.7069361,3.0658029 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 203.742500,5971.48324,2242.1579 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : High-precision EOP model        {East-longitude positive}
+Center radii    : 6378.1 x 6378.1 x 6356.8 km     {Equator, meridian, pole}
+Target primary  : Sun
+Vis. interferer : MOON (R_eq= 1737.400) km        {source: DE431}
+Rel. light bend : Sun, EARTH                      {source: DE431}
+Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2
+Small-body perts: Yes                             {source: SB431-N16}
+Atmos refraction: NO (AIRLESS)
+RA format       : HMS
+Time format     : JD
+EOP file        : eop.200210.p200503
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2020-FEB-10. PREDICTS-> 2020-MAY-02
+Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s
+Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass (>38.000=NO), Daylight (NO )
+Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
+Table cut-offs 3: RA/DEC angular rate (     0.0=NO )
+*******************************************************************************
+Initial IAU76/J2000 heliocentric ecliptic osculating elements (au, days, deg.):
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+  Equivalent ICRF heliocentric equatorial cartesian coordinates (au, au/d):
+   X=-4.594801534867052E+01  Y=-9.620475793810611E+00  Z= 2.316346263166737E+01
+  VX=-2.210217587691426E-04 VY=-1.960899352961049E-03 VZ=-9.635666653763773E-04
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+***************************************************************************************************************************
+Date_________JDUT     R.A._____(ICRF)_____DEC  APmag            delta      deldot    S-O-T /r    S-T-O RA_3sigma DEC_3sigma
+***************************************************************************************************************************
+$$SOE
+2458878.500000000 *m  13 10 55.49 +23 20 00.8  17.24 52.0964438612435 -21.9954126 118.4783 /L   0.9464     0.184      0.134
+2458879.500000000 *m  13 10 54.41 +23 20 37.0  17.24 52.0836509616908 -21.7395525 119.3374 /L   0.9387     0.184      0.133
+2458880.500000000 *m  13 10 53.25 +23 21 13.5  17.23 52.0710106424492 -21.4769424 120.1932 /L   0.9310     0.183      0.133
+2458881.500000000 *m  13 10 52.02 +23 21 50.1  17.23 52.0585268000740 -21.2077572 121.0456 /L   0.9230     0.183      0.132
+2458882.500000000 *m  13 10 50.71 +23 22 26.8  17.23 52.0462032276418 -20.9321779 121.8945 /L   0.9148     0.183      0.132
+2458883.500000000 *m  13 10 49.33 +23 23 03.6  17.23 52.0340436108214 -20.6503926 122.7396 /L   0.9065     0.182      0.131
+2458884.500000000 *m  13 10 47.88 +23 23 40.6  17.23 52.0220515237316 -20.3625958 123.5808 /L   0.8981     0.182      0.131
+2458885.500000000 *   13 10 46.35 +23 24 17.6  17.23 52.0102304266763 -20.0689827 124.4178 /L   0.8895     0.181      0.130
+2458886.500000000 *   13 10 44.74 +23 24 54.7  17.23 51.9985836689442 -19.7697368 125.2505 /L   0.8807     0.181      0.130
+2458887.500000000 *   13 10 43.07 +23 25 31.9  17.22 51.9871145004155 -19.4650121 126.0786 /L   0.8719     0.180      0.129
+2458888.500000000 *   13 10 41.32 +23 26 09.1  17.22 51.9758260947983 -19.1549119 126.9018 /L   0.8628     0.180      0.129
+2458889.500000000 *   13 10 39.51 +23 26 46.4  17.22 51.9647215841187 -18.8394721 127.7201 /L   0.8537     0.179      0.128
+2458890.500000000 *   13 10 37.62 +23 27 23.7  17.22 51.9538040990853 -18.5186591 128.5330 /L   0.8445     0.179      0.128
+2458891.500000000 *   13 10 35.66 +23 28 01.0  17.22 51.9430768056378 -18.1923853 129.3405 /L   0.8351     0.178      0.127
+2458892.500000000 *   13 10 33.64 +23 28 38.3  17.22 51.9325429276428 -17.8605401 130.1421 /L   0.8257     0.177      0.127
+2458893.500000000 *   13 10 31.55 +23 29 15.6  17.22 51.9222057503535 -17.5230233 130.9375 /L   0.8161     0.177      0.126
+2458894.500000000 *   13 10 29.39 +23 29 52.9  17.21 51.9120686061678 -17.1797715 131.7266 /L   0.8065     0.176      0.126
+2458895.500000000 *   13 10 27.16 +23 30 30.1  17.21 51.9021348491925 -16.8307704 132.5088 /L   0.7968     0.175      0.126
+2458896.500000000 *   13 10 24.87 +23 31 07.3  17.21 51.8924078260855 -16.4760559 133.2839 /L   0.7871     0.175      0.125
+2458897.500000000 *   13 10 22.51 +23 31 44.5  17.21 51.8828908485607 -16.1157082 134.0515 /L   0.7773     0.174      0.125
+2458898.500000000 *m  13 10 20.09 +23 32 21.5  17.21 51.8735871700451 -15.7498440 134.8111 /L   0.7675     0.173      0.124
+2458899.500000000 *m  13 10 17.60 +23 32 58.5  17.21 51.8644999668039 -15.3786089 135.5624 /L   0.7576     0.173      0.124
+2458900.500000000 *m  13 10 15.05 +23 33 35.3  17.21 51.8556323228483 -15.0021721 136.3048 /L   0.7477     0.172      0.124
+2458901.500000000 *m  13 10 12.44 +23 34 12.1  17.20 51.8469872178088 -14.6207215 137.0379 /L   0.7379     0.171      0.123
+2458902.500000000 *m  13 10 09.77 +23 34 48.7  17.20 51.8385675172443 -14.2344597 137.7612 /L   0.7280     0.170      0.123
+2458903.500000000 *m  13 10 07.04 +23 35 25.1  17.20 51.8303759651921 -13.8436004 138.4742 /L   0.7181     0.169      0.123
+2458904.500000000 *m  13 10 04.26 +23 36 01.4  17.20 51.8224151789256 -13.4483644 139.1762 /L   0.7083     0.169      0.122
+2458905.500000000 *m  13 10 01.41 +23 36 37.5  17.20 51.8146876458376 -13.0489762 139.8667 /L   0.6986     0.168      0.122
+2458906.500000000 *m  13 09 58.51 +23 37 13.5  17.20 51.8071957221522 -12.6456611 140.5451 /L   0.6889     0.167      0.122
+2458907.500000000 *m  13 09 55.56 +23 37 49.2  17.20 51.7999416329288 -12.2386438 141.2108 /L   0.6793     0.166      0.121
+2458908.500000000 *m  13 09 52.55 +23 38 24.7  17.19 51.7929274726603 -11.8281478 141.8631 /L   0.6698     0.165      0.121
+$$EOE
+***************************************************************************************************************************
+Column meaning:
+
+TIME
+
+  Times PRIOR to 1962 are UT1, a mean-solar time closely related to the
+prior but now-deprecated GMT. Times AFTER 1962 are in UTC, the current
+civil or "wall-clock" time-scale. UTC is kept within 0.9 seconds of UT1
+using integer leap-seconds for 1972 and later years.
+
+  Conversion from the internal Barycentric Dynamical Time (TDB) of solar
+system dynamics to the non-uniform civil UT time-scale requested for output
+has not been determined for UTC times after the next July or January 1st.
+Therefore, the last known leap-second is used as a constant over future
+intervals.
+
+  Time tags refer to the UT time-scale conversion on Earth regardless of
+observer location within the solar system, where clock rates may differ
+due to the local gravity field and there is no precisely defined or adopted
+"UT" analog timescale.
+
+  Any 'b' symbol in the 1st-column denotes a B.C. date. First-column blank
+(" ") denotes an A.D. date. Calendar dates prior to 1582-Oct-15 are in the
+Julian calendar system. Later calendar dates are in the Gregorian system.
+
+  NOTE: "n.a." in output means quantity "not available" at the print-time.
+
+SOLAR PRESENCE (OBSERVING SITE)
+  Time tag is followed by a blank, then a solar-presence symbol:
+
+        '*'  Daylight (refracted solar upper-limb on or above apparent horizon)
+        'C'  Civil twilight/dawn
+        'N'  Nautical twilight/dawn
+        'A'  Astronomical twilight/dawn
+        ' '  Night OR geocentric ephemeris
+
+LUNAR PRESENCE (OBSERVING SITE)
+  The solar-presence symbol is immediately followed by a lunar-presence symbol:
+
+        'm'  Refracted upper-limb of Moon on or above apparent horizon
+        ' '  Refracted upper-limb of Moon below apparent horizon OR geocentric
+             ephemeris
+
+STATISTICAL UNCERTAINTIES
+
+  Output includes formal +/- 3 standard-deviation statistical orbit uncertainty
+quantities. There is a 99.7% chance the actual value is within given bounds.
+These statistical calculations assume observational data errors are random. If
+there are systematic biases (such as timing, reduction or star-catalog errors),
+results can be optimistic. Because the epoch covariance is mapped using
+linearized variational partial derivatives, results can also be optimistic for
+times far from the solution epoch, particularly for objects having close
+planetary encounters.
+
+ R.A._____(ICRF)_____DEC =
+  Astrometric right ascension and declination of the target center with
+respect to the observing site (coordinate origin) in the reference frame of
+the planetary ephemeris (ICRF). Compensated for down-leg light-time delay
+aberration.
+
+  Units: RA  in hours-minutes-seconds of time   (HH MM SS.ff)
+         DEC in degrees-minutes-seconds of arc  (sDD MN SC.f)
+
+ APmag =
+   Asteroid's approximate apparent visual magnitude from the standard
+IAU H-G magnitude relationship:
+   APmag = H + 5*log10(delta) + 5*log10(r) - 2.5*log10((1-G)*phi1 + G*phi2).
+For solar phase angles > 90 deg, the error could exceed 1 magnitude. For phase
+angles > 120 degrees, output values are rounded to the nearest integer to
+indicate error could be large and unknown.
+   Units: MAGNITUDE
+
+ delta  deldot =
+   Range ("delta") and range-rate ("delta-dot") of target center with respect
+to the observer at the instant light seen by the observer at print-time would
+have left the target center (print-time minus down-leg light-time); the
+distance traveled by a light ray emanating from the center of the target and
+recorded by the observer at print-time. "deldot" is a projection of the
+velocity vector along this ray, the light-time-corrected line-of-sight from
+the coordinate center, and indicates relative motion. A positive "deldot"
+means the target center is moving away from the observer (coordinate center).
+A negative "deldot" means the target center is moving toward the observer.
+Units: AU and KM/S
+
+ S-O-T /r =
+    Sun-Observer-Target angle; target's apparent SOLAR ELONGATION seen from
+the observer location at print-time. Angular units: DEGREES
+
+    The '/r' column indicates the target's apparent position relative to
+the Sun in the observer's sky, as described below:
+
+    For an observing location on the surface of a rotating body
+(considering its rotational sense):
+
+    /T indicates target TRAILS Sun (evening sky; rises and sets AFTER Sun)
+    /L indicates target LEADS Sun  (morning sky; rises and sets BEFORE Sun)
+
+For an observing point NOT on a rotating body (such as a spacecraft), the
+"leading" and "trailing" condition is defined by the observer's
+heliocentric orbital motion: if continuing in the observer's current
+direction of heliocentric motion would encounter the target's apparent
+longitude first, followed by the Sun's, the target LEADS the Sun as seen by
+the observer. If the Sun's apparent longitude would be encountered first,
+followed by the target's, the target TRAILS the Sun.
+
+NOTE: The S-O-T solar elongation angle is numerically the minimum
+separation angle of the Sun and target in the sky in any direction. It
+does NOT indicate the amount of separation in the leading or trailing
+directions, which are defined in the equator of a spherical coordinate
+system.
+
+ S-T-O =
+   "S-T-O" is the Sun->Target->Observer angle; the interior vertex angle at
+target center formed by a vector to the apparent center of the Sun at
+reflection time on the target and the apparent vector to the observer at
+print-time. Slightly different from true PHASE ANGLE (requestable separately)
+at the few arcsecond level in that it includes stellar aberration on the
+down-leg from target to observer.  Units: DEGREES
+
+ RA_3sigma DEC_3sigma =
+  Uncertainty in Right-Ascension and Declination. Output values are the formal
++/- 3 standard-deviations (sigmas) around nominal position. Units: ARCSECONDS
+
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+
+************************************************************************************************
+*******************************************************************************
+JPL/HORIZONS             136472 Makemake (2005 FY9)        2020-Feb-11 13:57:56
+Rec #:  136472 (+COV) Soln.date: 2019-May-30_07:13:05   # obs: 1949 (1955-2019)
+
+IAU76/J2000 helio. ecliptic osc. elements (au, days, deg., period=Julian yrs):
+
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+   A= 45.64343693332217    MA= 155.2657054431733   ADIST= 52.84605423886966
+   PER= 308.37256          N= .003196219           ANGMOM= .114761145
+   DAN= 41.50451           DDN= 47.97743           L= 19.8421916
+   B= -25.532549           MOID= 37.54140091       TP= 1881-Jan-27.0732444809
+
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+
+ASTEROID comments:
+1: soln ref.= JPL#91, OCC=2
+2: source=ORB
+*******************************************************************************
+
+
+*******************************************************************************
+Ephemeris / WWW_USER Tue Feb 11 13:57:56 2020 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: 136472 Makemake (2005 FY9)      {source: JPL#91}
+Center body name: Earth (399)                     {source: DE431}
+Center-site name: Cerro Tololo-LCOGT A
+*******************************************************************************
+Start time      : A.D. 2020-Jan-30 00:00:00.0000 UT
+Stop  time      : A.D. 2020-Feb-29 00:00:00.0000 UT
+Step-size       : 1440 minutes
+*******************************************************************************
+Target pole/equ : No model available
+Target radii    : (unavailable)
+Center geodetic : 289.195200,-30.167405,2.2093405 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 289.195200,5520.86454,-3187.542 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : High-precision EOP model        {East-longitude positive}
+Center radii    : 6378.1 x 6378.1 x 6356.8 km     {Equator, meridian, pole}
+Target primary  : Sun
+Vis. interferer : MOON (R_eq= 1737.400) km        {source: DE431}
+Rel. light bend : Sun, EARTH                      {source: DE431}
+Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2
+Small-body perts: Yes                             {source: SB431-N16}
+Atmos refraction: NO (AIRLESS)
+RA format       : HMS
+Time format     : JD
+EOP file        : eop.200210.p200503
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2020-FEB-10. PREDICTS-> 2020-MAY-02
+Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s
+Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass (>38.000=NO), Daylight (NO )
+Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
+Table cut-offs 3: RA/DEC angular rate (     0.0=NO )
+*******************************************************************************
+Initial IAU76/J2000 heliocentric ecliptic osculating elements (au, days, deg.):
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+  Equivalent ICRF heliocentric equatorial cartesian coordinates (au, au/d):
+   X=-4.594801534867052E+01  Y=-9.620475793810611E+00  Z= 2.316346263166737E+01
+  VX=-2.210217587691426E-04 VY=-1.960899352961049E-03 VZ=-9.635666653763773E-04
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+***************************************************************************************************************************
+Date_________JDUT     R.A._____(ICRF)_____DEC  APmag            delta      deldot    S-O-T /r    S-T-O RA_3sigma DEC_3sigma
+***************************************************************************************************************************
+$$SOE
+2458878.500000000 Cm  13 10 55.51 +23 20 00.9  17.24 52.0964584853686 -22.5183802 118.4762 /L   0.9464     0.184      0.134
+2458879.500000000 Cm  13 10 54.43 +23 20 37.2  17.24 52.0836647632730 -22.2624611 119.3352 /L   0.9388     0.184      0.133
+2458880.500000000 Cm  13 10 53.27 +23 21 13.6  17.23 52.0710236215262 -21.9996357 120.1910 /L   0.9310     0.183      0.133
+2458881.500000000 Cm  13 10 52.04 +23 21 50.2  17.23 52.0585389569307 -21.7300787 121.0434 /L   0.9230     0.183      0.132
+2458882.500000000 Cm  13 10 50.73 +23 22 26.9  17.23 52.0462145628112 -21.4539711 121.8923 /L   0.9149     0.183      0.132
+2458883.500000000 Cm  13 10 49.35 +23 23 03.8  17.23 52.0340541250853 -21.1715011 122.7374 /L   0.9066     0.182      0.131
+2458884.500000000 Cm  13 10 47.89 +23 23 40.7  17.23 52.0220612181212 -20.8828634 123.5786 /L   0.8982     0.182      0.131
+2458885.500000000 Cm  13 10 46.36 +23 24 17.7  17.23 52.0102393024728 -20.5882532 124.4156 /L   0.8896     0.181      0.130
+2458886.500000000 Cm  13 10 44.76 +23 24 54.8  17.23 51.9985917276797 -20.2878543 125.2483 /L   0.8808     0.181      0.130
+2458887.500000000 Cm  13 10 43.08 +23 25 32.0  17.22 51.9871217438731 -19.9818209 126.0764 /L   0.8719     0.180      0.129
+2458888.500000000 Cm  13 10 41.34 +23 26 09.3  17.22 51.9758325250120 -19.6702565 126.8996 /L   0.8629     0.180      0.129
+2458889.500000000 C   13 10 39.52 +23 26 46.5  17.22 51.9647272033719 -19.3531975 127.7179 /L   0.8538     0.179      0.128
+2458890.500000000 C   13 10 37.63 +23 27 23.8  17.22 51.9538089099089 -19.0306105 128.5308 /L   0.8445     0.179      0.128
+2458891.500000000 N   13 10 35.68 +23 28 01.1  17.22 51.9430808108077 -18.7024085 129.3382 /L   0.8352     0.178      0.127
+2458892.500000000 N   13 10 33.65 +23 28 38.5  17.22 51.9325461301780 -18.3684812 130.1398 /L   0.8258     0.177      0.127
+2458893.500000000 N   13 10 31.56 +23 29 15.8  17.22 51.9222081535159 -18.0287292 130.9353 /L   0.8162     0.177      0.126
+2458894.500000000 N   13 10 29.40 +23 29 53.0  17.21 51.9120702134623 -17.6830896 131.7243 /L   0.8066     0.176      0.126
+2458895.500000000 N   13 10 27.17 +23 30 30.3  17.21 51.9021356643679 -17.3315486 132.5065 /L   0.7969     0.175      0.126
+2458896.500000000 N   13 10 24.88 +23 31 07.5  17.21 51.8924078531342 -16.9741430 133.2816 /L   0.7872     0.175      0.125
+2458897.500000000 N   13 10 22.52 +23 31 44.6  17.21 51.8828900917194 -16.6109537 134.0492 /L   0.7774     0.174      0.125
+2458898.500000000 N   13 10 20.10 +23 32 21.7  17.21 51.8735856337934 -16.2420980 134.8088 /L   0.7676     0.173      0.124
+2458899.500000000 N   13 10 17.61 +23 32 58.6  17.21 51.8644976558637 -15.8677225 135.5601 /L   0.7577     0.173      0.124
+2458900.500000000 N   13 10 15.07 +23 33 35.5  17.21 51.8556292421821 -15.4879973 136.3025 /L   0.7478     0.172      0.124
+2458901.500000000 N   13 10 12.46 +23 34 12.2  17.20 51.8469833726175 -15.1031110 137.0356 /L   0.7380     0.171      0.123
+2458902.500000000 N   13 10 09.79 +23 34 48.8  17.20 51.8385629129657 -14.7132674 137.7589 /L   0.7281     0.170      0.123
+2458903.500000000 N   13 10 07.06 +23 35 25.3  17.20 51.8303706074984 -14.3186811 138.4718 /L   0.7182     0.169      0.123
+2458904.500000000 Nm  13 10 04.27 +23 36 01.6  17.20 51.8224090737217 -13.9195740 139.1738 /L   0.7084     0.169      0.122
+2458905.500000000 Nm  13 10 01.43 +23 36 37.7  17.20 51.8146807992588 -13.5161717 139.8643 /L   0.6987     0.168      0.122
+2458906.500000000 Nm  13 09 58.53 +23 37 13.6  17.20 51.8071881405623 -13.1087008 140.5427 /L   0.6890     0.167      0.122
+2458907.500000000 Nm  13 09 55.57 +23 37 49.4  17.20 51.7999333229185 -12.6973871 141.2084 /L   0.6794     0.166      0.121
+2458908.500000000 Nm  13 09 52.56 +23 38 24.9  17.19 51.7929184410454 -12.2824554 141.8606 /L   0.6699     0.165      0.121
+$$EOE
+***************************************************************************************************************************
+Column meaning:
+
+TIME
+
+  Times PRIOR to 1962 are UT1, a mean-solar time closely related to the
+prior but now-deprecated GMT. Times AFTER 1962 are in UTC, the current
+civil or "wall-clock" time-scale. UTC is kept within 0.9 seconds of UT1
+using integer leap-seconds for 1972 and later years.
+
+  Conversion from the internal Barycentric Dynamical Time (TDB) of solar
+system dynamics to the non-uniform civil UT time-scale requested for output
+has not been determined for UTC times after the next July or January 1st.
+Therefore, the last known leap-second is used as a constant over future
+intervals.
+
+  Time tags refer to the UT time-scale conversion on Earth regardless of
+observer location within the solar system, where clock rates may differ
+due to the local gravity field and there is no precisely defined or adopted
+"UT" analog timescale.
+
+  Any 'b' symbol in the 1st-column denotes a B.C. date. First-column blank
+(" ") denotes an A.D. date. Calendar dates prior to 1582-Oct-15 are in the
+Julian calendar system. Later calendar dates are in the Gregorian system.
+
+  NOTE: "n.a." in output means quantity "not available" at the print-time.
+
+SOLAR PRESENCE (OBSERVING SITE)
+  Time tag is followed by a blank, then a solar-presence symbol:
+
+        '*'  Daylight (refracted solar upper-limb on or above apparent horizon)
+        'C'  Civil twilight/dawn
+        'N'  Nautical twilight/dawn
+        'A'  Astronomical twilight/dawn
+        ' '  Night OR geocentric ephemeris
+
+LUNAR PRESENCE (OBSERVING SITE)
+  The solar-presence symbol is immediately followed by a lunar-presence symbol:
+
+        'm'  Refracted upper-limb of Moon on or above apparent horizon
+        ' '  Refracted upper-limb of Moon below apparent horizon OR geocentric
+             ephemeris
+
+STATISTICAL UNCERTAINTIES
+
+  Output includes formal +/- 3 standard-deviation statistical orbit uncertainty
+quantities. There is a 99.7% chance the actual value is within given bounds.
+These statistical calculations assume observational data errors are random. If
+there are systematic biases (such as timing, reduction or star-catalog errors),
+results can be optimistic. Because the epoch covariance is mapped using
+linearized variational partial derivatives, results can also be optimistic for
+times far from the solution epoch, particularly for objects having close
+planetary encounters.
+
+ R.A._____(ICRF)_____DEC =
+  Astrometric right ascension and declination of the target center with
+respect to the observing site (coordinate origin) in the reference frame of
+the planetary ephemeris (ICRF). Compensated for down-leg light-time delay
+aberration.
+
+  Units: RA  in hours-minutes-seconds of time   (HH MM SS.ff)
+         DEC in degrees-minutes-seconds of arc  (sDD MN SC.f)
+
+ APmag =
+   Asteroid's approximate apparent visual magnitude from the standard
+IAU H-G magnitude relationship:
+   APmag = H + 5*log10(delta) + 5*log10(r) - 2.5*log10((1-G)*phi1 + G*phi2).
+For solar phase angles > 90 deg, the error could exceed 1 magnitude. For phase
+angles > 120 degrees, output values are rounded to the nearest integer to
+indicate error could be large and unknown.
+   Units: MAGNITUDE
+
+ delta  deldot =
+   Range ("delta") and range-rate ("delta-dot") of target center with respect
+to the observer at the instant light seen by the observer at print-time would
+have left the target center (print-time minus down-leg light-time); the
+distance traveled by a light ray emanating from the center of the target and
+recorded by the observer at print-time. "deldot" is a projection of the
+velocity vector along this ray, the light-time-corrected line-of-sight from
+the coordinate center, and indicates relative motion. A positive "deldot"
+means the target center is moving away from the observer (coordinate center).
+A negative "deldot" means the target center is moving toward the observer.
+Units: AU and KM/S
+
+ S-O-T /r =
+    Sun-Observer-Target angle; target's apparent SOLAR ELONGATION seen from
+the observer location at print-time. Angular units: DEGREES
+
+    The '/r' column indicates the target's apparent position relative to
+the Sun in the observer's sky, as described below:
+
+    For an observing location on the surface of a rotating body
+(considering its rotational sense):
+
+    /T indicates target TRAILS Sun (evening sky; rises and sets AFTER Sun)
+    /L indicates target LEADS Sun  (morning sky; rises and sets BEFORE Sun)
+
+For an observing point NOT on a rotating body (such as a spacecraft), the
+"leading" and "trailing" condition is defined by the observer's
+heliocentric orbital motion: if continuing in the observer's current
+direction of heliocentric motion would encounter the target's apparent
+longitude first, followed by the Sun's, the target LEADS the Sun as seen by
+the observer. If the Sun's apparent longitude would be encountered first,
+followed by the target's, the target TRAILS the Sun.
+
+NOTE: The S-O-T solar elongation angle is numerically the minimum
+separation angle of the Sun and target in the sky in any direction. It
+does NOT indicate the amount of separation in the leading or trailing
+directions, which are defined in the equator of a spherical coordinate
+system.
+
+ S-T-O =
+   "S-T-O" is the Sun->Target->Observer angle; the interior vertex angle at
+target center formed by a vector to the apparent center of the Sun at
+reflection time on the target and the apparent vector to the observer at
+print-time. Slightly different from true PHASE ANGLE (requestable separately)
+at the few arcsecond level in that it includes stellar aberration on the
+down-leg from target to observer.  Units: DEGREES
+
+ RA_3sigma DEC_3sigma =
+  Uncertainty in Right-Ascension and Declination. Output values are the formal
++/- 3 standard-deviations (sigmas) around nominal position. Units: ARCSECONDS
+
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+
+***********************************************************************************************
+*******************************************************************************
+JPL/HORIZONS             136472 Makemake (2005 FY9)        2020-Feb-11 13:58:56
+Rec #:  136472 (+COV) Soln.date: 2019-May-30_07:13:05   # obs: 1949 (1955-2019)
+
+IAU76/J2000 helio. ecliptic osc. elements (au, days, deg., period=Julian yrs):
+
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+   A= 45.64343693332217    MA= 155.2657054431733   ADIST= 52.84605423886966
+   PER= 308.37256          N= .003196219           ANGMOM= .114761145
+   DAN= 41.50451           DDN= 47.97743           L= 19.8421916
+   B= -25.532549           MOID= 37.54140091       TP= 1881-Jan-27.0732444809
+
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+
+ASTEROID comments:
+1: soln ref.= JPL#91, OCC=2
+2: source=ORB
+*******************************************************************************
+
+
+*******************************************************************************
+Ephemeris / WWW_USER Tue Feb 11 13:58:56 2020 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: 136472 Makemake (2005 FY9)      {source: JPL#91}
+Center body name: Earth (399)                     {source: DE431}
+Center-site name: Teide Observatory
+*******************************************************************************
+Start time      : A.D. 2020-Jan-30 00:00:00.0000 UT
+Stop  time      : A.D. 2020-Feb-29 00:00:00.0000 UT
+Step-size       : 1440 minutes
+*******************************************************************************
+Target pole/equ : No model available
+Target radii    : (unavailable)
+Center geodetic : 343.490600,28.2983824,2.3649836 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 343.490600,5622.20214,3006.7826 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : High-precision EOP model        {East-longitude positive}
+Center radii    : 6378.1 x 6378.1 x 6356.8 km     {Equator, meridian, pole}
+Target primary  : Sun
+Vis. interferer : MOON (R_eq= 1737.400) km        {source: DE431}
+Rel. light bend : Sun, EARTH                      {source: DE431}
+Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2
+Small-body perts: Yes                             {source: SB431-N16}
+Atmos refraction: NO (AIRLESS)
+RA format       : HMS
+Time format     : JD
+EOP file        : eop.200210.p200503
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2020-FEB-10. PREDICTS-> 2020-MAY-02
+Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s
+Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass (>38.000=NO), Daylight (NO )
+Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
+Table cut-offs 3: RA/DEC angular rate (     0.0=NO )
+*******************************************************************************
+Initial IAU76/J2000 heliocentric ecliptic osculating elements (au, days, deg.):
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+  Equivalent ICRF heliocentric equatorial cartesian coordinates (au, au/d):
+   X=-4.594801534867052E+01  Y=-9.620475793810611E+00  Z= 2.316346263166737E+01
+  VX=-2.210217587691426E-04 VY=-1.960899352961049E-03 VZ=-9.635666653763773E-04
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+***************************************************************************************************************************
+Date_________JDUT     R.A._____(ICRF)_____DEC  APmag            delta      deldot    S-O-T /r    S-T-O RA_3sigma DEC_3sigma
+***************************************************************************************************************************
+$$SOE
+2458878.500000000     13 10 55.51 +23 20 00.8  17.24 52.0964136051386 -22.6566754 118.4778 /L   0.9465     0.184      0.134
+2458879.500000000     13 10 54.43 +23 20 37.1  17.24 52.0836196637411 -22.3953441 119.3369 /L   0.9389     0.184      0.133
+2458880.500000000  m  13 10 53.27 +23 21 13.5  17.23 52.0709783112294 -22.1270656 120.1927 /L   0.9311     0.183      0.133
+2458881.500000000  m  13 10 52.04 +23 21 50.1  17.23 52.0584934444773 -21.8520167 121.0451 /L   0.9231     0.183      0.132
+2458882.500000000  m  13 10 50.73 +23 22 26.8  17.23 52.0461688568781 -21.5703797 121.8940 /L   0.9150     0.183      0.132
+2458883.500000000  m  13 10 49.35 +23 23 03.7  17.23 52.0340082344152 -21.2823445 122.7391 /L   0.9067     0.182      0.131
+2458884.500000000  m  13 10 47.89 +23 23 40.6  17.23 52.0220151515194 -20.9881075 123.5803 /L   0.8982     0.182      0.131
+2458885.500000000  m  13 10 46.36 +23 24 17.6  17.23 52.0101930688048 -20.6878655 124.4173 /L   0.8896     0.181      0.130
+2458886.500000000  m  13 10 44.76 +23 24 54.7  17.23 51.9985453358673 -20.3818042 125.2500 /L   0.8809     0.181      0.130
+2458887.500000000  m  13 10 43.09 +23 25 31.9  17.22 51.9870752028913 -20.0700793 126.0781 /L   0.8720     0.180      0.129
+2458888.500000000  m  13 10 41.34 +23 26 09.2  17.22 51.9757858438856 -19.7527961 126.9014 /L   0.8630     0.180      0.129
+2458889.500000000  m  13 10 39.52 +23 26 46.4  17.22 51.9646803911733 -19.4299926 127.7196 /L   0.8539     0.179      0.128
+2458890.500000000  m  13 10 37.64 +23 27 23.7  17.22 51.9537619757551 -19.1016373 128.5326 /L   0.8446     0.179      0.128
+2458891.500000000  m  13 10 35.68 +23 28 01.0  17.22 51.9430337638591 -18.7676448 129.3400 /L   0.8353     0.178      0.127
+2458892.500000000  m  13 10 33.66 +23 28 38.4  17.22 51.9324989796363 -18.4279067 130.1416 /L   0.8258     0.177      0.127
+2458893.500000000  m  13 10 31.56 +23 29 15.7  17.22 51.9221609086218 -18.0823251 130.9370 /L   0.8163     0.177      0.126
+2458894.500000000     13 10 29.40 +23 29 52.9  17.21 51.9120228834925 -17.7308390 131.7261 /L   0.8067     0.176      0.126
+2458895.500000000     13 10 27.17 +23 30 30.2  17.21 51.9020882586319 -17.3734365 132.5083 /L   0.7970     0.175      0.126
+2458896.500000000     13 10 24.88 +23 31 07.4  17.21 51.8923603809708 -17.0101559 133.2835 /L   0.7873     0.175      0.125
+2458897.500000000     13 10 22.52 +23 31 44.5  17.21 51.8828425624928 -16.6410801 134.0510 /L   0.7775     0.174      0.125
+2458898.500000000     13 10 20.10 +23 32 21.6  17.21 51.8735380568906 -16.2663281 134.8107 /L   0.7676     0.173      0.124
+2458899.500000000     13 10 17.61 +23 32 58.5  17.21 51.8644500406906 -15.8860484 135.5620 /L   0.7578     0.173      0.124
+2458900.500000000     13 10 15.07 +23 33 35.4  17.21 51.8555815981610 -15.5004128 136.3044 /L   0.7479     0.172      0.124
+2458901.500000000     13 10 12.46 +23 34 12.1  17.20 51.8469357091844 -15.1096118 137.0375 /L   0.7380     0.171      0.123
+2458902.500000000     13 10 09.79 +23 34 48.7  17.20 51.8385152395672 -14.7138509 137.7608 /L   0.7282     0.170      0.123
+2458903.500000000     13 10 07.06 +23 35 25.2  17.20 51.8303229335892 -14.3133466 138.4738 /L   0.7183     0.169      0.123
+2458904.500000000     13 10 04.27 +23 36 01.5  17.20 51.8223614087620 -13.9083226 139.1758 /L   0.7085     0.169      0.122
+2458905.500000000     13 10 01.43 +23 36 37.6  17.20 51.8146331527114 -13.4990062 139.8663 /L   0.6987     0.168      0.122
+2458906.500000000     13 09 58.52 +23 37 13.6  17.20 51.8071405218899 -13.0856260 140.5448 /L   0.6890     0.167      0.122
+2458907.500000000     13 09 55.57 +23 37 49.3  17.20 51.7998857415806 -12.6684094 141.2105 /L   0.6794     0.166      0.121
+2458908.500000000     13 09 52.56 +23 38 24.8  17.19 51.7928709064952 -12.2475832 141.8627 /L   0.6699     0.165      0.121
+$$EOE
+***************************************************************************************************************************
+Column meaning:
+
+TIME
+
+  Times PRIOR to 1962 are UT1, a mean-solar time closely related to the
+prior but now-deprecated GMT. Times AFTER 1962 are in UTC, the current
+civil or "wall-clock" time-scale. UTC is kept within 0.9 seconds of UT1
+using integer leap-seconds for 1972 and later years.
+
+  Conversion from the internal Barycentric Dynamical Time (TDB) of solar
+system dynamics to the non-uniform civil UT time-scale requested for output
+has not been determined for UTC times after the next July or January 1st.
+Therefore, the last known leap-second is used as a constant over future
+intervals.
+
+  Time tags refer to the UT time-scale conversion on Earth regardless of
+observer location within the solar system, where clock rates may differ
+due to the local gravity field and there is no precisely defined or adopted
+"UT" analog timescale.
+
+  Any 'b' symbol in the 1st-column denotes a B.C. date. First-column blank
+(" ") denotes an A.D. date. Calendar dates prior to 1582-Oct-15 are in the
+Julian calendar system. Later calendar dates are in the Gregorian system.
+
+  NOTE: "n.a." in output means quantity "not available" at the print-time.
+
+SOLAR PRESENCE (OBSERVING SITE)
+  Time tag is followed by a blank, then a solar-presence symbol:
+
+        '*'  Daylight (refracted solar upper-limb on or above apparent horizon)
+        'C'  Civil twilight/dawn
+        'N'  Nautical twilight/dawn
+        'A'  Astronomical twilight/dawn
+        ' '  Night OR geocentric ephemeris
+
+LUNAR PRESENCE (OBSERVING SITE)
+  The solar-presence symbol is immediately followed by a lunar-presence symbol:
+
+        'm'  Refracted upper-limb of Moon on or above apparent horizon
+        ' '  Refracted upper-limb of Moon below apparent horizon OR geocentric
+             ephemeris
+
+STATISTICAL UNCERTAINTIES
+
+  Output includes formal +/- 3 standard-deviation statistical orbit uncertainty
+quantities. There is a 99.7% chance the actual value is within given bounds.
+These statistical calculations assume observational data errors are random. If
+there are systematic biases (such as timing, reduction or star-catalog errors),
+results can be optimistic. Because the epoch covariance is mapped using
+linearized variational partial derivatives, results can also be optimistic for
+times far from the solution epoch, particularly for objects having close
+planetary encounters.
+
+ R.A._____(ICRF)_____DEC =
+  Astrometric right ascension and declination of the target center with
+respect to the observing site (coordinate origin) in the reference frame of
+the planetary ephemeris (ICRF). Compensated for down-leg light-time delay
+aberration.
+
+  Units: RA  in hours-minutes-seconds of time   (HH MM SS.ff)
+         DEC in degrees-minutes-seconds of arc  (sDD MN SC.f)
+
+ APmag =
+   Asteroid's approximate apparent visual magnitude from the standard
+IAU H-G magnitude relationship:
+   APmag = H + 5*log10(delta) + 5*log10(r) - 2.5*log10((1-G)*phi1 + G*phi2).
+For solar phase angles > 90 deg, the error could exceed 1 magnitude. For phase
+angles > 120 degrees, output values are rounded to the nearest integer to
+indicate error could be large and unknown.
+   Units: MAGNITUDE
+
+ delta  deldot =
+   Range ("delta") and range-rate ("delta-dot") of target center with respect
+to the observer at the instant light seen by the observer at print-time would
+have left the target center (print-time minus down-leg light-time); the
+distance traveled by a light ray emanating from the center of the target and
+recorded by the observer at print-time. "deldot" is a projection of the
+velocity vector along this ray, the light-time-corrected line-of-sight from
+the coordinate center, and indicates relative motion. A positive "deldot"
+means the target center is moving away from the observer (coordinate center).
+A negative "deldot" means the target center is moving toward the observer.
+Units: AU and KM/S
+
+ S-O-T /r =
+    Sun-Observer-Target angle; target's apparent SOLAR ELONGATION seen from
+the observer location at print-time. Angular units: DEGREES
+
+    The '/r' column indicates the target's apparent position relative to
+the Sun in the observer's sky, as described below:
+
+    For an observing location on the surface of a rotating body
+(considering its rotational sense):
+
+    /T indicates target TRAILS Sun (evening sky; rises and sets AFTER Sun)
+    /L indicates target LEADS Sun  (morning sky; rises and sets BEFORE Sun)
+
+For an observing point NOT on a rotating body (such as a spacecraft), the
+"leading" and "trailing" condition is defined by the observer's
+heliocentric orbital motion: if continuing in the observer's current
+direction of heliocentric motion would encounter the target's apparent
+longitude first, followed by the Sun's, the target LEADS the Sun as seen by
+the observer. If the Sun's apparent longitude would be encountered first,
+followed by the target's, the target TRAILS the Sun.
+
+NOTE: The S-O-T solar elongation angle is numerically the minimum
+separation angle of the Sun and target in the sky in any direction. It
+does NOT indicate the amount of separation in the leading or trailing
+directions, which are defined in the equator of a spherical coordinate
+system.
+
+ S-T-O =
+   "S-T-O" is the Sun->Target->Observer angle; the interior vertex angle at
+target center formed by a vector to the apparent center of the Sun at
+reflection time on the target and the apparent vector to the observer at
+print-time. Slightly different from true PHASE ANGLE (requestable separately)
+at the few arcsecond level in that it includes stellar aberration on the
+down-leg from target to observer.  Units: DEGREES
+
+ RA_3sigma DEC_3sigma =
+  Uncertainty in Right-Ascension and Declination. Output values are the formal
++/- 3 standard-deviations (sigmas) around nominal position. Units: ARCSECONDS
+
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+
+***************************************************************************************************************************
+*******************************************************************************
+JPL/HORIZONS             136472 Makemake (2005 FY9)        2020-Feb-11 14:00:10
+Rec #:  136472 (+COV) Soln.date: 2019-May-30_07:13:05   # obs: 1949 (1955-2019)
+
+IAU76/J2000 helio. ecliptic osc. elements (au, days, deg., period=Julian yrs):
+
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+   A= 45.64343693332217    MA= 155.2657054431733   ADIST= 52.84605423886966
+   PER= 308.37256          N= .003196219           ANGMOM= .114761145
+   DAN= 41.50451           DDN= 47.97743           L= 19.8421916
+   B= -25.532549           MOID= 37.54140091       TP= 1881-Jan-27.0732444809
+
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+
+ASTEROID comments:
+1: soln ref.= JPL#91, OCC=2
+2: source=ORB
+*******************************************************************************
+
+
+*******************************************************************************
+Ephemeris / WWW_USER Tue Feb 11 14:00:10 2020 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: 136472 Makemake (2005 FY9)      {source: JPL#91}
+Center body name: Earth (399)                     {source: DE431}
+Center-site name: Sunderland-LCOGT A
+*******************************************************************************
+Start time      : A.D. 2020-Jan-30 00:00:00.0000 UT
+Stop  time      : A.D. 2020-Feb-29 00:00:00.0000 UT
+Step-size       : 1440 minutes
+*******************************************************************************
+Target pole/equ : No model available
+Target radii    : (unavailable)
+Center geodetic : 20.8102000,-32.380541,1.8117864 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 20.8102000,5393.10796,-3397.113 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : High-precision EOP model        {East-longitude positive}
+Center radii    : 6378.1 x 6378.1 x 6356.8 km     {Equator, meridian, pole}
+Target primary  : Sun
+Vis. interferer : MOON (R_eq= 1737.400) km        {source: DE431}
+Rel. light bend : Sun, EARTH                      {source: DE431}
+Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2
+Small-body perts: Yes                             {source: SB431-N16}
+Atmos refraction: NO (AIRLESS)
+RA format       : HMS
+Time format     : JD
+EOP file        : eop.200210.p200503
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2020-FEB-10. PREDICTS-> 2020-MAY-02
+Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s
+Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass (>38.000=NO), Daylight (NO )
+Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
+Table cut-offs 3: RA/DEC angular rate (     0.0=NO )
+*******************************************************************************
+Initial IAU76/J2000 heliocentric ecliptic osculating elements (au, days, deg.):
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+  Equivalent ICRF heliocentric equatorial cartesian coordinates (au, au/d):
+   X=-4.594801534867052E+01  Y=-9.620475793810611E+00  Z= 2.316346263166737E+01
+  VX=-2.210217587691426E-04 VY=-1.960899352961049E-03 VZ=-9.635666653763773E-04
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+***************************************************************************************************************************
+Date_________JDUT     R.A._____(ICRF)_____DEC  APmag            delta      deldot    S-O-T /r    S-T-O RA_3sigma DEC_3sigma
+***************************************************************************************************************************
+$$SOE
+2458878.500000000     13 10 55.51 +23 20 01.0  17.24 52.0964110616823 -22.5514333 118.4784 /L   0.9465     0.184      0.134
+2458879.500000000     13 10 54.43 +23 20 37.3  17.24 52.0836172982328 -22.2864637 119.3374 /L   0.9389     0.184      0.133
+2458880.500000000     13 10 53.27 +23 21 13.7  17.23 52.0709761294870 -22.0145789 120.1933 /L   0.9311     0.183      0.133
+2458881.500000000     13 10 52.04 +23 21 50.3  17.23 52.0584914522655 -21.7359566 121.0457 /L   0.9232     0.183      0.132
+2458882.500000000     13 10 50.73 +23 22 27.0  17.23 52.0461670599064 -21.4507804 121.8946 /L   0.9150     0.183      0.132
+2458883.500000000     13 10 49.35 +23 23 03.8  17.23 52.0340066383367 -21.1592413 122.7397 /L   0.9067     0.182      0.131
+2458884.500000000  m  13 10 47.89 +23 23 40.8  17.23 52.0220137619291 -20.8615367 123.5809 /L   0.8983     0.182      0.131
+2458885.500000000  m  13 10 46.36 +23 24 17.8  17.23 52.0101918912385 -20.5578646 124.4179 /L   0.8897     0.181      0.130
+2458886.500000000  m  13 10 44.76 +23 24 54.9  17.23 51.9985443758007 -20.2484115 125.2505 /L   0.8809     0.181      0.130
+2458887.500000000  m  13 10 43.08 +23 25 32.1  17.22 51.9870744657397 -19.9333345 126.0786 /L   0.8720     0.180      0.129
+2458888.500000000  m  13 10 41.34 +23 26 09.3  17.22 51.9757853350024 -19.6127398 126.9019 /L   0.8630     0.180      0.129
+2458889.500000000  m  13 10 39.52 +23 26 46.6  17.22 51.9646801158482 -19.2866664 127.7201 /L   0.8539     0.179      0.128
+2458890.500000000  m  13 10 37.63 +23 27 23.9  17.22 51.9537619392119 -18.9550839 128.5331 /L   0.8446     0.179      0.128
+2458891.500000000  m  13 10 35.68 +23 28 01.2  17.22 51.9430339712517 -18.6179078 129.3405 /L   0.8353     0.178      0.127
+2458892.500000000  m  13 10 33.65 +23 28 38.5  17.22 51.9324994360456 -18.2750307 130.1420 /L   0.8259     0.177      0.127
+2458893.500000000  m  13 10 31.56 +23 29 15.8  17.22 51.9221616190533 -17.9263557 130.9375 /L   0.8163     0.177      0.126
+2458894.500000000  m  13 10 29.40 +23 29 53.1  17.21 51.9120238528744 -17.5718228 131.7265 /L   0.8067     0.176      0.126
+2458895.500000000  m  13 10 27.17 +23 30 30.4  17.21 51.9020894918144 -17.2114211 132.5088 /L   0.7970     0.175      0.126
+2458896.500000000  m  13 10 24.88 +23 31 07.6  17.21 51.8923618827255 -16.8451898 133.2839 /L   0.7873     0.175      0.125
+2458897.500000000  m  13 10 22.52 +23 31 44.7  17.21 51.8828443375124 -16.4732126 134.0514 /L   0.7775     0.174      0.125
+2458898.500000000     13 10 20.10 +23 32 21.8  17.21 51.8735401097874 -16.0956096 134.8110 /L   0.7677     0.173      0.124
+2458899.500000000     13 10 17.61 +23 32 58.7  17.21 51.8644523759956 -15.7125302 135.5623 /L   0.7578     0.173      0.124
+2458900.500000000     13 10 15.06 +23 33 35.6  17.21 51.8555842203225 -15.3241469 136.3047 /L   0.7479     0.172      0.124
+2458901.500000000     13 10 12.45 +23 34 12.3  17.20 51.8469386225658 -14.9306513 137.0378 /L   0.7380     0.171      0.123
+2458902.500000000     13 10 09.78 +23 34 48.9  17.20 51.8385184484454 -14.5322496 137.7611 /L   0.7282     0.170      0.123
+2458903.500000000     13 10 07.05 +23 35 25.4  17.20 51.8303264421528 -14.1291592 138.4740 /L   0.7183     0.169      0.123
+2458904.500000000     13 10 04.26 +23 36 01.7  17.20 51.8223652211090 -13.7216045 139.1760 /L   0.7085     0.169      0.122
+2458905.500000000     13 10 01.42 +23 36 37.8  17.20 51.8146372728473 -13.3098138 139.8665 /L   0.6988     0.168      0.122
+2458906.500000000     13 09 58.52 +23 37 13.7  17.20 51.8071449537264 -12.8940163 140.5449 /L   0.6891     0.167      0.122
+2458907.500000000     13 09 55.56 +23 37 49.5  17.20 51.7998904889337 -12.4744403 141.2105 /L   0.6795     0.166      0.121
+2458908.500000000     13 09 52.55 +23 38 25.0  17.19 51.7928759730841 -12.0513133 141.8627 /L   0.6700     0.165      0.121
+$$EOE
+***************************************************************************************************************************
+Column meaning:
+
+TIME
+
+  Times PRIOR to 1962 are UT1, a mean-solar time closely related to the
+prior but now-deprecated GMT. Times AFTER 1962 are in UTC, the current
+civil or "wall-clock" time-scale. UTC is kept within 0.9 seconds of UT1
+using integer leap-seconds for 1972 and later years.
+
+  Conversion from the internal Barycentric Dynamical Time (TDB) of solar
+system dynamics to the non-uniform civil UT time-scale requested for output
+has not been determined for UTC times after the next July or January 1st.
+Therefore, the last known leap-second is used as a constant over future
+intervals.
+
+  Time tags refer to the UT time-scale conversion on Earth regardless of
+observer location within the solar system, where clock rates may differ
+due to the local gravity field and there is no precisely defined or adopted
+"UT" analog timescale.
+
+  Any 'b' symbol in the 1st-column denotes a B.C. date. First-column blank
+(" ") denotes an A.D. date. Calendar dates prior to 1582-Oct-15 are in the
+Julian calendar system. Later calendar dates are in the Gregorian system.
+
+  NOTE: "n.a." in output means quantity "not available" at the print-time.
+
+SOLAR PRESENCE (OBSERVING SITE)
+  Time tag is followed by a blank, then a solar-presence symbol:
+
+        '*'  Daylight (refracted solar upper-limb on or above apparent horizon)
+        'C'  Civil twilight/dawn
+        'N'  Nautical twilight/dawn
+        'A'  Astronomical twilight/dawn
+        ' '  Night OR geocentric ephemeris
+
+LUNAR PRESENCE (OBSERVING SITE)
+  The solar-presence symbol is immediately followed by a lunar-presence symbol:
+
+        'm'  Refracted upper-limb of Moon on or above apparent horizon
+        ' '  Refracted upper-limb of Moon below apparent horizon OR geocentric
+             ephemeris
+
+STATISTICAL UNCERTAINTIES
+
+  Output includes formal +/- 3 standard-deviation statistical orbit uncertainty
+quantities. There is a 99.7% chance the actual value is within given bounds.
+These statistical calculations assume observational data errors are random. If
+there are systematic biases (such as timing, reduction or star-catalog errors),
+results can be optimistic. Because the epoch covariance is mapped using
+linearized variational partial derivatives, results can also be optimistic for
+times far from the solution epoch, particularly for objects having close
+planetary encounters.
+
+ R.A._____(ICRF)_____DEC =
+  Astrometric right ascension and declination of the target center with
+respect to the observing site (coordinate origin) in the reference frame of
+the planetary ephemeris (ICRF). Compensated for down-leg light-time delay
+aberration.
+
+  Units: RA  in hours-minutes-seconds of time   (HH MM SS.ff)
+         DEC in degrees-minutes-seconds of arc  (sDD MN SC.f)
+
+ APmag =
+   Asteroid's approximate apparent visual magnitude from the standard
+IAU H-G magnitude relationship:
+   APmag = H + 5*log10(delta) + 5*log10(r) - 2.5*log10((1-G)*phi1 + G*phi2).
+For solar phase angles > 90 deg, the error could exceed 1 magnitude. For phase
+angles > 120 degrees, output values are rounded to the nearest integer to
+indicate error could be large and unknown.
+   Units: MAGNITUDE
+
+ delta  deldot =
+   Range ("delta") and range-rate ("delta-dot") of target center with respect
+to the observer at the instant light seen by the observer at print-time would
+have left the target center (print-time minus down-leg light-time); the
+distance traveled by a light ray emanating from the center of the target and
+recorded by the observer at print-time. "deldot" is a projection of the
+velocity vector along this ray, the light-time-corrected line-of-sight from
+the coordinate center, and indicates relative motion. A positive "deldot"
+means the target center is moving away from the observer (coordinate center).
+A negative "deldot" means the target center is moving toward the observer.
+Units: AU and KM/S
+
+ S-O-T /r =
+    Sun-Observer-Target angle; target's apparent SOLAR ELONGATION seen from
+the observer location at print-time. Angular units: DEGREES
+
+    The '/r' column indicates the target's apparent position relative to
+the Sun in the observer's sky, as described below:
+
+    For an observing location on the surface of a rotating body
+(considering its rotational sense):
+
+    /T indicates target TRAILS Sun (evening sky; rises and sets AFTER Sun)
+    /L indicates target LEADS Sun  (morning sky; rises and sets BEFORE Sun)
+
+For an observing point NOT on a rotating body (such as a spacecraft), the
+"leading" and "trailing" condition is defined by the observer's
+heliocentric orbital motion: if continuing in the observer's current
+direction of heliocentric motion would encounter the target's apparent
+longitude first, followed by the Sun's, the target LEADS the Sun as seen by
+the observer. If the Sun's apparent longitude would be encountered first,
+followed by the target's, the target TRAILS the Sun.
+
+NOTE: The S-O-T solar elongation angle is numerically the minimum
+separation angle of the Sun and target in the sky in any direction. It
+does NOT indicate the amount of separation in the leading or trailing
+directions, which are defined in the equator of a spherical coordinate
+system.
+
+ S-T-O =
+   "S-T-O" is the Sun->Target->Observer angle; the interior vertex angle at
+target center formed by a vector to the apparent center of the Sun at
+reflection time on the target and the apparent vector to the observer at
+print-time. Slightly different from true PHASE ANGLE (requestable separately)
+at the few arcsecond level in that it includes stellar aberration on the
+down-leg from target to observer.  Units: DEGREES
+
+ RA_3sigma DEC_3sigma =
+  Uncertainty in Right-Ascension and Declination. Output values are the formal
++/- 3 standard-deviations (sigmas) around nominal position. Units: ARCSECONDS
+
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+
+********************************************************************************************************************
+*******************************************************************************
+JPL/HORIZONS             136472 Makemake (2005 FY9)        2020-Feb-11 14:01:12
+Rec #:  136472 (+COV) Soln.date: 2019-May-30_07:13:05   # obs: 1949 (1955-2019)
+
+IAU76/J2000 helio. ecliptic osc. elements (au, days, deg., period=Julian yrs):
+
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+   A= 45.64343693332217    MA= 155.2657054431733   ADIST= 52.84605423886966
+   PER= 308.37256          N= .003196219           ANGMOM= .114761145
+   DAN= 41.50451           DDN= 47.97743           L= 19.8421916
+   B= -25.532549           MOID= 37.54140091       TP= 1881-Jan-27.0732444809
+
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+
+ASTEROID comments:
+1: soln ref.= JPL#91, OCC=2
+2: source=ORB
+*******************************************************************************
+
+
+*******************************************************************************
+Ephemeris / WWW_USER Tue Feb 11 14:01:12 2020 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: 136472 Makemake (2005 FY9)      {source: JPL#91}
+Center body name: Earth (399)                     {source: DE431}
+Center-site name: Wise Observatory, Mitzpeh Ramon
+*******************************************************************************
+Start time      : A.D. 2020-Jan-30 00:00:00.0000 UT
+Stop  time      : A.D. 2020-Feb-29 00:00:00.0000 UT
+Step-size       : 1440 minutes
+*******************************************************************************
+Target pole/equ : No model available
+Target radii    : (unavailable)
+Center geodetic : 34.7625000,30.5956453,0.8980474 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 34.7625000,5495.71714,3227.8433 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : High-precision EOP model        {East-longitude positive}
+Center radii    : 6378.1 x 6378.1 x 6356.8 km     {Equator, meridian, pole}
+Target primary  : Sun
+Vis. interferer : MOON (R_eq= 1737.400) km        {source: DE431}
+Rel. light bend : Sun, EARTH                      {source: DE431}
+Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2
+Small-body perts: Yes                             {source: SB431-N16}
+Atmos refraction: NO (AIRLESS)
+RA format       : HMS
+Time format     : JD
+EOP file        : eop.200210.p200503
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2020-FEB-10. PREDICTS-> 2020-MAY-02
+Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s
+Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass (>38.000=NO), Daylight (NO )
+Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
+Table cut-offs 3: RA/DEC angular rate (     0.0=NO )
+*******************************************************************************
+Initial IAU76/J2000 heliocentric ecliptic osculating elements (au, days, deg.):
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+  Equivalent ICRF heliocentric equatorial cartesian coordinates (au, au/d):
+   X=-4.594801534867052E+01  Y=-9.620475793810611E+00  Z= 2.316346263166737E+01
+  VX=-2.210217587691426E-04 VY=-1.960899352961049E-03 VZ=-9.635666653763773E-04
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+***************************************************************************************************************************
+Date_________JDUT     R.A._____(ICRF)_____DEC  APmag            delta      deldot    S-O-T /r    S-T-O RA_3sigma DEC_3sigma
+***************************************************************************************************************************
+$$SOE
+2458878.500000000     13 10 55.51 +23 20 00.8  17.24 52.0963877454596 -22.4895734 118.4796 /L   0.9465     0.184      0.134
+2458879.500000000     13 10 54.43 +23 20 37.1  17.24 52.0835940741697 -22.2235150 119.3386 /L   0.9389     0.184      0.133
+2458880.500000000     13 10 53.27 +23 21 13.6  17.23 52.0709529992902 -21.9505601 120.1945 /L   0.9311     0.183      0.133
+2458881.500000000     13 10 52.04 +23 21 50.1  17.23 52.0584684176161 -21.6708866 121.0469 /L   0.9232     0.183      0.132
+2458882.500000000     13 10 50.73 +23 22 26.9  17.23 52.0461441224593 -21.3846786 121.8958 /L   0.9150     0.183      0.132
+2458883.500000000     13 10 49.34 +23 23 03.7  17.23 52.0339837997196 -21.0921273 122.7409 /L   0.9067     0.182      0.131
+2458884.500000000  m  13 10 47.89 +23 23 40.6  17.23 52.0219910237416 -20.7934305 123.5821 /L   0.8983     0.182      0.131
+2458885.500000000  m  13 10 46.36 +23 24 17.7  17.23 52.0101692550509 -20.4887863 124.4191 /L   0.8897     0.181      0.130
+2458886.500000000  m  13 10 44.76 +23 24 54.8  17.23 51.9985218431529 -20.1783819 125.2518 /L   0.8809     0.181      0.130
+2458887.500000000  m  13 10 43.08 +23 25 32.0  17.22 51.9870520381392 -19.8623744 126.0799 /L   0.8720     0.180      0.129
+2458888.500000000  m  13 10 41.33 +23 26 09.2  17.22 51.9757630139242 -19.5408703 126.9031 /L   0.8630     0.180      0.129
+2458889.500000000  m  13 10 39.52 +23 26 46.5  17.22 51.9646579027340 -19.2139091 127.7214 /L   0.8539     0.179      0.128
+2458890.500000000  m  13 10 37.63 +23 27 23.8  17.22 51.9537398354708 -18.8814604 128.5343 /L   0.8446     0.179      0.128
+2458891.500000000  m  13 10 35.67 +23 28 01.1  17.22 51.9430119782617 -18.5434403 129.3418 /L   0.8353     0.178      0.127
+2458892.500000000  m  13 10 33.65 +23 28 38.4  17.22 51.9324775551541 -18.1997414 130.1433 /L   0.8259     0.177      0.127
+2458893.500000000  m  13 10 31.56 +23 29 15.7  17.22 51.9221398515773 -17.8502672 130.9388 /L   0.8163     0.177      0.126
+2458894.500000000  m  13 10 29.40 +23 29 53.0  17.21 51.9120022000996 -17.4949579 131.7279 /L   0.8067     0.176      0.126
+2458895.500000000  m  13 10 27.17 +23 30 30.2  17.21 51.9020679549938 -17.1338028 132.5101 /L   0.7970     0.175      0.126
+2458896.500000000  m  13 10 24.87 +23 31 07.4  17.21 51.8923404630782 -16.7668415 133.2852 /L   0.7873     0.175      0.125
+2458897.500000000     13 10 22.52 +23 31 44.5  17.21 51.8828230362219 -16.3941578 134.0528 /L   0.7775     0.174      0.125
+2458898.500000000     13 10 20.09 +23 32 21.6  17.21 51.8735189280010 -16.0158721 134.8124 /L   0.7677     0.173      0.124
+2458899.500000000     13 10 17.61 +23 32 58.6  17.21 51.8644313148237 -15.6321340 135.5637 /L   0.7578     0.173      0.124
+2458900.500000000     13 10 15.06 +23 33 35.4  17.21 51.8555632808383 -15.2431162 136.3061 /L   0.7479     0.172      0.124
+2458901.500000000     13 10 12.45 +23 34 12.2  17.20 51.8469178058053 -14.8490105 137.0393 /L   0.7380     0.171      0.123
+2458902.500000000     13 10 09.78 +23 34 48.8  17.20 51.8384977554075 -14.4500234 137.7625 /L   0.7282     0.170      0.123
+2458903.500000000     13 10 07.05 +23 35 25.2  17.20 51.8303058737993 -14.0463723 138.4755 /L   0.7183     0.169      0.123
+2458904.500000000     13 10 04.26 +23 36 01.5  17.20 51.8223447783649 -13.6382820 139.1775 /L   0.7085     0.169      0.122
+2458905.500000000     13 10 01.42 +23 36 37.6  17.20 51.8146169566007 -13.2259809 139.8680 /L   0.6988     0.168      0.122
+2458906.500000000     13 09 58.52 +23 37 13.6  17.20 51.8071247648286 -12.8096982 140.5465 /L   0.6891     0.167      0.122
+2458907.500000000     13 09 55.56 +23 37 49.3  17.20 51.7998704281988 -12.3896626 141.2121 /L   0.6794     0.166      0.121
+2458908.500000000     13 09 52.55 +23 38 24.8  17.19 51.7928560412889 -11.9661016 141.8644 /L   0.6699     0.165      0.121
+$$EOE
+***************************************************************************************************************************
+Column meaning:
+
+TIME
+
+  Times PRIOR to 1962 are UT1, a mean-solar time closely related to the
+prior but now-deprecated GMT. Times AFTER 1962 are in UTC, the current
+civil or "wall-clock" time-scale. UTC is kept within 0.9 seconds of UT1
+using integer leap-seconds for 1972 and later years.
+
+  Conversion from the internal Barycentric Dynamical Time (TDB) of solar
+system dynamics to the non-uniform civil UT time-scale requested for output
+has not been determined for UTC times after the next July or January 1st.
+Therefore, the last known leap-second is used as a constant over future
+intervals.
+
+  Time tags refer to the UT time-scale conversion on Earth regardless of
+observer location within the solar system, where clock rates may differ
+due to the local gravity field and there is no precisely defined or adopted
+"UT" analog timescale.
+
+  Any 'b' symbol in the 1st-column denotes a B.C. date. First-column blank
+(" ") denotes an A.D. date. Calendar dates prior to 1582-Oct-15 are in the
+Julian calendar system. Later calendar dates are in the Gregorian system.
+
+  NOTE: "n.a." in output means quantity "not available" at the print-time.
+
+SOLAR PRESENCE (OBSERVING SITE)
+  Time tag is followed by a blank, then a solar-presence symbol:
+
+        '*'  Daylight (refracted solar upper-limb on or above apparent horizon)
+        'C'  Civil twilight/dawn
+        'N'  Nautical twilight/dawn
+        'A'  Astronomical twilight/dawn
+        ' '  Night OR geocentric ephemeris
+
+LUNAR PRESENCE (OBSERVING SITE)
+  The solar-presence symbol is immediately followed by a lunar-presence symbol:
+
+        'm'  Refracted upper-limb of Moon on or above apparent horizon
+        ' '  Refracted upper-limb of Moon below apparent horizon OR geocentric
+             ephemeris
+
+STATISTICAL UNCERTAINTIES
+
+  Output includes formal +/- 3 standard-deviation statistical orbit uncertainty
+quantities. There is a 99.7% chance the actual value is within given bounds.
+These statistical calculations assume observational data errors are random. If
+there are systematic biases (such as timing, reduction or star-catalog errors),
+results can be optimistic. Because the epoch covariance is mapped using
+linearized variational partial derivatives, results can also be optimistic for
+times far from the solution epoch, particularly for objects having close
+planetary encounters.
+
+ R.A._____(ICRF)_____DEC =
+  Astrometric right ascension and declination of the target center with
+respect to the observing site (coordinate origin) in the reference frame of
+the planetary ephemeris (ICRF). Compensated for down-leg light-time delay
+aberration.
+
+  Units: RA  in hours-minutes-seconds of time   (HH MM SS.ff)
+         DEC in degrees-minutes-seconds of arc  (sDD MN SC.f)
+
+ APmag =
+   Asteroid's approximate apparent visual magnitude from the standard
+IAU H-G magnitude relationship:
+   APmag = H + 5*log10(delta) + 5*log10(r) - 2.5*log10((1-G)*phi1 + G*phi2).
+For solar phase angles > 90 deg, the error could exceed 1 magnitude. For phase
+angles > 120 degrees, output values are rounded to the nearest integer to
+indicate error could be large and unknown.
+   Units: MAGNITUDE
+
+ delta  deldot =
+   Range ("delta") and range-rate ("delta-dot") of target center with respect
+to the observer at the instant light seen by the observer at print-time would
+have left the target center (print-time minus down-leg light-time); the
+distance traveled by a light ray emanating from the center of the target and
+recorded by the observer at print-time. "deldot" is a projection of the
+velocity vector along this ray, the light-time-corrected line-of-sight from
+the coordinate center, and indicates relative motion. A positive "deldot"
+means the target center is moving away from the observer (coordinate center).
+A negative "deldot" means the target center is moving toward the observer.
+Units: AU and KM/S
+
+ S-O-T /r =
+    Sun-Observer-Target angle; target's apparent SOLAR ELONGATION seen from
+the observer location at print-time. Angular units: DEGREES
+
+    The '/r' column indicates the target's apparent position relative to
+the Sun in the observer's sky, as described below:
+
+    For an observing location on the surface of a rotating body
+(considering its rotational sense):
+
+    /T indicates target TRAILS Sun (evening sky; rises and sets AFTER Sun)
+    /L indicates target LEADS Sun  (morning sky; rises and sets BEFORE Sun)
+
+For an observing point NOT on a rotating body (such as a spacecraft), the
+"leading" and "trailing" condition is defined by the observer's
+heliocentric orbital motion: if continuing in the observer's current
+direction of heliocentric motion would encounter the target's apparent
+longitude first, followed by the Sun's, the target LEADS the Sun as seen by
+the observer. If the Sun's apparent longitude would be encountered first,
+followed by the target's, the target TRAILS the Sun.
+
+NOTE: The S-O-T solar elongation angle is numerically the minimum
+separation angle of the Sun and target in the sky in any direction. It
+does NOT indicate the amount of separation in the leading or trailing
+directions, which are defined in the equator of a spherical coordinate
+system.
+
+ S-T-O =
+   "S-T-O" is the Sun->Target->Observer angle; the interior vertex angle at
+target center formed by a vector to the apparent center of the Sun at
+reflection time on the target and the apparent vector to the observer at
+print-time. Slightly different from true PHASE ANGLE (requestable separately)
+at the few arcsecond level in that it includes stellar aberration on the
+down-leg from target to observer.  Units: DEGREES
+
+ RA_3sigma DEC_3sigma =
+  Uncertainty in Right-Ascension and Declination. Output values are the formal
++/- 3 standard-deviations (sigmas) around nominal position. Units: ARCSECONDS
+
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+
+***************************************************************************************************************************
+*******************************************************************************
+JPL/HORIZONS             136472 Makemake (2005 FY9)        2020-Feb-11 14:02:10
+Rec #:  136472 (+COV) Soln.date: 2019-May-30_07:13:05   # obs: 1949 (1955-2019)
+
+IAU76/J2000 helio. ecliptic osc. elements (au, days, deg., period=Julian yrs):
+
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+   A= 45.64343693332217    MA= 155.2657054431733   ADIST= 52.84605423886966
+   PER= 308.37256          N= .003196219           ANGMOM= .114761145
+   DAN= 41.50451           DDN= 47.97743           L= 19.8421916
+   B= -25.532549           MOID= 37.54140091       TP= 1881-Jan-27.0732444809
+
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+
+ASTEROID comments:
+1: soln ref.= JPL#91, OCC=2
+2: source=ORB
+*******************************************************************************
+
+
+*******************************************************************************
+Ephemeris / WWW_USER Tue Feb 11 14:02:10 2020 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: 136472 Makemake (2005 FY9)      {source: JPL#91}
+Center body name: Earth (399)                     {source: DE431}
+Center-site name: Siding Spring-LCOGT A
+*******************************************************************************
+Start time      : A.D. 2020-Jan-30 00:00:00.0000 UT
+Stop  time      : A.D. 2020-Feb-29 00:00:00.0000 UT
+Step-size       : 1440 minutes
+*******************************************************************************
+Target pole/equ : No model available
+Target radii    : (unavailable)
+Center geodetic : 149.070600,-31.272987,1.1750341 {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 149.070600,5457.34528,-3292.410 {E-lon(deg),Dxy(km),Dz(km)}
+Center pole/equ : High-precision EOP model        {East-longitude positive}
+Center radii    : 6378.1 x 6378.1 x 6356.8 km     {Equator, meridian, pole}
+Target primary  : Sun
+Vis. interferer : MOON (R_eq= 1737.400) km        {source: DE431}
+Rel. light bend : Sun, EARTH                      {source: DE431}
+Rel. lght bnd GM: 1.3271E+11, 3.9860E+05 km^3/s^2
+Small-body perts: Yes                             {source: SB431-N16}
+Atmos refraction: NO (AIRLESS)
+RA format       : HMS
+Time format     : JD
+EOP file        : eop.200210.p200503
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2020-FEB-10. PREDICTS-> 2020-MAY-02
+Units conversion: 1 au= 149597870.700 km, c= 299792.458 km/s, 1 day= 86400.0 s
+Table cut-offs 1: Elevation (-90.0deg=NO ),Airmass (>38.000=NO), Daylight (NO )
+Table cut-offs 2: Solar elongation (  0.0,180.0=NO ),Local Hour Angle( 0.0=NO )
+Table cut-offs 3: RA/DEC angular rate (     0.0=NO )
+*******************************************************************************
+Initial IAU76/J2000 heliocentric ecliptic osculating elements (au, days, deg.):
+  EPOCH=  2456685.5 ! 2014-Jan-28.00 (TDB)         Residual RMS= .29893
+   EC= .1578018175114501   QR= 38.44081962777469   TP= 2408107.5732444809
+   OM= 79.3100646538354    W=  297.2844380342058   IN= 29.01129634081993
+  Equivalent ICRF heliocentric equatorial cartesian coordinates (au, au/d):
+   X=-4.594801534867052E+01  Y=-9.620475793810611E+00  Z= 2.316346263166737E+01
+  VX=-2.210217587691426E-04 VY=-1.960899352961049E-03 VZ=-9.635666653763773E-04
+Asteroid physical parameters (km, seconds, rotational period in hours):
+   GM= n.a.                RAD= n.a.               ROTPER= 22.48
+   H= -.100                G= .150                 B-V= n.a.
+                           ALBEDO= n.a.            STYP= n.a.
+***************************************************************************************************************************
+Date_________JDUT     R.A._____(ICRF)_____DEC  APmag            delta      deldot    S-O-T /r    S-T-O RA_3sigma DEC_3sigma
+***************************************************************************************************************************
+$$SOE
+2458878.500000000 *m  13 10 55.49 +23 20 00.9  17.24 52.0964268193931 -21.9210153 118.4795 /L   0.9464     0.184      0.134
+2458879.500000000 *   13 10 54.41 +23 20 37.2  17.24 52.0836340507385 -21.6592092 119.3386 /L   0.9388     0.184      0.133
+2458880.500000000 *   13 10 53.25 +23 21 13.7  17.23 52.0709938718657 -21.3906760 120.1944 /L   0.9310     0.183      0.133
+2458881.500000000 *   13 10 52.02 +23 21 50.3  17.23 52.0585101792924 -21.1155927 121.0468 /L   0.9230     0.183      0.132
+2458882.500000000 *   13 10 50.71 +23 22 27.0  17.23 52.0461867660547 -20.8341417 121.8957 /L   0.9149     0.183      0.132
+2458883.500000000 *   13 10 49.33 +23 23 03.8  17.23 52.0340273177788 -20.5465132 122.7408 /L   0.9066     0.182      0.131
+2458884.500000000 *   13 10 47.87 +23 23 40.8  17.23 52.0220354085375 -20.2529035 123.5820 /L   0.8981     0.182      0.131
+2458885.500000000 *   13 10 46.34 +23 24 17.8  17.23 52.0102144985870 -19.9535093 124.4190 /L   0.8895     0.181      0.130
+2458886.500000000 *   13 10 44.74 +23 24 54.9  17.23 51.9985679371663 -19.6485162 125.2517 /L   0.8808     0.181      0.130
+2458887.500000000 *   13 10 43.07 +23 25 32.1  17.22 51.9870989741038 -19.3380799 126.0797 /L   0.8719     0.180      0.129
+2458888.500000000 *   13 10 41.32 +23 26 09.3  17.22 51.9758107830535 -19.0223053 126.9030 /L   0.8629     0.180      0.129
+2458889.500000000 *   13 10 39.50 +23 26 46.6  17.22 51.9647064959845 -18.7012302 127.7212 /L   0.8538     0.179      0.128
+2458890.500000000 *   13 10 37.62 +23 27 23.9  17.22 51.9537892435448 -18.3748226 128.5342 /L   0.8445     0.179      0.128
+2458891.500000000 *   13 10 35.66 +23 28 01.2  17.22 51.9430621916089 -18.0429969 129.3416 /L   0.8352     0.178      0.127
+2458892.500000000 *   13 10 33.63 +23 28 38.5  17.22 51.9325285639731 -17.7056438 130.1431 /L   0.8257     0.177      0.127
+2458893.500000000 *m  13 10 31.54 +23 29 15.8  17.22 51.9221916458173 -17.3626651 130.9386 /L   0.8162     0.177      0.126
+2458894.500000000 *m  13 10 29.38 +23 29 53.1  17.21 51.9120547694629 -17.0139990 131.7276 /L   0.8066     0.176      0.126
+2458895.500000000 *m  13 10 27.15 +23 30 30.3  17.21 51.9021212889384 -16.6596329 132.5099 /L   0.7969     0.175      0.126
+2458896.500000000 *m  13 10 24.86 +23 31 07.5  17.21 51.8923945508215 -16.2996044 133.2850 /L   0.7872     0.175      0.125
+2458897.500000000 *m  13 10 22.50 +23 31 44.6  17.21 51.8828778667442 -15.9339952 134.0525 /L   0.7774     0.174      0.125
+2458898.500000000 *m  13 10 20.08 +23 32 21.7  17.21 51.8735744900492 -15.5629237 134.8121 /L   0.7675     0.173      0.124
+2458899.500000000 *m  13 10 17.59 +23 32 58.7  17.21 51.8644875969152 -15.1865373 135.5634 /L   0.7577     0.173      0.124
+2458900.500000000 *m  13 10 15.05 +23 33 35.5  17.21 51.8556202712643 -14.8050067 136.3058 /L   0.7478     0.172      0.124
+2458901.500000000 *m  13 10 12.44 +23 34 12.2  17.20 51.8469754926344 -14.4185213 137.0388 /L   0.7379     0.171      0.123
+2458902.500000000 *m  13 10 09.77 +23 34 48.9  17.20 51.8385561264894 -14.0272853 137.7621 /L   0.7280     0.170      0.123
+2458903.500000000 *m  13 10 07.04 +23 35 25.3  17.20 51.8303649167678 -13.6315140 138.4750 /L   0.7182     0.169      0.123
+2458904.500000000 *m  13 10 04.25 +23 36 01.6  17.20 51.8224044806417 -13.2314298 139.1770 /L   0.7084     0.169      0.122
+2458905.500000000 *m  13 10 01.41 +23 36 37.7  17.20 51.8146773053988 -12.8272585 139.8675 /L   0.6986     0.168      0.122
+2458906.500000000 *m  13 09 58.51 +23 37 13.7  17.20 51.8071857471559 -12.4192271 140.5459 /L   0.6889     0.167      0.122
+2458907.500000000 *m  13 09 55.55 +23 37 49.4  17.20 51.7999320308620 -12.0075618 141.2115 /L   0.6793     0.166      0.121
+2458908.500000000 *   13 09 52.54 +23 38 24.9  17.19 51.7929182508972 -11.5924874 141.8637 /L   0.6698     0.165      0.121
+$$EOE
+***************************************************************************************************************************
+Column meaning:
+
+TIME
+
+  Times PRIOR to 1962 are UT1, a mean-solar time closely related to the
+prior but now-deprecated GMT. Times AFTER 1962 are in UTC, the current
+civil or "wall-clock" time-scale. UTC is kept within 0.9 seconds of UT1
+using integer leap-seconds for 1972 and later years.
+
+  Conversion from the internal Barycentric Dynamical Time (TDB) of solar
+system dynamics to the non-uniform civil UT time-scale requested for output
+has not been determined for UTC times after the next July or January 1st.
+Therefore, the last known leap-second is used as a constant over future
+intervals.
+
+  Time tags refer to the UT time-scale conversion on Earth regardless of
+observer location within the solar system, where clock rates may differ
+due to the local gravity field and there is no precisely defined or adopted
+"UT" analog timescale.
+
+  Any 'b' symbol in the 1st-column denotes a B.C. date. First-column blank
+(" ") denotes an A.D. date. Calendar dates prior to 1582-Oct-15 are in the
+Julian calendar system. Later calendar dates are in the Gregorian system.
+
+  NOTE: "n.a." in output means quantity "not available" at the print-time.
+
+SOLAR PRESENCE (OBSERVING SITE)
+  Time tag is followed by a blank, then a solar-presence symbol:
+
+        '*'  Daylight (refracted solar upper-limb on or above apparent horizon)
+        'C'  Civil twilight/dawn
+        'N'  Nautical twilight/dawn
+        'A'  Astronomical twilight/dawn
+        ' '  Night OR geocentric ephemeris
+
+LUNAR PRESENCE (OBSERVING SITE)
+  The solar-presence symbol is immediately followed by a lunar-presence symbol:
+
+        'm'  Refracted upper-limb of Moon on or above apparent horizon
+        ' '  Refracted upper-limb of Moon below apparent horizon OR geocentric
+             ephemeris
+
+STATISTICAL UNCERTAINTIES
+
+  Output includes formal +/- 3 standard-deviation statistical orbit uncertainty
+quantities. There is a 99.7% chance the actual value is within given bounds.
+These statistical calculations assume observational data errors are random. If
+there are systematic biases (such as timing, reduction or star-catalog errors),
+results can be optimistic. Because the epoch covariance is mapped using
+linearized variational partial derivatives, results can also be optimistic for
+times far from the solution epoch, particularly for objects having close
+planetary encounters.
+
+ R.A._____(ICRF)_____DEC =
+  Astrometric right ascension and declination of the target center with
+respect to the observing site (coordinate origin) in the reference frame of
+the planetary ephemeris (ICRF). Compensated for down-leg light-time delay
+aberration.
+
+  Units: RA  in hours-minutes-seconds of time   (HH MM SS.ff)
+         DEC in degrees-minutes-seconds of arc  (sDD MN SC.f)
+
+ APmag =
+   Asteroid's approximate apparent visual magnitude from the standard
+IAU H-G magnitude relationship:
+   APmag = H + 5*log10(delta) + 5*log10(r) - 2.5*log10((1-G)*phi1 + G*phi2).
+For solar phase angles > 90 deg, the error could exceed 1 magnitude. For phase
+angles > 120 degrees, output values are rounded to the nearest integer to
+indicate error could be large and unknown.
+   Units: MAGNITUDE
+
+ delta  deldot =
+   Range ("delta") and range-rate ("delta-dot") of target center with respect
+to the observer at the instant light seen by the observer at print-time would
+have left the target center (print-time minus down-leg light-time); the
+distance traveled by a light ray emanating from the center of the target and
+recorded by the observer at print-time. "deldot" is a projection of the
+velocity vector along this ray, the light-time-corrected line-of-sight from
+the coordinate center, and indicates relative motion. A positive "deldot"
+means the target center is moving away from the observer (coordinate center).
+A negative "deldot" means the target center is moving toward the observer.
+Units: AU and KM/S
+
+ S-O-T /r =
+    Sun-Observer-Target angle; target's apparent SOLAR ELONGATION seen from
+the observer location at print-time. Angular units: DEGREES
+
+    The '/r' column indicates the target's apparent position relative to
+the Sun in the observer's sky, as described below:
+
+    For an observing location on the surface of a rotating body
+(considering its rotational sense):
+
+    /T indicates target TRAILS Sun (evening sky; rises and sets AFTER Sun)
+    /L indicates target LEADS Sun  (morning sky; rises and sets BEFORE Sun)
+
+For an observing point NOT on a rotating body (such as a spacecraft), the
+"leading" and "trailing" condition is defined by the observer's
+heliocentric orbital motion: if continuing in the observer's current
+direction of heliocentric motion would encounter the target's apparent
+longitude first, followed by the Sun's, the target LEADS the Sun as seen by
+the observer. If the Sun's apparent longitude would be encountered first,
+followed by the target's, the target TRAILS the Sun.
+
+NOTE: The S-O-T solar elongation angle is numerically the minimum
+separation angle of the Sun and target in the sky in any direction. It
+does NOT indicate the amount of separation in the leading or trailing
+directions, which are defined in the equator of a spherical coordinate
+system.
+
+ S-T-O =
+   "S-T-O" is the Sun->Target->Observer angle; the interior vertex angle at
+target center formed by a vector to the apparent center of the Sun at
+reflection time on the target and the apparent vector to the observer at
+print-time. Slightly different from true PHASE ANGLE (requestable separately)
+at the few arcsecond level in that it includes stellar aberration on the
+down-leg from target to observer.  Units: DEGREES
+
+ RA_3sigma DEC_3sigma =
+  Uncertainty in Right-Ascension and Declination. Output values are the formal
++/- 3 standard-deviations (sigmas) around nominal position. Units: ARCSECONDS
+
+
+ Computations by ...
+     Solar System Dynamics Group, Horizons On-Line Ephemeris System
+     4800 Oak Grove Drive, Jet Propulsion Laboratory
+     Pasadena, CA  91109   USA
+     Information: http://ssd.jpl.nasa.gov/
+     Connect    : telnet://ssd.jpl.nasa.gov:6775  (via browser)
+                  telnet ssd.jpl.nasa.gov 6775    (via command-line)
+     Author     : Jon.D.Giorgini@jpl.nasa.gov
+
+***************************************************************************************************************************

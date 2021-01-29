@@ -55,9 +55,6 @@ def get_service_class(name):
         raise ImportError('Could not a find a facility with that name. Did you add it to TOM_FACILITY_CLASSES?')
 
 
-# TODO: Ensure docstrings are up to date
-
-
 class BaseObservationForm(forms.Form):
     """
     This is the class that is responsible for displaying the observation request form.
@@ -66,7 +63,7 @@ class BaseObservationForm(forms.Form):
     the other BaseObservationForms.
 
     For an implementation example please see
-    https://github.com/TOMToolkit/tom_base/blob/master/tom_observations/facilities/lco.py#L132
+    https://github.com/TOMToolkit/tom_base/blob/main/tom_observations/facilities/lco.py#L132
     """
     facility = forms.CharField(required=True, max_length=50, widget=forms.HiddenInput())
     target_id = forms.IntegerField(required=True, widget=forms.HiddenInput())
@@ -134,7 +131,7 @@ class BaseRoboticObservationForm(BaseObservationForm):
     This specific class is intended for use with robotic facilities, such as LCO, Gemini, and SOAR.
 
     For an implementation example please see
-    https://github.com/TOMToolkit/tom_base/blob/master/tom_observations/facilities/lco.py#L132
+    https://github.com/TOMToolkit/tom_base/blob/main/tom_observations/facilities/lco.py#L132
     """
     pass
 
@@ -156,7 +153,7 @@ class BaseManualObservationForm(BaseObservationForm):
     This specific class is intended for use with classical-style manual facilities.
 
     For an implementation example please see
-    https://github.com/TOMToolkit/tom_base/blob/master/tom_observations/facilities/lco.py#L132
+    https://github.com/TOMToolkit/tom_base/blob/main/tom_observations/facilities/lco.py#L132
     """
     name = forms.CharField()
     start = forms.CharField(widget=forms.TextInput(attrs={'type': 'date'}))
@@ -216,6 +213,7 @@ class BaseObservationFacility(ABC):
         """
         pass
 
+    # TODO: consider making submit_observation create ObservationRecords as well
     @abstractmethod
     def submit_observation(self, observation_payload):
         """
@@ -334,7 +332,7 @@ class BaseRoboticObservationFacility(BaseObservationFacility):
     This specific class is intended for use with robotic facilities, such as LCO, Gemini, and SOAR.
 
     For an implementation example, please see
-    https://github.com/TOMToolkit/tom_base/blob/master/tom_observations/facilities/lco.py
+    https://github.com/TOMToolkit/tom_base/blob/main/tom_observations/facilities/lco.py
     """
     name = 'BaseRobotic'  # rename in concrete subclasses
 
@@ -422,7 +420,5 @@ class BaseManualObservationFacility(BaseObservationFacility):
     ``TOM_FACILITY_CLASSES`` in your ``settings.py``.
 
     This specific class is intended for use with classical-style manual facilities.
-
-    TODO: Add an implementation example.
     """
     name = 'BaseManual'  # rename in concrete subclasses

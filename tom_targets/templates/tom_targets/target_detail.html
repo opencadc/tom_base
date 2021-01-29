@@ -1,7 +1,8 @@
 {% extends 'tom_common/base.html' %}
-{% load comments bootstrap4 tom_common_extras targets_extras observation_extras dataproduct_extras publication_extras static cache %}
+{% load comments bootstrap4 tom_common_extras targets_extras observation_extras dataproduct_extras static cache nonsidereal_airmass_extras %}
 {% block title %}Target {{ object.name }}{% endblock %}
 {% block additional_css %}
+<link rel="stylesheet" href="{% static 'tom_common/css/main.css' %}">
 <link rel="stylesheet" href="{% static 'tom_targets/css/main.css' %}">
 {% endblock %}
 {% bootstrap_javascript jquery='True' %}
@@ -14,14 +15,19 @@
       <div class="alert alert-success">
         {{ object.future_observations|length }} upcoming observation{{ object.future_observations|pluralize }}
       </div>
+      {% target_unknown_statuses object %}
       {% endif %}
       {% target_buttons object %}
+      {% if object.type == 'NON_SIDEREAL' %}
+      {% target_ssois object %}
+      {% endif %}
       {% target_data object %}
       {% recent_photometry object limit=3 %}
       {% if object.type == 'SIDEREAL' %}
       {% aladin object %}
+      {% elif object.type == 'NON_SIDEREAL' %}
+      {% aladin_nonsidereal %}
       {% endif %}
-      
     </div>
   </div>
   <div class="col-md-8">
@@ -53,14 +59,19 @@
         <h4>Observe</h4>
         {% observing_buttons object %}
         <hr/>
-        {% observingstrategy_run object %}
+        {% observationtemplate_run object %}
         <hr/>
+        {% if object.type == 'NON_SIDEREAL' %}
+          <h4>Tile</h4>
+          {% tile_plan %}
+          <hr/>
+        {% endif %}
         <h4>Plan</h4>
         {% if object.type == 'SIDEREAL' %}
           {% target_plan %}
           {% moon_distance object %}
         {% elif target.type == 'NON_SIDEREAL' %}
-          <p>Airmass plotting for non-sidereal targets is not currently supported. If you would like to add this functionality, please check out the <a href="https://github.com/TOMToolkit/tom_nonsidereal_airmass" target="_blank">non-sidereal airmass plugin.</a></p>
+          {% nonsidereal_target_plan %}
         {% endif %}
       </div>
       <div class="tab-pane" id="observations">

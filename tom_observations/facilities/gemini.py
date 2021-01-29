@@ -1,13 +1,22 @@
+import logging
 import requests
+
 from django.conf import settings
 from django import forms
 from dateutil.parser import parse
 from crispy_forms.layout import Layout, Div, HTML
-from astropy import units as u
+from astropy import units as u, time
+import numpy as np
 
 from tom_observations.facility import BaseRoboticObservationFacility, BaseRoboticObservationForm
 from tom_common.exceptions import ImproperCredentialsException
 from tom_targets.models import Target
+from tom_observations.facilities.utils import reconstruct_gemini_eph_note, add_month, get_hex
+
+import json
+
+
+logger = logging.getLogger(__name__)
 
 try:
     GEM_SETTINGS = settings.FACILITIES['GEM']
@@ -35,6 +44,7 @@ except KeyError:
     }
 
 PORTAL_URL = GEM_SETTINGS['portal_url']
+VALID_OBSERVING_STATES = ['TRIGGERED', 'ON_HOLD']
 TERMINAL_OBSERVING_STATES = ['TRIGGERED', 'ON_HOLD']
 
 # Units of flux and wavelength for converting to Specutils Spectrum1D objects
@@ -60,7 +70,7 @@ SITES = {
 def make_request(*args, **kwargs):
     response = requests.request(*args, **kwargs)
     if 400 <= response.status_code < 500:
-        print('Request failed: {}'.format(response.content))
+        logger.log(msg=f'Gemini request failed: {response.content}', level=logging.WARN)
         raise ImproperCredentialsException('GEM')
     response.raise_for_status()
     return response
@@ -140,7 +150,7 @@ class GEMObservationForm(BaseRoboticObservationForm):
     ra             - target RA [J2000], format 'HH:MM:SS.SS'
     dec            - target Dec[J2000], format 'DD:MM:SS.SSS'
     mags           - target magnitude information (optional)
-    noteTitle      - title for the note, "Finding Chart" if not provided (optional)
+    notetitle      - title for the note, "Finding Chart" if not provided (optional)
     note           - text to include in a "Finding Chart" note (optional)
     posangle       - position angle [degrees E of N], defaults to 0 (optional)
     exptime        - exposure time [seconds], if not given then value in template used (optional)
@@ -257,6 +267,28 @@ class GEMObservationForm(BaseRoboticObservationForm):
                                    label='Timing Window [Date Time]')
     window_duration = forms.IntegerField(required=False, min_value=1, label='Timing Window Duration [hr]')
 
+
+    def __init__(self, *args, **kwargs):
+        # the ephemeris target stuff must come before super()
+        self.eph_target = False
+        if 'initial' in kwargs:
+            target = Target.objects.get(pk=kwargs['initial']['target_id'])
+            if target.type == Target.NON_SIDEREAL:
+                if target.scheme == 'EPHEMERIS':
+                    self.eph_target = True
+                    eph_json = json.loads(target.eph_json)
+                    self.eph_GN = reconstruct_gemini_eph_note(eph_json, site='mko')
+                    self.eph_GS = reconstruct_gemini_eph_note(eph_json, site='cpo')
+
+        super().__init__(*args, **kwargs)
+        self.helper.layout = Layout(
+            self.common_layout,
+            self.layout(),
+            #self.cadence_layout,
+            self.button_layout()
+        )
+
+
     def layout(self):
         return Div(
             HTML('<big>Observation Parameters</big>'),
@@ -310,8 +342,14 @@ class GEMObservationForm(BaseRoboticObservationForm):
                     css_class='col'
                 ),
                 css_class='form-row',
-            )
+            ),
+            self.extra_layout()
         )
+
+    def extra_layout(self):
+        # If you just want to add some fields to the end of the form, add them here.
+        return Div()
+
 
     def is_valid(self):
         super().is_valid()
@@ -355,14 +393,39 @@ class GEMObservationForm(BaseRoboticObservationForm):
             ii = obs.rfind('-')
             progid = obs[0:ii]
             obsnum = obs[ii+1:]
+
+            if not self.eph_target:
+                RA, DEC = target.ra, target.dec
+            else:
+                RA, DEC = 0.0, 0.0
+                if self.cleaned_data['window_start'].strip() != '':
+                    wdate, wtime = isodatetime(self.cleaned_data['window_start'])
+                    dtime = float(str(self.cleaned_data['window_duration']).strip())
+                    time_obj = time.Time(wdate+' '+wtime)
+                    min_mjd = time_obj.mjd
+                    max_mjd = (time_obj + dtime/24.0).mjd
+
+                    if obs[:2] == 'GN':
+                        mjds = self.eph_GN[1]
+                    else:
+                        mjds = self.eph_GS[1]
+                    mjd_k = max(0, np.sum(np.less_equal(mjds, min_mjd))-1)
+                    mjd_K = min(len(mjds), np.sum(np.less_equal(mjds, max_mjd))+1)
+
+                    #mjd_K = mjd_k + 52
+
+                else:
+                    mjd_k = 0
+                    mjd_K = 0
+
             payload = {
                 "prog": progid,
                 "password": GEM_SETTINGS['api_key'][get_site(obs)],
                 "email": GEM_SETTINGS['user_email'],
                 "obsnum": obsnum,
                 "target": target.name,
-                "ra": target.ra,
-                "dec": target.dec,
+                "ra": RA,
+                "dec": DEC,
                 "ready": self.cleaned_data['ready']
             }
 
@@ -370,6 +433,21 @@ class GEMObservationForm(BaseRoboticObservationForm):
                 payload["noteTitle"] = self.cleaned_data['notetitle']
                 payload["note"] = self.cleaned_data['note']
 
+            if self.eph_target:
+                if 'noteTitle' not in payload:
+                    payload['noteTitle'] = 'Ephemeris'
+                    payload['note'] = ''
+                else:
+                    payload['noteTitle'] += ' and Ephemeris'
+
+                if obs[:2] == 'GN':
+                    note_text = self.eph_GN[0][0:4] + self.eph_GN[0][mjd_k:mjd_K] + self.eph_GN[0][-2:]
+                    payload['note'] += "\n\n"
+                    payload['note'] += "\n".join(note_text)
+                elif obs[:2] == 'GS':
+                    note_text = self.eph_GS[0][0:4] + self.eph_GS[0][mjd_k:mjd_K] + self.eph_GS[0][-2:]
+                    payload['note'] += "\n\n"
+                    payload['note'] += "\n".join(note_text)
             if self.cleaned_data['brightness'] is not None:
                 smags = str(self.cleaned_data['brightness']).strip() + '/' + \
                     self.cleaned_data['brightness_band'] + '/' + \
@@ -388,6 +466,7 @@ class GEMObservationForm(BaseRoboticObservationForm):
                 payload['windowDate'] = wdate
                 payload['windowTime'] = wtime
                 payload['windowDuration'] = str(self.cleaned_data['window_duration']).strip()
+
 
             # elevation/airmass
             if self.cleaned_data['eltype'] is not None:
@@ -426,7 +505,9 @@ class GEMFacility(BaseRoboticObservationFacility):
     """
 
     name = 'GEM'
-    observation_types = [('OBSERVATION', 'Gemini Observation')]
+    observation_forms = {
+        'OBSERVATION': GEMObservationForm
+    }
 
     def get_form(self, observation_type):
         return GEMObservationForm

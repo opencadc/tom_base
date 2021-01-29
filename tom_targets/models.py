@@ -1,10 +1,11 @@
-from django.db import models, transaction
-from django.core.exceptions import ValidationError
-from django.urls import reverse
-from django.forms.models import model_to_dict
-from django.conf import settings
-from dateutil.parser import parse
 from datetime import datetime
+from dateutil.parser import parse
+
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models, transaction
+from django.forms.models import model_to_dict
+from django.urls import reverse
 
 from tom_common.hooks import run_hook
 
@@ -17,19 +18,24 @@ SIDEREAL_FIELDS = GLOBAL_TARGET_FIELDS + [
 NON_SIDEREAL_FIELDS = GLOBAL_TARGET_FIELDS + [
     'scheme', 'mean_anomaly', 'arg_of_perihelion', 'lng_asc_node', 'inclination', 'mean_daily_motion', 'semimajor_axis',
     'eccentricity', 'epoch_of_elements', 'epoch_of_perihelion', 'ephemeris_period', 'ephemeris_period_err',
-    'ephemeris_epoch', 'ephemeris_epoch_err', 'perihdist'
+    'ephemeris_epoch', 'ephemeris_epoch_err', 'perihdist', 'centsite', 'eph_json'
 ]
 
 REQUIRED_SIDEREAL_FIELDS = ['ra', 'dec']
 REQUIRED_NON_SIDEREAL_FIELDS = [
-    'scheme', 'epoch_of_elements', 'inclination', 'lng_asc_node', 'arg_of_perihelion', 'eccentricity',
+    'scheme',
 ]
 # Additional non-sidereal fields that are required for specific orbital element
 # schemes
 REQUIRED_NON_SIDEREAL_FIELDS_PER_SCHEME = {
-    'MPC_COMET': ['perihdist', 'epoch_of_perihelion'],
-    'MPC_MINOR_PLANET': ['mean_anomaly', 'semimajor_axis'],
-    'JPL_MAJOR_PLANET': ['mean_daily_motion', 'mean_anomaly', 'semimajor_axis']
+    'MPC_COMET': ['perihdist', 'epoch_of_perihelion', 'inclination',
+                  'lng_asc_node', 'arg_of_perihelion', 'eccentricity', 'epoch_of_elements'],
+    'MPC_MINOR_PLANET': ['mean_anomaly', 'semimajor_axis', 'inclination',
+                         'lng_asc_node', 'arg_of_perihelion', 'eccentricity', 'epoch_of_elements'],
+    'JPL_MAJOR_PLANET': ['mean_daily_motion', 'mean_anomaly', 'semimajor_axis',
+                         'inclination', 'lng_asc_node', 'arg_of_perihelion',
+                         'eccentricity', 'epoch_of_elements'],
+    'EPHEMERIS': ['eph_json']
 }
 
 
@@ -120,16 +126,21 @@ class Target(models.Model):
 
     :param ephemeris_epoch_err: Days
     :type ephemeris_epoch_err: float
+
+    :param eph_json:
+    : type eph_json: str
     """
 
     SIDEREAL = 'SIDEREAL'
     NON_SIDEREAL = 'NON_SIDEREAL'
+    EPHEMERIS = 'EPHEMERIS'
     TARGET_TYPES = ((SIDEREAL, 'Sidereal'), (NON_SIDEREAL, 'Non-sidereal'))
 
     TARGET_SCHEMES = (
         ('MPC_MINOR_PLANET', 'MPC Minor Planet'),
         ('MPC_COMET', 'MPC Comet'),
-        ('JPL_MAJOR_PLANET', 'JPL Major Planet')
+        ('JPL_MAJOR_PLANET', 'JPL Major Planet'),
+        ('EPHEMERIS', 'Custom Ephemeris')
     )
 
     name = models.CharField(
@@ -226,6 +237,13 @@ class Target(models.Model):
     perihdist = models.FloatField(
         null=True, blank=True, verbose_name='Perihelion Distance', help_text='AU'
     )
+    centsite = models.CharField(
+        max_length=50, null=True, blank=True, verbose_name='Centre-Site Name', help_text='Observatory Site Code'
+    )
+    eph_json = models.TextField(
+        null=True, blank=True, verbose_name='Ephemeris JSON',
+        help_text="Don't fill this in by hand unless you know what you are doing."
+    )
 
     class Meta:
         ordering = ('id',)
@@ -306,7 +324,7 @@ class Target(models.Model):
         :rtype: list
         """
         return [
-            obs for obs in self.observationrecord_set.all().order_by('scheduled_start') if not obs.terminal
+            obs for obs in self.observationrecord_set.exclude(status='').order_by('scheduled_start') if not obs.terminal
         ]
 
     @property
@@ -369,7 +387,7 @@ class TargetName(models.Model):
     :type modified: datetime
     """
     target = models.ForeignKey(Target, on_delete=models.CASCADE, related_name='aliases')
-    name = models.CharField(max_length=100, unique=True, verbose_name='Alias for target')
+    name = models.CharField(max_length=100, unique=True, verbose_name='Alias')
     created = models.DateTimeField(
         auto_now_add=True, help_text='The time which this target name was created.'
     )
@@ -387,7 +405,8 @@ class TargetName(models.Model):
         """
         super().validate_unique(*args, **kwargs)
         if self.name == self.target.name:
-            raise ValidationError('Target name and target aliases must be unique')
+            raise ValidationError(f'''Alias {self.name} has a conflict with the primary name of the target
+                                      {self.target.name} (id={self.target.id})''')
 
 
 class TargetExtra(models.Model):

@@ -5,7 +5,7 @@ from astropy import units
 
 from tom_observations.facility import BaseRoboticObservationFacility, GenericObservationForm
 from tom_observations.facility import BaseManualObservationFacility
-from tom_observations.observing_strategy import GenericStrategyForm
+from tom_observations.observation_template import GenericTemplateForm
 
 # Site data matches built-in pyephem observer data for Los Angeles
 SITES = {
@@ -27,19 +27,21 @@ class FakeFacilityForm(GenericObservationForm):
     test_input = forms.CharField(help_text='fake form input')
 
 
-class FakeFacilityStrategyForm(GenericStrategyForm):
+class FakeFacilityTemplateForm(GenericTemplateForm):
     pass
 
 
 class FakeRoboticFacility(BaseRoboticObservationFacility):
     name = 'FakeRoboticFacility'
-    observation_types = [('FakeRoboticFacility Observation', 'OBSERVATION')]
+    observation_forms = {
+        'OBSERVATION': FakeFacilityForm
+    }
 
     def get_form(self, observation_type):
-        return FakeFacilityForm
+        return self.observation_forms[observation_type]
 
-    def get_strategy_form(self, observation_type):
-        return FakeFacilityStrategyForm
+    def get_template_form(self, observation_type):
+        return FakeFacilityTemplateForm
 
     def get_observing_sites(self):
         return SITES
@@ -75,13 +77,15 @@ class FakeRoboticFacility(BaseRoboticObservationFacility):
 
 class FakeManualFacility(BaseManualObservationFacility):
     name = 'FakeManualFacility'
-    observation_types = [('FakeManualFacility Observation', 'OBSERVATION')]
+    observation_forms = {
+        'OBSERVATION': FakeFacilityForm
+    }
 
     def get_form(self, observation_type):
         return FakeFacilityForm
 
-    def get_strategy_form(self, observation_type):
-        return FakeFacilityStrategyForm
+    def get_template_form(self, observation_type):
+        return FakeFacilityTemplateForm
 
     def get_observing_sites(self):
         return SITES

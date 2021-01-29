@@ -12,7 +12,7 @@ from django.core.management import call_command
 from django.db import transaction
 from django.http import QueryDict, StreamingHttpResponse
 from django.forms import HiddenInput
-from django.shortcuts import redirect
+from django.shortcuts import redirect, redirect
 from django.urls import reverse_lazy, reverse
 from django.utils.text import slugify
 from django.utils.safestring import mark_safe
@@ -20,6 +20,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.views.generic import TemplateView, View
+from django.views.generic.base import RedirectView
 from django_filters.views import FilterView
 
 from guardian.mixins import PermissionListMixin
@@ -28,16 +29,17 @@ from guardian.shortcuts import get_objects_for_user, get_groups_with_perms, assi
 from tom_common.hints import add_hint
 from tom_common.hooks import run_hook
 from tom_common.mixins import Raise403PermissionRequiredMixin
-from tom_observations.observing_strategy import RunStrategyForm
-from tom_observations.models import ObservingStrategy
-from tom_targets.models import Target, TargetList
+from tom_observations.observation_template import ApplyObservationTemplateForm
+from tom_observations.models import ObservationTemplate
+from tom_targets.filters import TargetFilter
 from tom_targets.forms import (
     SiderealTargetCreateForm, NonSiderealTargetCreateForm, TargetExtraFormset, TargetNamesFormset
 )
-from tom_targets.utils import import_targets, export_targets
-from tom_targets.filters import TargetFilter
-from tom_targets.groups import add_all_to_grouping, add_selected_to_grouping
-from tom_targets.groups import remove_all_from_grouping, remove_selected_from_grouping
+from tom_targets.groups import (
+    add_all_to_grouping, add_selected_to_grouping, remove_all_from_grouping, remove_selected_from_grouping
+)
+from tom_targets.models import Target, TargetList
+from tom_targets.utils import import_targets, export_targets, import_ephemeris_target
 
 logger = logging.getLogger(__name__)
 
@@ -306,6 +308,26 @@ class TargetDeleteView(Raise403PermissionRequiredMixin, DeleteView):
     model = Target
 
 
+class TargetSSOISView(RedirectView):
+    """
+    View that redirect to SSOIS
+    """
+
+    model = Target
+
+    def get_redirect_url(*args, **kwargs):
+        """
+        Produce a redirect to the Solar System Object Image Search at the
+        Canadian Astronomy Data Centre, for the target.
+        """
+        now = datetime.now()
+        targ_name_guess = kwargs['pk'].split()[0].split('-')[0]
+        url = 'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/ssos/ssosclf.pl?lang=en&object={}'.format(targ_name_guess.split()[0])
+        url += '%0D%0A&search=bynameall&epoch1=1990+01+01&epoch2={}+{}+{}'.format(now.year, now.month, now.day)
+        url += '&eellipse=&eunits=arcseconds&extres=no&xyres=no'
+        return url
+
+
 class TargetDetailView(Raise403PermissionRequiredMixin, DetailView):
     """
     View that handles the display of the target details. Requires authorization.
@@ -321,15 +343,15 @@ class TargetDetailView(Raise403PermissionRequiredMixin, DetailView):
         :rtype: dict
         """
         context = super().get_context_data(*args, **kwargs)
-        observing_strategy_form = RunStrategyForm(initial={'target': self.get_object()})
-        if any(self.request.GET.get(x) for x in ['observing_strategy', 'cadence_strategy', 'cadence_frequency']):
+        observation_template_form = ApplyObservationTemplateForm(initial={'target': self.get_object()})
+        if any(self.request.GET.get(x) for x in ['observation_template', 'cadence_strategy', 'cadence_frequency']):
             initial = {'target': self.object}
             initial.update(self.request.GET)
-            observing_strategy_form = RunStrategyForm(
+            observation_template_form = ApplyObservationTemplateForm(
                 initial=initial
             )
-        observing_strategy_form.fields['target'].widget = HiddenInput()
-        context['observing_strategy_form'] = observing_strategy_form
+        observation_template_form.fields['target'].widget = HiddenInput()
+        context['observation_template_form'] = observation_template_form
         return context
 
     def get(self, request, *args, **kwargs):
@@ -355,13 +377,16 @@ class TargetDetailView(Raise403PermissionRequiredMixin, DetailView):
                               ' the docs.</a>'))
             return redirect(reverse('tom_targets:detail', args=(target_id,)))
 
-        run_strategy_form = RunStrategyForm(request.GET)
-        if run_strategy_form.is_valid():
-            obs_strat = ObservingStrategy.objects.get(pk=run_strategy_form.cleaned_data['observing_strategy'].id)
-            params = urlencode(obs_strat.parameters_as_dict)
+        obs_template_form = ApplyObservationTemplateForm(request.GET)
+        if obs_template_form.is_valid():
+            obs_template = ObservationTemplate.objects.get(pk=obs_template_form.cleaned_data['observation_template'].id)
+            obs_template_params = obs_template.parameters_as_dict
+            obs_template_params['cadence_strategy'] = request.GET.get('cadence_strategy', '')
+            obs_template_params['cadence_frequency'] = request.GET.get('cadence_frequency', '')
+            params = urlencode(obs_template_params)
             return redirect(
                 reverse('tom_observations:create',
-                        args=(obs_strat.facility,)) + f'?target_id={self.get_object().id}&' + params)
+                        args=(obs_template.facility,)) + f'?target_id={self.get_object().id}&' + params)
 
         return super().get(request, *args, **kwargs)
 
@@ -382,6 +407,32 @@ class TargetImportView(LoginRequiredMixin, TemplateView):
         csv_file = request.FILES['target_csv']
         csv_stream = StringIO(csv_file.read().decode('utf-8'), newline=None)
         result = import_targets(csv_stream)
+        messages.success(
+            request,
+            'Targets created: {}'.format(len(result['targets']))
+        )
+        for error in result['errors']:
+            messages.warning(request, error)
+        return redirect(reverse('tom_targets:list'))
+
+
+class TargetImportEphemerisView(LoginRequiredMixin, TemplateView):
+    """
+    View that handles the import of targets from a .eph file for EPHEMERIS scheme.
+    Requires authentication.
+    """
+    template_name = 'tom_targets/target_ephemeris_import.html'
+
+    def post(self, request):
+        """
+        Handles the POST requests to this view. Creates a StringIO object and passes it to ``import_ephemeris_targets``.
+
+        :param request: the request object passed to this view
+        :type request: HTTPRequest
+        """
+        eph_file = request.FILES['target_eph']
+        eph_stream = StringIO(eph_file.read().decode('utf-8'), newline=None)
+        result = import_ephemeris_target(eph_stream)
         messages.success(
             request,
             'Targets created: {}'.format(len(result['targets']))

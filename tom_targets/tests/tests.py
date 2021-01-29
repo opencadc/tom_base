@@ -1,5 +1,6 @@
 import pytz
 from datetime import datetime
+from io import StringIO
 
 from django.contrib.auth.models import User, Group
 from django.contrib.messages import get_messages
@@ -9,9 +10,81 @@ from django.urls import reverse
 
 from .factories import SiderealTargetFactory, NonSiderealTargetFactory, TargetGroupingFactory, TargetNameFactory
 from tom_targets.models import Target, TargetExtra, TargetList, TargetName
-from tom_targets.utils import import_targets
+from tom_targets.utils import import_targets, import_ephemeris_target
+import tom_targets
 from guardian.shortcuts import assign_perm
 
+
+base_data_Major_Planet = {
+    'name': 'nonsidereal_target',
+    'identifier': 'nonsidereal_identifier',
+    'type': Target.NON_SIDEREAL,
+    'epoch_of_elements': 100,
+    'lng_asc_node': 100,
+    'arg_of_perihelion': 100,
+    'eccentricity': 100,
+    'mean_anomaly': 100,
+    'inclination': 100,
+    'semimajor_axis': 100,
+    'targetextra_set-TOTAL_FORMS': 1,
+    'targetextra_set-INITIAL_FORMS': 0,
+    'targetextra_set-MIN_NUM_FORMS': 0,
+    'targetextra_set-MAX_NUM_FORMS': 1000,
+    'targetextra_set-0-key': '',
+    'targetextra_set-0-value': '',
+    'aliases-TOTAL_FORMS': 1,
+    'aliases-INITIAL_FORMS': 0,
+    'aliases-MIN_NUM_FORMS': 0,
+    'aliases-MAX_NUM_FORMS': 1000,
+}
+
+base_data_Comet = {
+    'name': 'nonsidereal_target',
+    'identifier': 'nonsidereal_identifier',
+    'type': Target.NON_SIDEREAL,
+    'epoch_of_elements': 100,
+    'perihdist': 1.0,
+    'epoch_of_perihelion': 100.0,
+    'arg_of_perihelion': 100,
+    'eccentricity': 100,
+    'lng_asc_node': 100,
+    'semimajor_axis': 100,
+    'inclination': 100,
+    'targetextra_set-TOTAL_FORMS': 1,
+    'targetextra_set-INITIAL_FORMS': 0,
+    'targetextra_set-MIN_NUM_FORMS': 0,
+    'targetextra_set-MAX_NUM_FORMS': 1000,
+    'targetextra_set-0-key': '',
+    'targetextra_set-0-value': '',
+    'aliases-TOTAL_FORMS': 1,
+    'aliases-INITIAL_FORMS': 0,
+    'aliases-MIN_NUM_FORMS': 0,
+    'aliases-MAX_NUM_FORMS': 1000,
+}
+
+base_data_EPH = {
+    'name': 'nonsidereal_target',
+    'identifier': 'nonsidereal_identifier',
+    'type': Target.NON_SIDEREAL,
+    'eph_json': {'568': [{'t': '58940.0', 'R': '196.9809167', 'D': ' 23.904639', 'dR': 0.0, 'dD': 0.0},
+                         {'t': '58940.1', 'R': '196.9806667', 'D': ' 23.904722', 'dR': 0.0, 'dD': 0.0},
+                         {'t': '58940.2', 'R': '196.9804167', 'D': ' 23.904833', 'dR': 0.0, 'dD': 0.0}]
+                 },
+    'epoch_of_elements': 100,
+    'targetextra_set-TOTAL_FORMS': 1,
+    'targetextra_set-INITIAL_FORMS': 0,
+    'targetextra_set-MIN_NUM_FORMS': 0,
+    'targetextra_set-MAX_NUM_FORMS': 1000,
+    'targetextra_set-0-key': '',
+    'targetextra_set-0-value': '',
+    'aliases-TOTAL_FORMS': 1,
+    'aliases-INITIAL_FORMS': 0,
+    'aliases-MIN_NUM_FORMS': 0,
+    'aliases-MAX_NUM_FORMS': 1000,
+
+}
+
+#{'568': [{'t': '58940.0', 'R': '196.9809167', 'D': ' 23.904639', 'dR': 0.0, 'dD': 0.0}, {'t': '58940.01388888899', 'R': '196.9806667', 'D': ' 23.904722', 'dR': 0.0, 'dD': 0.0}, {'t': '58940.027777777985', 'R': '196.9804167', 'D': ' 23.904833', 'dR': 0.0, 'dD': 0.0}
 
 class TestTargetListUserPermissions(TestCase):
     def setUp(self):
@@ -65,6 +138,11 @@ class TestTargetListGroupPermissions(TestCase):
         self.assertNotContains(response, self.st1.name)
 
 
+# Because the target detail page has a templatetag that tries to get the facility status, these tests fail without
+# network. While the preferred solution would be to create a mock facility class, in order to avoid any potential
+# circular imports, we're simply disabling the facility classes for these tests. This can be revisited if need be at a
+# future time, but currently the target tests don't do anything with ObservationRecords anyway.
+@override_settings(TOM_FACILITY_CLASSES=[])
 class TestTargetDetail(TestCase):
     def setUp(self):
         user = User.objects.create(username='testuser')
@@ -74,6 +152,9 @@ class TestTargetDetail(TestCase):
         assign_perm('tom_targets.view_target', user, self.st)
         assign_perm('tom_targets.view_target', user, self.nst)
 
+    """
+    these four below tests are the ones to comment out if you can't get to api/telescope_states
+    """
     def test_sidereal_target_detail(self):
         response = self.client.get(reverse('targets:detail', kwargs={'pk': self.st.id}))
         self.assertContains(response, self.st.id)
@@ -92,14 +173,19 @@ class TestTargetDetail(TestCase):
         self.assertContains(response, 'somevalue')
         self.assertNotContains(response, 'hiddenvalue')
 
+    ## Wes: probably want to test that an EPHEMERIS object with custom scheme actually
+    ## has the necessary ephemeris variables. Like test_extra_fields above
+
     def test_target_bad_permissions(self):
         other_user = User.objects.create(username='otheruser')
         self.client.force_login(other_user)
         response = self.client.get(reverse('targets:detail', kwargs={'pk': self.st.id}), follow=True)
         self.assertRedirects(response, '{}?next=/targets/{}/'.format(reverse('login'), self.st.id))
         self.assertContains(response, 'You do not have permission to access this page')
+    """
+    """
 
-
+@override_settings(TOM_FACILITY_CLASSES=[])
 class TestTargetCreate(TestCase):
     def setUp(self):
         user = User.objects.create(username='testuser')
@@ -113,6 +199,8 @@ class TestTargetCreate(TestCase):
         self.assertContains(response, Target.SIDEREAL)
         self.assertContains(response, Target.NON_SIDEREAL)
 
+    ## Wes: add a test ephemeris target creation here with all four schemes like test_create_target below
+    ## Actually probably want to test the items as in test_non_sidereal_required_fields
     def test_create_target(self):
         target_data = {
             'name': 'test_target_name',
@@ -250,33 +338,13 @@ class TestTargetCreate(TestCase):
         target.save(extras={'foo': 5})
         self.assertTrue(TargetExtra.objects.filter(target=target, key='foo', value='5').exists())
 
-    def test_non_sidereal_required_fields(self):
-        base_data = {
-            'name': 'nonsidereal_target',
-            'identifier': 'nonsidereal_identifier',
-            'type': Target.NON_SIDEREAL,
-            'epoch_of_elements': 100,
-            'lng_asc_node': 100,
-            'arg_of_perihelion': 100,
-            'eccentricity': 100,
-            'mean_anomaly': 100,
-            'inclination': 100,
-            'semimajor_axis': 100,
-            'targetextra_set-TOTAL_FORMS': 1,
-            'targetextra_set-INITIAL_FORMS': 0,
-            'targetextra_set-MIN_NUM_FORMS': 0,
-            'targetextra_set-MAX_NUM_FORMS': 1000,
-            'targetextra_set-0-key': '',
-            'targetextra_set-0-value': '',
-            'aliases-TOTAL_FORMS': 1,
-            'aliases-INITIAL_FORMS': 0,
-            'aliases-MIN_NUM_FORMS': 0,
-            'aliases-MAX_NUM_FORMS': 1000,
-        }
+    def test_non_sidereal_required_fields_Major_Planet(self):
+        print('here Major')
+
         create_url = reverse('targets:create') + '?type=NON_SIDEREAL'
 
         # Make data for a major planet scheme: missing 'mean_daily_motion'
-        maj_planet_data = dict(**base_data, scheme='JPL_MAJOR_PLANET')
+        maj_planet_data = dict(**base_data_Major_Planet, scheme='JPL_MAJOR_PLANET')
         response = self.client.post(create_url, data=maj_planet_data, follow=True)
         errors = response.context['form'].errors
         self.assertEqual(set(errors.keys()), {'__all__'})
@@ -285,8 +353,35 @@ class TestTargetCreate(TestCase):
         self.assertTrue(messages[0].startswith("Scheme 'JPL Major Planet' requires fields"))
         self.assertIn('Daily Motion', messages[0])
 
+    def test_non_sidereal_required_fields_Minor_Planet(self):
+        print('here Minor')
+
+        create_url = reverse('targets:create') + '?type=NON_SIDEREAL'
+
         # Use the same data for minor planet: should be no errors
-        min_planet_data = dict(**base_data, scheme='MPC_MINOR_PLANET')
+        min_planet_data = dict(**base_data_Major_Planet, scheme='MPC_MINOR_PLANET')
+        response = self.client.post(create_url, data=min_planet_data, follow=True)
+        errors = response.context['form'].errors
+        self.assertEqual(errors, {})
+
+    def test_non_sidereal_required_fields_Comet(self):
+        print('here Comet')
+
+        create_url = reverse('targets:create') + '?type=NON_SIDEREAL'
+
+        # Use the same data for minor planet: should be no errors
+        min_planet_data = dict(**base_data_Comet, scheme='MPC_COMET')
+        response = self.client.post(create_url, data=min_planet_data, follow=True)
+        errors = response.context['form'].errors
+        self.assertEqual(errors, {})
+
+    def test_non_sidereal_required_fields_EPHEMERIS(self):
+        print('here Ephemeris')
+
+        create_url = reverse('targets:create') + '?type=NON_SIDEREAL'
+
+        # Use the same data for minor planet: should be no errors
+        min_planet_data = dict(**base_data_EPH, scheme='EPHEMERIS')
         response = self.client.post(create_url, data=min_planet_data, follow=True)
         errors = response.context['form'].errors
         self.assertEqual(errors, {})
@@ -392,9 +487,10 @@ class TestTargetCreate(TestCase):
         self.client.post(reverse('targets:create'), data=target_data, follow=True)
         target_data['name'] = 'multiple_names_target2'
         second_response = self.client.post(reverse('targets:create'), data=target_data, follow=True)
-        self.assertContains(second_response, 'Target name with this Alias for target already exists.')
+        self.assertContains(second_response, 'Target name with this Alias already exists.')
 
 
+# Wes: probably want to test importing an ephemeris csv file
 class TestTargetImport(TestCase):
     def setUp(self):
         user = User.objects.create(username='testuser')
@@ -435,6 +531,13 @@ class TestTargetImport(TestCase):
             for alias in aliases[target_name].split(','):
                 self.assertTrue(TargetName.objects.filter(target=target, name=alias).exists())
 
+    def test_import_ephemeris_csv(self):
+        root = tom_targets.__file__.split('__')[0]
+        eph_file = open(root + 'static/tom_targets/target_ephemeris_import.eph')
+        eph_stream = StringIO(eph_file.read(), newline='\n')
+        result = import_ephemeris_target(eph_stream)
+        eph_file.close()
+        self.assertEqual(len(result['targets']), 1)
 
 class TestTargetExport(TestCase):
     """
@@ -467,14 +570,14 @@ class TestTargetExport(TestCase):
         self.assertNotIn('M52', content)
 
     def test_export_all_targets_with_aliases(self):
-        st_name = TargetNameFactory.create(name='Messier 42', target=self.st)
+        TargetNameFactory.create(name='Messier 42', target=self.st)
         response = self.client.get(reverse('targets:export'))
         content = ''.join(line.decode('utf-8') for line in list(response.streaming_content))
         self.assertIn('M42', content)
         self.assertIn('M52', content)
 
     def test_export_filtered_targets_with_aliases(self):
-        st_name = TargetNameFactory.create(name='Messier 42', target=self.st)
+        TargetNameFactory.create(name='Messier 42', target=self.st)
         response = self.client.get(reverse('targets:export') + '?name=M42')
         content = ''.join(line.decode('utf-8') for line in list(response.streaming_content))
         self.assertIn('M42', content)

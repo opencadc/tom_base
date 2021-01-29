@@ -7,6 +7,7 @@ from astropy.time import Time
 from dateutil.parser import parse
 from django import template
 from django.conf import settings
+from django.db.models import Q
 from guardian.shortcuts import get_objects_for_user
 import numpy as np
 from plotly import offline
@@ -14,7 +15,15 @@ from plotly import graph_objs as go
 
 from tom_observations.utils import get_sidereal_visibility
 from tom_targets.models import Target, TargetExtra, TargetList
-from tom_targets.forms import TargetVisibilityForm
+from tom_targets.forms import TargetVisibilityForm, AladinNonSiderealForm
+
+from scipy import interpolate as interp
+import json
+
+from astroquery.jplhorizons import Horizons
+
+# global ephemeris object such that the horizons query doesn't happen twice
+eph_obj_coords = None
 
 register = template.Library()
 
@@ -53,6 +62,14 @@ def target_buttons(target):
     return {'target': target}
 
 
+@register.inclusion_tag('tom_targets/partials/target_ssois.html')
+def target_ssois(target):
+    """
+    Displays the ssois query button.
+    """
+    return {'target': target}
+
+
 @register.inclusion_tag('tom_targets/partials/target_data.html')
 def target_data(target):
     """
@@ -62,6 +79,13 @@ def target_data(target):
     return {
         'target': target,
         'extras': extras
+    }
+
+
+@register.inclusion_tag('tom_targets/partials/target_unknown_statuses.html')
+def target_unknown_statuses(target):
+    return {
+        'num_unknown_statuses': len(target.observationrecord_set.filter(Q(status='') | Q(status=None)))
     }
 
 
@@ -116,7 +140,7 @@ def target_plan(context):
 @register.inclusion_tag('tom_targets/partials/moon_distance.html')
 def moon_distance(target, day_range=30):
     """
-    Renders plot for lunar distance from target.
+    Renders plot for lunar distance from sidereal target.
 
     Adapted from Jamison Frost Burke's moon visibility code in Supernova Exchange 2.0, as seen here:
     https://github.com/jfrostburke/snex2/blob/0c1eb184c942cb10f7d54084e081d8ac11700edf/custom_code/templatetags/custom_code_tags.py#L196
@@ -127,6 +151,8 @@ def moon_distance(target, day_range=30):
     :param day_range: Number of days to plot lunar distance
     :type day_range: int
     """
+    if target.type != 'SIDEREAL':
+        return {'plot': None}
 
     day_range = 30
     times = Time(
@@ -254,3 +280,263 @@ def aladin(target):
     and a scale bar. The resulting image is downloadable. This templatetag only works for sidereal targets.
     """
     return {'target': target}
+
+
+@register.inclusion_tag('tom_targets/partials/aladin_nonsidereal.html', takes_context=True)
+def aladin_nonsidereal(context):
+    """
+    Displays Aladin skyview of the given non-sidereal target along with basic finder chart
+    annotations including a compass and a scale bar. The resulting image is downloadable.
+    This templatetag only works for non-sidereal targets.
+    """
+
+    request = context['request']
+    aladin_form = AladinNonSiderealForm()
+
+    selected_date = datetime.now().strftime("%Y-%m-%d")
+    selected_time = datetime.now().strftime("%H:%M")
+    duration = 24.0*7 # 7 day default duration to match the airmass plot in the observation plan panel
+
+    if 'object' not in context:
+        context['object'] = context['target']
+    if all(request.GET.get(x) for x in ['selected_date']):
+        aladin_form = AladinNonSiderealForm({
+            'selected_date': request.GET.get('selected_date'),
+            'selected_time': request.GET.get('selected_time'),
+            'duration': request.GET.get('duration'),
+            'target': context['object']
+        })
+        if aladin_form.is_valid():
+            selected_date = request.GET.get('selected_date')
+            selected_time = request.GET.get('selected_time')
+            duration = float(request.GET.get('duration'))
+
+    if context['object'].type == 'NON_SIDEREAL':
+        if context['object'].scheme == 'EPHEMERIS':
+            # this logic can probably be pulled from tom_observations.utils
+            # but this is actually lighter weight
+            eph_json = json.loads(context['object'].eph_json)
+            keys = list(eph_json.keys())
+            mjd, ra, dec = [], [], []
+            for i in eph_json[keys[0]]:
+                mjd.append(i['t'])
+                ra.append(i['R'])
+                dec.append(i['D'])
+            mjd = np.array(mjd, dtype='float64')
+            ra = np.array(ra, dtype='float64')
+            dec = np.array(dec, dtype='float64')
+            try:
+                fra = interp.interp1d(mjd, ra)
+                fdec = interp.interp1d(mjd, dec)
+                t = Time(selected_date+'T'+selected_time+':00')
+                if 'object' in context:
+                    context['object'].ra = fra(t.mjd)
+                    context['object'].dec = fdec(t.mjd)
+                    context['object'].ra1 = fra(t.mjd+duration/24.0)
+                    context['object'].dec1 = fdec(t.mjd+duration/24.0)
+            except:
+                context['object'].ra = None
+                context['object'].dec = None
+        else:
+            try:
+                t = Time(selected_date+'T'+selected_time+':00')
+
+                # if there is a space in the nane, assume the first string is an acceptable name
+                obj = Horizons(id=context['object'].names[0].split()[0], epochs=[t.jd, (t+duration/24.0).jd])
+                context['object'].ra = obj.ephemerides()['RA'][0]
+                context['object'].dec = obj.ephemerides()['DEC'][0]
+                context['object'].ra1 = obj.ephemerides()['RA'][1]
+                context['object'].dec1 = obj.ephemerides()['DEC'][1]
+            except:
+                context['object'].ra = None
+                context['object'].dec = None
+                context['object'].ra1 = None
+                context['object'].dec1 = None
+                pass
+
+    # return the html you need
+    return {
+        'form': aladin_form,
+        'target': context['object'],
+    }
+
+@register.inclusion_tag('tom_targets/partials/aladin_nonsidereal_observations.html', takes_context=True)
+def aladin_nonsidereal_observations(context):
+    """
+    Displays Aladin skyview of the given non-sidereal target along with basic finder chart
+    annotations including a compass and a scale bar. The resulting image is downloadable.
+    This templatetag only works for non-sidereal targets, and appears on the observation
+    create view.
+    """
+
+    request = context['request']
+    if 'object' not in context:
+        context['object'] = context['target']
+
+    facility = request.GET.get('facility')
+    if facility is None:
+        url = str(request).split()[2]
+        facility = url.split('/')[2]
+    aladin_form = AladinNonSiderealForm(initial={'facility': facility, 'target_id': context['object'].id})
+
+    selected_date = datetime.now().strftime("%Y-%m-%d")
+    selected_time = datetime.now().strftime("%H:%M")
+    duration = 24.0*7 # 7 day default duration to match the airmass plot in the observation plan panel
+
+    if 'object' not in context:
+        context['object'] = context['target']
+
+    if all(request.GET.get(x) for x in ['selected_date']):
+        aladin_form = AladinNonSiderealForm({
+            'selected_date': request.GET.get('selected_date'),
+            'selected_time': request.GET.get('selected_time'),
+            'duration': request.GET.get('duration'),
+            'target': context['object'],
+            'target_id': context['object'].id,
+            'facility': facility
+        })
+        if aladin_form.is_valid():
+            selected_date = request.GET.get('selected_date')
+            selected_time = request.GET.get('selected_time')
+            duration = float(request.GET.get('duration'))
+            facility = request.GET.get('facility')
+
+    if context['object'].type == 'NON_SIDEREAL':
+        if context['object'].scheme == 'EPHEMERIS':
+            # this logic can probably be pulled from tom_observations.utils
+            # but this is actually lighter weight
+            eph_json = json.loads(context['object'].eph_json)
+            keys = list(eph_json.keys())
+            mjd, ra, dec = [], [], []
+            for i in eph_json[keys[0]]:
+                mjd.append(i['t'])
+                ra.append(i['R'])
+                dec.append(i['D'])
+            mjd = np.array(mjd, dtype='float64')
+            ra = np.array(ra, dtype='float64')
+            dec = np.array(dec, dtype='float64')
+
+            fra = interp.interp1d(mjd, ra)
+            fdec = interp.interp1d(mjd, dec)
+            try:
+                fra = interp.interp1d(mjd, ra)
+                fdec = interp.interp1d(mjd, dec)
+                t = Time(selected_date+'T'+selected_time+':00')
+                if 'object' in context:
+                    context['object'].ra = fra(t.mjd)
+                    context['object'].dec = fdec(t.mjd)
+                    context['object'].ra1 = fra(t.mjd+duration/24.0)
+                    context['object'].dec1 = fdec(t.mjd+duration/24.0)
+            except:
+                context['object'].ra = None
+                context['object'].dec = None
+        else:
+            try:
+                t = Time(selected_date+'T'+selected_time+':00')
+
+                # if there is a space in the nane, assume the first string is an acceptable name
+                obj = Horizons(id=context['object'].names[0].split()[0], epochs=[t.jd, (t+duration/24.0).jd])
+                context['object'].ra = obj.ephemerides()['RA'][0]
+                context['object'].dec = obj.ephemerides()['DEC'][0]
+                context['object'].ra1 = obj.ephemerides()['RA'][1]
+                context['object'].dec1 = obj.ephemerides()['DEC'][1]
+            except:
+                context['object'].ra = None
+                context['object'].dec = None
+                context['object'].ra1 = None
+                context['object'].dec1 = None
+                pass
+
+    # return the html you need
+    return {
+        'form': aladin_form,
+        'target': context['object'],
+        'target_id': context['object'].id,
+        'facility': facility,
+    }
+
+
+@register.filter
+def eph_json_to_value_ra(value):
+    """
+    Returns the middle RA and Dec of the json_ephemeris
+    """
+    if value != 'None':
+        eph_json = json.loads(value)
+        keys = list(eph_json.keys())
+        k = keys[0]
+
+        # bug catch for truly empty ephemerides, which can happen if a user provides a poorly formatted ephemeris file
+        if len(eph_json[k]) == 0:
+            return -32768.0
+
+        eph_len = len(eph_json[k][0])
+        return deg_to_sexigesimal(float(eph_json[k][int(eph_len/2)]['R']), 'hms')
+    else:
+        return -32768.0
+
+
+@register.filter
+def eph_json_to_value_dec(value):
+    """
+    Returns the middle RA and Dec of the json_ephemeris
+    """
+    if value != 'None':
+        eph_json = json.loads(value)
+        keys = list(eph_json.keys())
+        k = keys[0]
+
+        # bug catch for truly empty ephemerides, which can happen if a user provides a poorly formatted ephemeris file
+        if len(eph_json[k]) == 0:
+            return -32768.0
+
+        eph_len = len(eph_json[k][0])
+        return deg_to_sexigesimal(float(eph_json[k][int(eph_len/2)]['D']), 'dms')
+    else:
+        return -32768.0
+
+
+@register.filter
+def eph_json_to_value_mjd(value):
+    """
+    Returns the middle RA and Dec of the json_ephemeris
+    """
+    if value != 'None':
+        eph_json = json.loads(value)
+        keys = list(eph_json.keys())
+        k = keys[0]
+
+        # bug catch for truly empty ephemerides, which can happen if a user provides a poorly formatted ephemeris file
+        if len(eph_json[k]) == 0:
+            return -32768.0
+
+        eph_len = len(eph_json[k][0])
+        return round(float(eph_json[k][int(eph_len/2)]['t']), 5)
+    else:
+        return -32768.0
+
+
+@register.filter
+def non_sidereal_ra(target_name):
+    global eph_obj_coords
+
+    if eph_obj_coords is None:
+        try:
+            # if there is a space in the nane, assume the first string is an acceptable name
+            obj = Horizons(id=target_name[0].split()[0], epochs=Time.now().jd)
+            eph_obj_coords = [obj.ephemerides()['RA'][0], obj.ephemerides()['DEC'][0]]
+            return eph_obj_coords[0]
+        except:
+            pass
+    return None
+
+
+@register.filter
+def non_sidereal_dec(target_name):
+    global eph_obj_coords
+
+    if eph_obj_coords is not None:
+        dec = eph_obj_coords[1]
+        eph_obj_coords = None
+        return dec
+    return None

@@ -1,0 +1,17 @@
+{% extends 'tom_common/base.html' %}
+{% load bootstrap4 static %}
+{% block title %}Import Targets{% endblock %}
+{% block content %}
+<h3>Import Targets</h3>
+<p>
+  Upload a JPL formatted ephemeris file.
+  View the <a href="{% static 'tom_targets/target_ephemeris_import.eph' %}">example .eph file</a>.
+</p>
+<form method="POST" action="{% url 'tom_targets:ephemeris-import' %}" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input type="file" name="target_eph">
+  {% buttons %}
+  <input type="submit" value="Upload" class="btn btn-primary">
+  {% endbuttons %}
+</form>
+{% endblock %}

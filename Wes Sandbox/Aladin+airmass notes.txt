@@ -1,0 +1,61 @@
+Summary of changes
+~~~~~~~~~~~~~~~~~~
+The visibility(airmass) plot function, and the target distribution function for non-sidereal targets
+from from functions I added to nonsidereal_airmass_extras.py
+
+The aladin plot view comes from changes I made to tom_extras.py and forms.py in tom_targets.
+
+
+files that get changed with non-sidereal-airmass:
+
+observation_form.html
+~~~~~~~~~~~~~~~~~~~~~~
+
+{load  nonsidereal_airmass_extras}
+
+and then
+
+{% if target.type == 'SIDEREAL' %}
+<div class="row">
+    <div class="col">
+      {% observation_plan target form.facility.value %}
+    </div>
+</div>
+{% elif target.type == 'NON_SIDEREAL' %}
+<div class="row">
+    <div class="col">
+      {% observation_plan_nonsidereal target form.facility.value %}
+    </div>
+</div>
+{% endif %}
+
+
+
+
+
+
+For aladin non-sidereal and SSOIS:
+
+Files added to tom_targets:
+templates/tom_targets/partials/aladin_nonsidereal.html
+templates/tom_targets/partials/target_ssois.html
+
+Files updated:
+templatetags/target_extras.py
+
+target_detail.html
+~~~~~~~~~~~~~~~~~~
+
+After the line containing {% target_buttons object %}
+
+{% if object.type == 'NON_SIDEREAL' %}
+{% target_ssois object %}
+{% endif %}
+
+and after recent photometry object replace the aladin call with
+
+{% if object.type == 'SIDEREAL' %}
+{% aladin object %}
+{% elif object.type == 'NON_SIDEREAL' %}
+{% aladin_nonsidereal %}
+{% endif %}
